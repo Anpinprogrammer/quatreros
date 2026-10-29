@@ -1,0 +1,31 @@
+{
+  "name": "@quatreros/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Contratos compartidos (esquemas Zod y tipos) entre API y web — ADR-006",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@quatreros/config": "workspace:*",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

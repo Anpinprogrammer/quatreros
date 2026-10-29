@@ -1,0 +1,29 @@
+# Hooks de Git (ADR-022). Se instalan con `pnpm install`.
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: '*.{ts,tsx,js,json,md,yml,yaml,css}'
+      run: pnpm exec prettier --check {staged_files}
+    lint:
+      glob: '*.{ts,tsx}'
+      run: pnpm exec eslint {staged_files}
+    secrets:
+      # Usa gitleaks si está instalado localmente; en CI siempre se ejecuta.
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then gitleaks protect --staged --redact; else echo "gitleaks no instalado; se valida en CI"; fi
+
+commit-msg:
+  commands:
+    conventional:
+      # Conventional Commits en español con alcances del proyecto (quatreros-conventions).
+      run: |
+        grep -qE '^(feat|fix|docs|refactor|test|chore|perf|build|ci|revert)(\((adm|cat|comp|prod|inv|com|dis|pos|fin|cont|ia|tg|mig|plat|docs)\))?!?: .+' {1} \
+          || (echo "Mensaje inválido. Formato: tipo(alcance): descripción  — p. ej. feat(inv): traslado con FEFO" && exit 1)
+
+pre-push:
+  commands:
+    typecheck:
+      run: pnpm typecheck
+    test:
+      run: pnpm test

@@ -1,0 +1,40 @@
+# Entorno local (deployment-design §2). Solo PostgreSQL: la API y la web corren con `pnpm dev`
+# para tener recarga en caliente. Para probar la imagen de producción: perfil `app`.
+#
+#   docker compose up -d                  # PostgreSQL 17 con roles creados
+#   docker compose --profile app up -d    # además, la imagen compilada en :3000
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_local_dev # solo desarrollo local
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infrastructure/scripts/db-roles.sql:/scripts/db-roles.sql:ro
+      - ./infrastructure/docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      retries: 10
+
+  app:
+    profiles: ['app']
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: postgres://quatreros_app:app_local_dev@postgres:5432/quatreros
+      APP_BASE_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: local-dev-secret-not-for-production-0001
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

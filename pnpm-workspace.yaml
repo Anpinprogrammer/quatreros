@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Seguridad de la cadena de suministro (pnpm 12):
+# - minimumReleaseAge (por defecto en pnpm 12) evita instalar versiones publicadas hace muy poco.
+#   No se agregan excepciones: si una versión es demasiado reciente, pnpm resuelve la anterior.
+# - Solo estos paquetes pueden ejecutar scripts de instalación.
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  # Dependencias nativas opcionales de Testcontainers (ssh2): no se compilan.
+  cpu-features: false
+  ssh2: false
+  protobufjs: false

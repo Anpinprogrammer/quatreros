@@ -1,0 +1,45 @@
+# Despliegue (deployment-design §3). PROPUESTO: depende de aprobar el hosting (Q-C-01, ADR-020).
+# Con Render: cada servicio tiene un "Deploy Hook"; las migraciones corren como Pre-Deploy Command
+# configurado en Render: `node dist/cli/migrate.js` (con DATABASE_MIGRATIONS_URL del rol dueño).
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Entorno
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+
+jobs:
+  staging:
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || inputs.target == 'staging' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Disparar despliegue en staging
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
+
+  production:
+    # Producción solo manual y con aprobación del entorno protegido en GitHub.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'production' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Disparar despliegue en producción
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PRODUCTION }}"
+      - name: Verificar salud
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "${{ vars.PRODUCTION_URL }}/ready" && exit 0
+            sleep 10
+          done
+          echo "La aplicación no quedó lista" && exit 1

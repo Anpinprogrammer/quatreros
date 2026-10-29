@@ -1,0 +1,8 @@
+{
+  "extends": "@quatreros/config/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "customConditions": ["development"]
+  },
+  "include": ["src", "vitest.config.ts"]
+}

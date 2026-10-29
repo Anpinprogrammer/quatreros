@@ -1,0 +1,120 @@
+# CI de Quatreros (deployment-design §3). Corre en cada PR y en main.
+# Las versiones de las acciones se mantienen al día con Dependabot (.github/dependabot.yml).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+jobs:
+  calidad:
+    name: Formato, lint, tipos, unitarias y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  integracion:
+    name: Integración con PostgreSQL 17 real
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 10
+    env:
+      PGPASSWORD: postgres_ci
+      # Migraciones con el rol dueño y pruebas con el rol de aplicación: valida permisos (ADR-013).
+      TEST_DATABASE_MIGRATIONS_URL: postgres://quatreros_owner:owner_ci@localhost:5432/quatreros_test
+      TEST_DATABASE_URL: postgres://quatreros_app:app_ci@localhost:5432/quatreros_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Crear roles y base de pruebas
+        run: >-
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1
+          -v owner_pw="'owner_ci'" -v app_pw="'app_ci'" -v ro_pw="'ro_ci'" -v dbname=quatreros_test
+          -f infrastructure/scripts/db-roles.sql
+      - run: pnpm test:integration
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @quatreros/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        env:
+          CI: 'true'
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
+
+  seguridad:
+    name: Secretos y dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      # Bloquea si hay vulnerabilidades críticas en dependencias de producción (RNF-010).
+      - run: pnpm audit --prod --audit-level critical
+
+  imagen:
+    name: Imagen Docker
+    runs-on: ubuntu-latest
+    needs: [calidad, integracion]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infrastructure/docker/Dockerfile
+          push: false
+          tags: quatreros:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

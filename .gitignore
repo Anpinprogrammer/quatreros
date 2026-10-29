@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+
+# Variables de entorno: nunca se versionan (política de secretos)
+.env
+.env.*
+!.env.example
+
+# Respaldos locales
+*.dump
+*.sql.gz
+*.age

@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/atkinson-hyperlegible-next';
+
+/* Tokens del sistema visual (apps/web/DESIGN.md) */
+@theme {
+  --font-sans: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+
+  --color-ink: #1e2a24;
+  --color-ink-muted: #4f5d55;
+  --color-surface: #f5f7f6;
+  --color-panel: #ffffff;
+  --color-line: #d5ddd8;
+  --color-chimichurri: #2d6a4f;
+  --color-chimichurri-strong: #1b4332;
+  --color-chimichurri-soft: #e3efe8;
+  --color-brasa: #d99a0b;
+  --color-brasa-soft: #fbf1d9;
+  --color-alerta: #b3261e;
+
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: 1.953rem;
+
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-surface);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-chimichurri);
+    outline-offset: 2px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}

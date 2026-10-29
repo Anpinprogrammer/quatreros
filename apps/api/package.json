@@ -1,0 +1,57 @@
+{
+  "name": "@quatreros/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API de Quatreros — monolito modular Express 5 (ADR-001, ADR-004)",
+  "files": [
+    "dist",
+    "drizzle"
+  ],
+  "scripts": {
+    "dev": "tsx watch --conditions=development --env-file-if-exists=../../.env src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --conditions=development --env-file-if-exists=../../.env src/cli/migrate.ts",
+    "db:seed": "tsx --conditions=development --env-file-if-exists=../../.env src/cli/seed.ts",
+    "openapi:print": "tsx --conditions=development scripts/print-openapi.ts",
+    "db:migrate:prod": "node dist/cli/migrate.js",
+    "db:seed:prod": "node dist/cli/seed.js",
+    "deps:check": "depcruise src --config .dependency-cruiser.cjs"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@quatreros/contracts": "workspace:*",
+    "@scalar/express-api-reference": "0.10.31",
+    "better-auth": "^1.7.14",
+    "decimal.js": "^10.6.0",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.3.0",
+    "express-rate-limit": "8.7.1",
+    "helmet": "^8.3.0",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
+    "@electric-sql/pglite-socket": "^0.2.16",
+    "@quatreros/config": "workspace:*",
+    "@testcontainers/postgresql": "^12.2.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/supertest": "^7.2.1",
+    "drizzle-kit": "^0.31.11",
+    "supertest": "^7.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5",
+    "dependency-cruiser": "^18.7.0"
+  }
+}
