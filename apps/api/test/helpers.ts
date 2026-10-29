@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import type { Env } from '../src/config/env.js';
 import { createApp, type AppDeps } from '../src/app.js';
 import type { FeatureFlagReader } from '../src/platform/features/flags.js';
@@ -12,7 +13,8 @@ export const testEnv: Env = {
   TZ_BUSINESS: 'America/Bogota',
   DATABASE_URL: 'postgres://unused',
   DATABASE_SSL: false,
-  BETTER_AUTH_SECRET: 'test-secret-test-secret-test-secret-1234',
+  // Generado en cada ejecución: ningún secreto fijo en el repositorio (secrets-policy).
+  BETTER_AUTH_SECRET: randomBytes(32).toString('base64'),
   APP_VERSION: 'test',
 };
 

@@ -134,7 +134,7 @@ describe('autenticación (ADR-007)', () => {
     const res = await request(app)
       .post('/api/auth/sign-up/email')
       .set('Origin', 'http://localhost:5173')
-      .send({ email: 'nuevo@example.com', password: 'una-clave-muy-larga', name: 'Nuevo' });
+      .send({ email: 'nuevo@example.com', password: randomUUID(), name: 'Nuevo' });
     expect(res.status).toBeGreaterThanOrEqual(400);
     const users = await db.execute<{ n: number }>(sql`select count(*)::int as n from auth."user"`);
     expect(users.rows[0]?.n).toBe(0);

@@ -1,0 +1,25 @@
+# Configuración de gitleaks (secrets-policy). Usa las reglas por defecto y solo exceptúa
+# valores FICTICIOS, públicos y documentados. Cada excepción nueva requiere justificación en el PR.
+title = "Quatreros"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Valores ficticios de desarrollo local, CI efímero y ejemplos de documentación"
+regexes = [
+  # Contraseñas de la base local de docker compose (infrastructure/docker/initdb/01-roles.sh)
+  '''^(postgres|owner|app|ro)_local_dev$''',
+  # Contraseñas del contenedor PostgreSQL efímero de CI (.github/workflows/ci.yml)
+  '''^(postgres|owner|app|ro)_ci$''',
+  # Marcador de plantilla en .env.example
+  '''^CAMBIAR$''',
+  # UUID de ejemplo en docs/02-architecture/api-design.md
+  '''^6b1f8b52-2a1d-4c43-9c8a-9a1e2f0d7c11$''',
+  # Valores de prueba ya retirados que siguen en el historial del commit inicial
+  '''^local-dev-secret-not-for-production-0001$''',
+  '''^test-secret-test-secret-test-secret-1234$''',
+]
+paths = [
+  '''(^|/)pnpm-lock\.yaml$''',
+]

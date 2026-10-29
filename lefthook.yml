@@ -11,7 +11,7 @@ pre-commit:
     secrets:
       # Usa gitleaks si está instalado localmente; en CI siempre se ejecuta.
       run: |
-        if command -v gitleaks >/dev/null 2>&1; then gitleaks protect --staged --redact; else echo "gitleaks no instalado; se valida en CI"; fi
+        if command -v gitleaks >/dev/null 2>&1; then gitleaks protect --staged --redact --config .gitleaks.toml; else echo "gitleaks no instalado; se valida en CI"; fi
 
 commit-msg:
   commands:

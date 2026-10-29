@@ -29,7 +29,8 @@ services:
       NODE_ENV: staging
       DATABASE_URL: postgres://quatreros_app:app_local_dev@postgres:5432/quatreros
       APP_BASE_URL: http://localhost:3000
-      BETTER_AUTH_SECRET: local-dev-secret-not-for-production-0001
+      # Se toma de .env (openssl rand -base64 32); nunca se escribe en el repositorio.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Define BETTER_AUTH_SECRET en .env}
     ports:
       - '3000:3000'
     depends_on:

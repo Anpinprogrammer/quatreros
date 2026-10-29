@@ -1,0 +1,18 @@
+name: Preparar Node y dependencias
+description: Instala Node (según .nvmrc), activa pnpm con Corepack e instala dependencias con el lockfile.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc
+        # pnpm se activa con Corepack DESPUÉS de instalar Node; la caché automática no aplica.
+        package-manager-cache: false
+    - shell: bash
+      run: corepack enable
+      env:
+        COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    - shell: bash
+      run: pnpm install --frozen-lockfile
+      env:
+        COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
