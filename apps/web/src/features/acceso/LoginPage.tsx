@@ -1,9 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState, type SubmitEvent } from 'react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router';
 import { authClient } from '../../shared/auth/client';
 import { FullPageMessage, ME_KEY, useSession } from '../../shared/auth/session';
-import { Alert, Button, TextField } from '../../shared/ui/form';
+import { Alert, Button, PasswordField, TextField } from '../../shared/ui/form';
+import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 
 const REASONS: Record<string, string> = {
   disabled: 'Tu cuenta está desactivada. Habla con el administrador.',
@@ -22,6 +23,9 @@ export function LoginPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
+  useDocumentTitle(step === 'credentials' ? 'Ingresar' : 'Código de verificación');
 
   if (session.status === 'loading') return <FullPageMessage>Cargando…</FullPageMessage>;
   if (session.status === 'authenticated') return <Navigate to="/" replace />;
@@ -46,6 +50,9 @@ export function LoginPage() {
           ? 'Correo o contraseña incorrectos.'
           : 'No fue posible ingresar. Si tu cuenta fue desactivada, habla con el administrador.',
       );
+      // El botón se deshabilita durante el envío y el foco se perdería: se devuelve al campo.
+      passwordRef.current?.focus();
+      passwordRef.current?.select();
       return;
     }
     if ('twoFactorRedirect' in data && data.twoFactorRedirect) {
@@ -63,6 +70,8 @@ export function LoginPage() {
     setBusy(false);
     if (err) {
       setError('El código no es válido o ya venció. Escribe el que muestra ahora tu aplicación.');
+      codeRef.current?.focus();
+      codeRef.current?.select();
       return;
     }
     await finish();
@@ -84,7 +93,7 @@ export function LoginPage() {
           ) : null}
           {error ? (
             <div className="mb-4">
-              <Alert>{error}</Alert>
+              <Alert id="error-ingreso">{error}</Alert>
             </div>
           ) : null}
 
@@ -100,11 +109,13 @@ export function LoginPage() {
                   setEmail(e.target.value);
                 }}
               />
-              <TextField
+              <PasswordField
+                ref={passwordRef}
                 label="Contraseña"
-                type="password"
                 autoComplete="current-password"
                 required
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? 'error-ingreso' : undefined}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -117,6 +128,7 @@ export function LoginPage() {
           ) : (
             <form className="flex flex-col gap-4" onSubmit={(e) => void submitCode(e)}>
               <TextField
+                ref={codeRef}
                 label="Código de 6 dígitos"
                 hint="Ábrelo en tu aplicación de autenticación (Google Authenticator, Microsoft Authenticator…)."
                 inputMode="numeric"
@@ -125,6 +137,7 @@ export function LoginPage() {
                 maxLength={6}
                 required
                 autoFocus
+                aria-invalid={error ? true : undefined}
                 className="tabular tracking-widest"
                 value={code}
                 onChange={(e) => {

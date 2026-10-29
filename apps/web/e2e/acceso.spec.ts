@@ -46,7 +46,10 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await page.getByRole('button', { name: 'Ya los guardé, continuar' }).click();
 
   await expect(page).toHaveURL(/\/erp$/);
-  await page.getByRole('link', { name: /Usuarios y permisos/ }).click();
+  await page
+    .getByRole('navigation', { name: 'Módulos' })
+    .getByRole('link', { name: /Usuarios y permisos/ })
+    .click();
   await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
 
   const email = `juan.${String(Date.now())}@quatreros.example`;
@@ -59,7 +62,7 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await form.getByLabel(/Bodega principal/).check();
   await form.getByRole('button', { name: 'Crear usuario' }).click();
   await expect(page.getByText('Juan Repartidor ya puede ingresar')).toBeVisible();
-  await expect(page.getByRole('cell', { name: new RegExp(email) })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: new RegExp(email) })).toBeVisible();
 
   await signOut(page);
   await signIn(page, email);
@@ -71,4 +74,20 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await page.getByLabel('Código de 6 dígitos').fill(totp(secret));
   await page.getByRole('button', { name: 'Verificar' }).click();
   await expect(page).toHaveURL(/\/erp$/);
+
+  // Desactivar con confirmación dentro de la fila; la persona ya no puede ingresar.
+  await page
+    .getByRole('navigation', { name: 'Módulos' })
+    .getByRole('link', { name: /Usuarios y permisos/ })
+    .click();
+  await page.getByRole('button', { name: 'Desactivar a Juan Repartidor' }).click();
+  const confirm = page.getByRole('group', { name: 'Confirmar desactivación' });
+  await expect(confirm.getByRole('button', { name: 'No' })).toBeFocused();
+  await confirm.getByRole('button', { name: 'Sí, desactivar' }).click();
+  await expect(page.getByText('Juan Repartidor quedó desactivado.')).toBeVisible();
+
+  await signOut(page);
+  await signIn(page, email);
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(page).toHaveURL(/\/ingresar/);
 });

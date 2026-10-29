@@ -1,6 +1,6 @@
 import type { MeResponse } from '@quatreros/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ErpShell } from './ErpShell';
@@ -42,15 +42,27 @@ describe('ErpShell', () => {
 
   it('el administrador ve el enlace a Usuarios; quien no tiene permiso, no', () => {
     renderShell(admin);
-    expect(screen.getByRole('link', { name: /Usuarios y permisos/ })).toHaveAttribute(
+    const nav = screen.getByRole('navigation', { name: 'Módulos' });
+    expect(within(nav).getByRole('link', { name: /Usuarios y permisos/ })).toHaveAttribute(
       'href',
       '/erp/usuarios',
     );
+    // El inicio ofrece acceso directo a lo que el usuario sí puede usar.
+    expect(screen.getByRole('heading', { name: 'Puedes usar' })).toBeInTheDocument();
+  });
+
+  it('en pantallas pequeñas el menú se abre y se cierra con su botón', () => {
+    renderShell(admin);
+    const toggle = screen.getByRole('button', { name: 'Menú' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('sin permiso adm.user.read el módulo se muestra sin enlace', () => {
     renderShell({ ...admin, roles: [{ code: 'PROD', name: 'Productor' }], permissions: {} });
     expect(screen.queryByRole('link', { name: /Usuarios y permisos/ })).toBeNull();
     expect(screen.getByText('Usuarios y permisos')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Puedes usar' })).toBeNull();
   });
 });

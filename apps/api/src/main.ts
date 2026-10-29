@@ -13,7 +13,9 @@ import { registerModules } from './modules/index.js';
 
 const env = loadEnv();
 const logger = createLogger(env.LOG_LEVEL);
-const { db, close } = createDb(env.DATABASE_URL, env.DATABASE_SSL);
+const { db, close } = createDb(env.DATABASE_URL, env.DATABASE_SSL, (err) => {
+  logger.warn({ err }, 'Conexión inactiva con la base de datos cerrada; el pool abrirá otra');
+});
 
 const auth = createAuth(db, env, { isBlocked: (authUserId) => isAuthUserBlocked(db, authUserId) });
 

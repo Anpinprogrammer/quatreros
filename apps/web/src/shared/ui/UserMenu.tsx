@@ -1,5 +1,6 @@
 import type { MeResponse } from '@quatreros/contracts';
 import { useSignOut } from '../auth/session';
+import { Button } from './form';
 
 /** Identidad del usuario y cierre de sesión, presente en los tres shells. */
 export function UserMenu({ me }: { me: MeResponse }) {
@@ -10,13 +11,9 @@ export function UserMenu({ me }: { me: MeResponse }) {
         <span className="block font-semibold">{me.user.fullName}</span>
         <span className="text-ink-muted">{me.roles.map((r) => r.name).join(', ')}</span>
       </p>
-      <button
-        type="button"
-        onClick={() => void signOut()}
-        className="min-h-11 rounded-control px-3 text-sm font-semibold text-chimichurri-strong ring-1 ring-line hover:ring-chimichurri"
-      >
+      <Button variant="secondary" className="px-3 text-sm" onClick={() => void signOut()}>
         Salir
-      </button>
+      </Button>
     </div>
   );
 }

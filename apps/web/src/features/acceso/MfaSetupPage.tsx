@@ -1,10 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState, type SubmitEvent } from 'react';
+import { useMemo, useRef, useState, type SubmitEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import { renderSVG } from 'uqr';
 import { authClient } from '../../shared/auth/client';
 import { FullPageMessage, ME_KEY, useSession, useSignOut } from '../../shared/auth/session';
-import { Alert, Button, TextField } from '../../shared/ui/form';
+import { Alert, Button, PasswordField, TextField } from '../../shared/ui/form';
+import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
+import { BackupCodes } from './BackupCodes';
 
 type Step =
   | { kind: 'password' }
@@ -24,6 +26,9 @@ export function MfaSetupPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const codeRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  useDocumentTitle('Verificación en dos pasos');
 
   const qr = useMemo(() => {
     if (step.kind !== 'scan') return null;
@@ -43,6 +48,7 @@ export function MfaSetupPage() {
     setBusy(false);
     if (err || !('totpURI' in data)) {
       setError('La contraseña no es correcta.');
+      passwordRef.current?.focus();
       return;
     }
     setPassword('');
@@ -60,6 +66,8 @@ export function MfaSetupPage() {
       setError(
         'El código no coincide. Revisa que la hora del celular sea automática y escribe el código actual.',
       );
+      codeRef.current?.focus();
+      codeRef.current?.select();
       return;
     }
     setStep({ kind: 'codes', backupCodes: step.backupCodes });
@@ -97,9 +105,10 @@ export function MfaSetupPage() {
 
         {step.kind === 'password' ? (
           <form className="flex flex-col gap-4" onSubmit={(e) => void start(e)}>
-            <TextField
+            <PasswordField
+              ref={passwordRef}
               label="Tu contraseña actual"
-              type="password"
+              aria-invalid={error ? true : undefined}
               autoComplete="current-password"
               required
               value={password}
@@ -133,6 +142,8 @@ export function MfaSetupPage() {
               </p>
             </div>
             <TextField
+              ref={codeRef}
+              aria-invalid={error ? true : undefined}
               label="Código de 6 dígitos que muestra la aplicación"
               inputMode="numeric"
               autoComplete="one-time-code"
@@ -158,11 +169,7 @@ export function MfaSetupPage() {
               Guarda estos códigos de respaldo en un lugar seguro. Cada uno sirve una sola vez si pierdes el
               celular.
             </p>
-            <ul className="tabular grid grid-cols-2 gap-2 rounded-control bg-surface p-3 font-semibold">
-              {step.backupCodes.map((c) => (
-                <li key={c}>{c}</li>
-              ))}
-            </ul>
+            <BackupCodes codes={step.backupCodes} />
             <Button
               onClick={() => {
                 void queryClient
