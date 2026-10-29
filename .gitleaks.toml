@@ -11,7 +11,7 @@ regexes = [
   # Contraseñas de la base local de docker compose (infrastructure/docker/initdb/01-roles.sh)
   '''^(postgres|owner|app|ro)_local_dev$''',
   # Contraseñas del contenedor PostgreSQL efímero de CI (.github/workflows/ci.yml)
-  '''^(postgres|owner|app|ro)_ci$''',
+  '''^(postgres|owner|app|ro|demo_password)_ci$''',
   # Marcador de plantilla en .env.example
   '''^CAMBIAR$''',
   # UUID de ejemplo en docs/02-architecture/api-design.md

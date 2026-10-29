@@ -57,11 +57,33 @@ jobs:
       - run: pnpm test:integration
 
   e2e:
-    name: E2E (Playwright)
+    name: E2E (Playwright, sistema completo)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres_ci # contenedor efímero de CI, no es un secreto
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 10
+    env:
+      PGPASSWORD: postgres_ci
+      DATABASE_MIGRATIONS_URL: postgres://quatreros_owner:owner_ci@localhost:5432/quatreros
+      DATABASE_URL: postgres://quatreros_app:app_ci@localhost:5432/quatreros
+      APP_BASE_URL: http://localhost:3000
+      DEMO_PASSWORD: demo_password_ci # solo usuarios de demostración en base efímera
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
+      - name: Crear roles y base demo
+        run: >-
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1
+          -v owner_pw="'owner_ci'" -v app_pw="'app_ci'" -v ro_pw="'ro_ci'" -v dbname=quatreros
+          -f infrastructure/scripts/db-roles.sql
+      - run: pnpm db:migrate
+      - run: pnpm db:seed:demo
+      - run: pnpm build
       - run: pnpm --filter @quatreros/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e
         env:

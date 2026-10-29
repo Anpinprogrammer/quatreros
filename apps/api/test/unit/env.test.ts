@@ -21,4 +21,18 @@ describe('loadEnv', () => {
       loadEnv({ DATABASE_URL: 'postgres://x', NODE_ENV: 'production', BETTER_AUTH_SECRET: 'a'.repeat(32) }),
     ).not.toThrow();
   });
+
+  it('nunca permite desactivar el límite de ingresos en producción', () => {
+    expect(() =>
+      loadEnv({
+        DATABASE_URL: 'postgres://x',
+        NODE_ENV: 'production',
+        BETTER_AUTH_SECRET: 'a'.repeat(32),
+        AUTH_RATE_LIMIT_DISABLED: 'true',
+      }),
+    ).toThrow(/AUTH_RATE_LIMIT_DISABLED/);
+    expect(
+      loadEnv({ DATABASE_URL: 'postgres://x', AUTH_RATE_LIMIT_DISABLED: 'true' }).AUTH_RATE_LIMIT_DISABLED,
+    ).toBe(true);
+  });
 });

@@ -1,15 +1,20 @@
+import type { MeResponse } from '@quatreros/contracts';
 import { Link } from 'react-router';
 import { ServerStatus } from '../../shared/ui/ServerStatus';
+import { UserMenu } from '../../shared/ui/UserMenu';
 
 /** Shell POS (ADR-014): catálogo táctil a la izquierda, ticket y pagos a la derecha. */
-export function PosShell() {
+export function PosShell({ me }: { me: MeResponse }) {
   return (
     <div className="grid min-h-dvh grid-rows-[auto_1fr] bg-surface">
       <header className="flex items-center justify-between border-b border-line bg-panel px-4 py-3">
         <Link to="/" className="font-bold text-chimichurri-strong">
           Quatreros <span className="ml-1 font-normal text-ink-muted">Caja</span>
         </Link>
-        <ServerStatus />
+        <div className="flex items-center gap-4">
+          <ServerStatus />
+          <UserMenu me={me} />
+        </div>
       </header>
       <div className="grid gap-4 p-4 md:grid-cols-[1fr_20rem] lg:grid-cols-[1fr_24rem]">
         <section aria-labelledby="pos-catalogo" className="rounded-panel bg-panel p-4">

@@ -9,6 +9,10 @@ export interface ModuleEntry {
   name: string;
   description: string;
   status: ModuleStatus;
+  /** Ruta dentro del ERP cuando el módulo está disponible. */
+  path?: string;
+  /** Permiso necesario para verlo en el menú. */
+  permission?: string;
 }
 
 export interface ModuleGroup {
@@ -104,8 +108,10 @@ export const MODULE_GROUPS: ModuleGroup[] = [
       {
         id: 'usuarios',
         name: 'Usuarios y permisos',
-        description: 'Roles, sedes, aprobaciones y auditoría',
-        status: { kind: 'blocked', by: 'Q-B-01' },
+        description: 'Usuarios, roles y sedes (matriz de permisos provisional)',
+        status: { kind: 'available' },
+        path: '/erp/usuarios',
+        permission: 'adm.user.read',
       },
     ],
   },

@@ -8,9 +8,12 @@ import { pinoHttp } from 'pino-http';
 import { toNodeHandler } from 'better-auth/node';
 import type { Env } from './config/env.js';
 import type { Auth } from './platform/auth/auth.js';
+import type { AuthProvisioner } from './platform/auth/provisioner.js';
+import type { Database } from './platform/db/client.js';
+import { actorMiddleware, mfaGate, requireAuthenticated, type ActorResolver } from './platform/http/actor.js';
 import { sessionMiddleware } from './platform/auth/session.js';
 import { contextMiddleware } from './platform/http/context.js';
-import { errorHandler, notFoundHandler } from './platform/http/errors.js';
+import { AppError, errorHandler, notFoundHandler } from './platform/http/errors.js';
 import { healthRouter } from './platform/health/routes.js';
 import type { IdempotencyStore } from './platform/idempotency/store.js';
 import type { FeatureFlagReader } from './platform/features/flags.js';
@@ -27,6 +30,11 @@ export interface AppDeps {
   auth?: Auth;
   /** Carpeta con la SPA compilada (apps/web/dist). En producción la API la sirve (deployment-design §1). */
   webDistDir?: string;
+  /** Resuelve roles, sedes y permisos del usuario autenticado (módulo admin). Activa la protección de /api/v1. */
+  resolveActor?: ActorResolver;
+  /** Base de datos y alta de credenciales para los módulos de negocio. */
+  db?: Database;
+  provisioner?: AuthProvisioner;
   /** Punto de extensión: cada módulo vertical monta aquí su router bajo /api/v1. */
   registerModules?: (api: express.Router, deps: AppDeps) => void;
 }
@@ -74,6 +82,18 @@ export function createApp(deps: AppDeps): Express {
     rateLimit({ windowMs: 60_000, limit: 300, standardHeaders: 'draft-8', legacyHeaders: false }),
   );
   if (deps.auth) app.use('/api', sessionMiddleware(deps.auth));
+  if (deps.resolveActor) app.use('/api', actorMiddleware(deps.resolveActor));
+
+  // Defensa CSRF adicional (security-design §5): en métodos que modifican, el Origin debe ser el de la SPA.
+  app.use('/api/v1', (req, _res, next) => {
+    const origin = req.header('origin');
+    const unsafe = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+    if (unsafe && origin && origin !== new URL(env.APP_BASE_URL).origin) {
+      next(AppError.forbidden('Origen no permitido.'));
+      return;
+    }
+    next();
+  });
 
   // Documentación OpenAPI (api-design §8): solo fuera de producción.
   if (env.NODE_ENV !== 'production') {
@@ -83,6 +103,8 @@ export function createApp(deps: AppDeps): Express {
   }
 
   const api = express.Router();
+  // Con resolución de usuario activa, toda ruta de negocio exige sesión y, si el rol lo pide, segundo factor.
+  if (deps.resolveActor) api.use(requireAuthenticated, mfaGate);
   deps.registerModules?.(api, deps);
   app.use('/api/v1', api);
   app.use('/api', notFoundHandler);

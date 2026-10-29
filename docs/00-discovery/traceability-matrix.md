@@ -110,21 +110,21 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 
 ## 5. Artefactos generados en Etapa B (2026-10-29)
 
-| Módulo   | BR                     | RF                     | Bloqueados / pendientes                          |
-| -------- | ---------------------- | ---------------------- | ------------------------------------------------ |
-| ADM      | BR-001–010             | RF-001–008             | Umbrales AP (P-10)                               |
-| CAT      | BR-020–025             | RF-030–033             | BR-024 (Q-COM-03)                                |
-| COMP     | BR-040–044             | RF-050–053             | BR-044 (P-02)                                    |
-| PROD     | BR-060–068             | RF-080–084             | BR-067 (Q-PRO-03), BR-068 (P-03)                 |
-| INV      | BR-080–093             | RF-110–119             | BR-087/RF-119 (P-05), BR-090/RF-116 (P-06)       |
-| COM      | BR-110–114             | RF-150–153             | BR-113/114, RF-153 (P-09)                        |
-| DIS      | BR-120–128             | RF-180–186             | BR-127/RF-186 (P-08), BR-128 (Q-DIS-02)          |
-| POS      | BR-140–150             | RF-220–227             | BR-149/RF-227 (P-07), BR-150 (P-02)              |
-| FIN      | BR-170–178             | RF-260–266             | BR-173 (Q-COM-04); rentabilidad en RF-266 (P-03) |
-| CONT     | BR-200–207             | RF-300–305             | BR-203–206, RF-304 (P-01..P-04)                  |
-| IA       | BR-230–237             | RF-340–345             | RF-343 habilitación (P-10)                       |
-| TG / MIG | BR-250–253, BR-260–261 | RF-370–372, RF-375–376 | BR-253/RF-372 (P-13)                             |
-| RNF      | —                      | RNF-001–134 (58)       | Valores numéricos PENDING                        |
+| Módulo   | BR                     | RF                     | Bloqueados / pendientes                                                                             |
+| -------- | ---------------------- | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| ADM      | BR-001–010             | RF-001–008             | Umbrales AP (P-10) · RF-001/003/004/005 implementados y probados (entrega 1, `adm/acceso-usuarios`) |
+| CAT      | BR-020–025             | RF-030–033             | BR-024 (Q-COM-03)                                                                                   |
+| COMP     | BR-040–044             | RF-050–053             | BR-044 (P-02)                                                                                       |
+| PROD     | BR-060–068             | RF-080–084             | BR-067 (Q-PRO-03), BR-068 (P-03)                                                                    |
+| INV      | BR-080–093             | RF-110–119             | BR-087/RF-119 (P-05), BR-090/RF-116 (P-06)                                                          |
+| COM      | BR-110–114             | RF-150–153             | BR-113/114, RF-153 (P-09)                                                                           |
+| DIS      | BR-120–128             | RF-180–186             | BR-127/RF-186 (P-08), BR-128 (Q-DIS-02)                                                             |
+| POS      | BR-140–150             | RF-220–227             | BR-149/RF-227 (P-07), BR-150 (P-02)                                                                 |
+| FIN      | BR-170–178             | RF-260–266             | BR-173 (Q-COM-04); rentabilidad en RF-266 (P-03)                                                    |
+| CONT     | BR-200–207             | RF-300–305             | BR-203–206, RF-304 (P-01..P-04)                                                                     |
+| IA       | BR-230–237             | RF-340–345             | RF-343 habilitación (P-10)                                                                          |
+| TG / MIG | BR-250–253, BR-260–261 | RF-370–372, RF-375–376 | BR-253/RF-372 (P-13)                                                                                |
+| RNF      | —                      | RNF-001–134 (58)       | Valores numéricos PENDING                                                                           |
 
 Flujos: `business-workflows.md` WF-01..WF-11 · Datos: `data-requirements.md` DR-001..025 · Integraciones: `integrations.md` INT-01..09 · Permisos: `actors-permissions.md` (AP-01..AP-10).
 

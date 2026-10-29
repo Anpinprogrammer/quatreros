@@ -13,7 +13,12 @@ import * as authSchema from '../db/schema/auth.js';
  * - Sesiones en base de datos, revocables.
  * La AUTORIZACIÓN (roles, sedes, aprobaciones) es propia y vive en el módulo admin.
  */
-export function createAuth(db: Database, env: Env) {
+export interface AuthOptions {
+  /** Devuelve true si la cuenta de negocio está desactivada: no se le crea sesión (BR-010). */
+  isBlocked?: (authUserId: string) => Promise<boolean>;
+}
+
+export function createAuth(db: Database, env: Env, options: AuthOptions = {}) {
   return betterAuth({
     appName: 'Quatreros',
     baseURL: env.APP_BASE_URL,
@@ -41,7 +46,18 @@ export function createAuth(db: Database, env: Env) {
       expiresIn: 60 * 60 * 12, // 12 h (POS por turno); el shell ERP aplica inactividad propia (RNF-006, PENDING)
       updateAge: 60 * 15,
     },
-    rateLimit: { enabled: env.NODE_ENV !== 'test', window: 60, max: 20 },
+    // Incluye la regla propia de Better Auth para /sign-in (3 intentos / 10 s por IP).
+    rateLimit: { enabled: env.NODE_ENV !== 'test' && !env.AUTH_RATE_LIMIT_DISABLED, window: 60, max: 20 },
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            if (options.isBlocked && (await options.isBlocked(session.userId))) return false;
+            return { data: session };
+          },
+        },
+      },
+    },
     plugins: [twoFactor({ issuer: 'Quatreros' })],
   });
 }

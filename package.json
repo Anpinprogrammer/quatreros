@@ -23,7 +23,8 @@
     "db:migrate": "pnpm --filter @quatreros/api db:migrate",
     "db:seed": "pnpm --filter @quatreros/api db:seed",
     "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test",
-    "prepare": "lefthook install || true"
+    "prepare": "lefthook install || true",
+    "db:seed:demo": "pnpm --filter @quatreros/api db:seed:demo"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

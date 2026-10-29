@@ -136,7 +136,9 @@ describe('autenticación (ADR-007)', () => {
       .set('Origin', 'http://localhost:5173')
       .send({ email: 'nuevo@example.com', password: randomUUID(), name: 'Nuevo' });
     expect(res.status).toBeGreaterThanOrEqual(400);
-    const users = await db.execute<{ n: number }>(sql`select count(*)::int as n from auth."user"`);
+    const users = await db.execute<{ n: number }>(
+      sql`select count(*)::int as n from auth."user" where email = 'nuevo@example.com'`,
+    );
     expect(users.rows[0]?.n).toBe(0);
   });
 

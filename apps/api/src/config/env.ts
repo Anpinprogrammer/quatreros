@@ -20,8 +20,17 @@ const EnvSchema = z
     DATABASE_SSL: booleanFromString,
     BETTER_AUTH_SECRET: z.string().optional(),
     APP_VERSION: z.string().default('0.1.0'),
+    /** Solo para pruebas E2E locales/CI: desactiva el límite de intentos de ingreso. Prohibido en staging/producción. */
+    AUTH_RATE_LIMIT_DISABLED: booleanFromString,
   })
   .superRefine((env, ctx) => {
+    if (env.AUTH_RATE_LIMIT_DISABLED && (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AUTH_RATE_LIMIT_DISABLED'],
+        message: 'AUTH_RATE_LIMIT_DISABLED no se permite en staging ni producción',
+      });
+    }
     const needsSecret = env.NODE_ENV === 'staging' || env.NODE_ENV === 'production';
     if (needsSecret && (!env.BETTER_AUTH_SECRET || env.BETTER_AUTH_SECRET.length < 32)) {
       ctx.addIssue({

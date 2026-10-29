@@ -1,5 +1,6 @@
 import type { Router } from 'express';
 import type { AppDeps } from '../app.js';
+import { adminRouter } from './admin/http/router.js';
 
 /**
  * Registro de módulos verticales (ADR-001, module-boundaries.md).
@@ -9,12 +10,8 @@ import type { AppDeps } from '../app.js';
  *   application/     casos de uso + public.ts (API pública para otros módulos y el ToolGateway)
  *   infrastructure/  repositorios Drizzle y schema.ts del esquema de BD del módulo
  *   http/            router Express, validación con contratos Zod
- *
- * Al construir una funcionalidad vertical, se monta su router aquí, p. ej.:
- *   api.use('/inventory', inventoryRouter(deps));
- *
- * Todavía no hay módulos de negocio: se construyen uno por uno según el roadmap aprobado.
  */
-export function registerModules(_api: Router, _deps: AppDeps): void {
-  // Sin módulos de negocio todavía (Etapa F: solo base técnica).
+export function registerModules(api: Router, deps: AppDeps): void {
+  if (!deps.db || !deps.provisioner) return;
+  api.use(adminRouter({ db: deps.db, provisioner: deps.provisioner, idempotency: deps.idempotency }));
 }
