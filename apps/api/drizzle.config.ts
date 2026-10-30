@@ -10,7 +10,7 @@ export default defineConfig({
   schema: './src/platform/db/schema/index.ts',
   out: './drizzle',
   casing: 'snake_case',
-  schemaFilter: ['auth', 'platform', 'audit'],
+  schemaFilter: ['auth', 'platform', 'audit', 'admin'],
   dbCredentials: {
     url: process.env.DATABASE_MIGRATIONS_URL ?? process.env.DATABASE_URL ?? '',
   },

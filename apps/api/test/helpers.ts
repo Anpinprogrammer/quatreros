@@ -16,6 +16,7 @@ export const testEnv: Env = {
   // Generado en cada ejecución: ningún secreto fijo en el repositorio (secrets-policy).
   BETTER_AUTH_SECRET: randomBytes(32).toString('base64'),
   APP_VERSION: 'test',
+  AUTH_RATE_LIMIT_DISABLED: false,
 };
 
 export const allFlagsOff: FeatureFlagReader = { isEnabled: () => Promise.resolve(false) };

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Channel } from '@quatreros/contracts';
+import type { Channel, RoleCode, Scope } from '@quatreros/contracts';
 import type { RequestHandler } from 'express';
 
 /**
@@ -11,6 +11,22 @@ export interface ExecutionContext {
   channel: Channel;
   /** Id de usuario de autenticación (Better Auth). Ausente en rutas públicas. */
   actorId?: string;
+  /** Identidad de negocio resuelta por el módulo admin (roles, sedes, permisos). */
+  actor?: Actor;
+}
+
+/** Usuario de negocio con sus permisos efectivos (especificación adm §4). */
+export interface Actor {
+  userId: string;
+  authUserId: string;
+  fullName: string;
+  email: string;
+  isActive: boolean;
+  roleCodes: RoleCode[];
+  siteIds: string[];
+  permissions: ReadonlyMap<string, Scope>;
+  mfaRequired: boolean;
+  mfaEnabled: boolean;
 }
 
 declare global {

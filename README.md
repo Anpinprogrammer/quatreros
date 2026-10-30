@@ -2,6 +2,7 @@
 
 ERP a medida para Quatreros: compras, producción por lotes, inventarios con FEFO, pedidos y reparto, punto de venta, cartera y contabilidad. Complementos opcionales: asistente de IA y Telegram.
 
+- **¿Eres un agente o vas a continuar el trabajo?** Empieza por [`AGENTS.md`](AGENTS.md) y [`docs/HANDOFF.md`](docs/HANDOFF.md).
 - **Estado del proyecto:** [`docs/PROJECT-STATUS.md`](docs/PROJECT-STATUS.md)
 - **Fuente de verdad del negocio:** [`docs/Quatreros_Documento_Maestro_v1.0.pdf`](docs/Quatreros_Documento_Maestro_v1.0.pdf)
 - **Decisiones:** [`docs/00-discovery/decision-register.md`](docs/00-discovery/decision-register.md) · **Arquitectura:** [`docs/02-architecture/`](docs/02-architecture/)
@@ -29,8 +30,8 @@ quatreros/
 | ----------- | --------------------- | ----------------------------------------- |
 | Node.js     | 24 LTS (mínimo 22.12) | `.nvmrc`                                  |
 | pnpm        | 12 (vía Corepack)     | `corepack enable`                         |
-| Docker      | Reciente              | PostgreSQL local y pruebas de integración |
-| PostgreSQL  | 17 (15+ compatible)   | Lo levanta `docker compose`               |
+| Docker      | Reciente (opcional)   | PostgreSQL local y pruebas de integración |
+| PostgreSQL  | 17 (15+ compatible)   | `docker compose` o cualquier instalación  |
 
 ## Puesta en marcha local
 
@@ -56,7 +57,11 @@ pnpm db:seed                       # flags de funcionalidades bloqueadas (apagad
 pnpm dev                           # API en :3000 y web en :5173 (con proxy a la API)
 ```
 
+Atajo para la demo (cualquier PostgreSQL, con o sin Docker): `PG_ADMIN_URL=<superusuario> DEMO_PASSWORD=<12+> pnpm db:reset:demo` recrea roles, base, migraciones y los 7 usuarios demo.
+
 - Web: http://localhost:5173 · Salud: http://localhost:3000/health · Documentación API: http://localhost:3000/api/docs
+- Usuarios demo y guion para mostrar el prototipo: [`docs/operations/demo-local.md`](docs/operations/demo-local.md)
+- Sistema de diseño (base visual única, DEC-086): [`docs/05-design/sistema-de-diseno.md`](docs/05-design/sistema-de-diseno.md)
 
 ## Comandos
 
@@ -64,7 +69,8 @@ pnpm dev                           # API en :3000 y web en :5173 (con proxy a la
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pnpm check`                                                                      | Formato + ESLint + fronteras de módulos + tipos + pruebas unitarias (lo mismo que el hook de pre-push) |
 | `pnpm test:integration`                                                           | Pruebas contra PostgreSQL real (Testcontainers; ver modos abajo)                                       |
-| `pnpm test:e2e`                                                                   | Playwright en escritorio, tableta y móvil                                                              |
+| `pnpm test:e2e`                                                                   | Playwright en escritorio, tableta y móvil (flujos + accesibilidad axe con capturas)                    |
+| `pnpm db:reset:demo`                                                              | Recrea la base demo desde cero (solo local/CI)                                                         |
 | `pnpm build`                                                                      | Compila contratos, web y API                                                                           |
 | `pnpm db:generate`                                                                | Genera una migración SQL desde los esquemas Drizzle (se revisa en el PR)                               |
 | `pnpm --filter @quatreros/api exec drizzle-kit generate --custom --name <nombre>` | Migración manual (triggers, permisos)                                                                  |
@@ -83,7 +89,7 @@ pnpm dev                           # API en :3000 y web en :5173 (con proxy a la
 1. Ninguna funcionalidad se programa sin especificación aprobada (`docs/04-specifications/`).
 2. Una funcionalidad vertical por PR: contrato → dominio → caso de uso → API → UI → pruebas.
 3. Reglas de negocio solo desde el registro de decisiones; lo pendiente queda detrás de un flag (`423 FEATURE_BLOCKED`).
-4. Detalle de convenciones en [`CONTRIBUTING.md`](CONTRIBUTING.md).
+4. Detalle de convenciones en [`CONTRIBUTING.md`](CONTRIBUTING.md) y procedimientos en [`.claude/skills/`](.claude/skills/).
 
 ## Operación
 

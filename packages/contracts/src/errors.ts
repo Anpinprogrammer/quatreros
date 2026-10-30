@@ -7,7 +7,10 @@ import { z } from 'zod';
 export const ErrorCode = z.enum([
   'MALFORMED_REQUEST',
   'UNAUTHENTICATED',
+  'ACCOUNT_DISABLED',
+  'ACCOUNT_NOT_PROVISIONED',
   'MFA_REQUIRED',
+  'MFA_SETUP_REQUIRED',
   'FORBIDDEN',
   'NOT_FOUND',
   'CONFLICT',

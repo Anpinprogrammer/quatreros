@@ -1,0 +1,205 @@
+Sistema de Diseño y Prototipado UI/UX: Platforma ERP/POS "Los Quatreros"
+PARTE 1: DESIGN SYSTEM OFICIAL (Tokens & UI Kit)
+1. Paleta de Color (Tokens de Color Extraídos del Isotipo)
+A partir de la identidad del logo oficial (personaje embutido a la parrilla, sombrero vaquero, tipografía desgastada y anillo exterior), definimos un sistema de color de alto contraste en modo oscuro por defecto (Dark Mode Native), ideal para entornos de cocina, operación POS nocturna/continua y uso móvil en exterior.
+Token
+Código HEX
+Descripción / Uso
+Primary / Ember Orange
+#EA580C
+Color dominante (anillo exterior y tono medio del chorizo). Botones primarios, estados activos, selecciones.
+Primary Hover / Flame Red-Orange
+#C2410C
+Tono tostado/asado. Estados Hover/Focus en elementos de acción.
+Accent / Terracotta Gold
+#F97316
+Acentos de alerta sutil, resaltados y micro-badges.
+Background / Char Black
+#09090B
+Fondo principal profundo estilo carbón (Zinc-950).
+Surface Dark / Smoked Charcoal
+#18181B
+Superficie de Cards, Bento Grids y contenedores elevación L1 (Zinc-900).
+Surface Border / Grill Gray
+#27272A
+Bordes sutiles de Cards, separadores e inputs (Zinc-800).
+Text Primary / Pure Chalk
+#FFFFFF
+Textos de alto contraste y títulos Bolds.
+Text Muted / Ash Gray
+#A1A1AA
+Metadatos, etiquetas secundarias y descripciones.
+Semantic Success
+#22C55E
+Entregado, Lote Óptimo, Caja Cuadrada, Cobro Recibido.
+Semantic Warning
+#EAB308
+Vencimiento Próximo (FEFO), Cupo de Crédito al 80%, Stock Bajo.
+Semantic Danger
+#EF4444
+Lote Vencido, Credito Excedido, Descuadre de Caja, Merma Crítica.
+Semantic Info
+#3B82F6
+Pedido Reasignado, Proceso en Cocina, Sugerencia IA.
+
+2. Tipografía y Estilos de Texto
+Para garantizar compatibilidad con React + Tailwind CSS y legibilidad en pantallas táctiles o móviles de baja resolución:
+Tipografía Principal: Inter o Plus Jakarta Sans (Sans-serif moderna con excelente x-height).
+Tipografía Numérica (POS & Caja): JetBrains Mono (Monospaced para alineación perfecta de precios, cantidades y pesos).
+Plaintext
+Display Bold (28px / 32px)   -> Indicadores KPi, Totales POS, Encabezados Bento Grid
+Title SemiBold (20px / 24px) -> Títulos de Cards, Nombres de Productos
+Body Medium (14px / 20px)    -> Texto Operativo, Inputs, Opciones de Menú
+Caption Regular (12px / 16px)-> Metadatos, Lotes FEFO, Timestamps
+3. Componentes Clave & UI Kit
+A. Botones (Button.tsx)
+Primary Action (POS / Confirmar): Fondo #EA580C, texto #FFFFFF, bordes redondeados rounded-xl, sombra de brillo de brasa (shadow-orange-950/50), min-height de 52px para interacción táctil rápida sin margen de error.
+Secondary Action: Fondo #27272A, borde 1px solid #3F3F46, texto #FFFFFF.
+Ghost / Cancel: Borde transparente, texto #A1A1AA, hover a #27272A.
+B. Cards & Bento Containers (Card.tsx)
+Estructura: bg-[#18181B] border border-[#27272A] rounded-2xl p-5 shadow-xl transition-all duration-200.
+Hover Effect: hover:border-[#EA580C]/50 hover:translate-y-[-2px].
+C. Badges de Estado (Badge.tsx)
+Lote Vencido: bg-red-500/10 text-red-400 border border-red-500/20
+Lote FEFO Próximo: bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
+Entregado Parcial: bg-blue-500/10 text-blue-400 border border-blue-500/20
+Paquete Abierto (Desglose): bg-orange-500/10 text-orange-400 border border-orange-500/20
+D. Inputs & Controles Táctiles (Input.tsx / Keypad.tsx)
+Campos numéricos con teclado gigante integrado (Big Numpad Overlay) para cajeros y personal con guantes o movilidad ágil. Altura mínima de input: 48px.
+PARTE 2: ESPECIFICACIÓN Y FLUJO DE PANTALLAS DEL PROTOTIPO
++---------------------------------------------------------------------------------------+
+|                               QUATREROS PLATFORM (HEADER)                             |
+|  [Logo Quatreros] [Sede: Bodega Principal v]  [Turno: Abierto]   (🤖 IA Assistant)   |
++---------------------------------------------------------------------------------------+
+|  [01. Command Center]  [02. POS/Cocina]  [03. Reparto]  [04. Producción]  [05. IA Log] |
++---------------------------------------------------------------------------------------+
+1. Dashboard Principal / Command Center
+Enfoque: Bento Grid interactivo con cero tablas aburridas. Vista ejecutiva en tiempo real del estado de la empresa.
++-----------------------------------+-----------------------------------+-----------------------------------+
+| 📊 VENTAS DEL DÍA (HOY)           | 🚚 ESTADO DE REPARTO              | 🥩 PRODUCCIÓN & MERMAS           |
+| $ 4,850,000 COP                   | [8/12 Entregados] [3 En Ruta]     | 450 Kg Chorizo Santarrosano       |
+| (+14% vs ayer) [Gráfica de Área]  | [1 Entrega Parcial / Pendiente]   | Rendimiento Promedio: 96.2%       |
++-----------------------------------+-----------------------------------+-----------------------------------+
+| ⚠️ ALERTAS FEFO & SALIDA PREFERENTE (Inventario Prioritario)                                              |
+|  - Lote #CH-20261024 (Chorizo Premium) -> Vence en 3 Días (12 Paquetes restantes en Bodega) [Despachar]   |
+|  - Lote #RL-20261020 (Rellena Mixta)   -> Vence en 1 Día  (4 Paquetes restantes) [Mover a POS]            |
++-----------------------------------------------------------------------+-----------------------------------+
+| 💰 ESTADO DE CAJA POS             | 💳 CRÉDITO & CARTERA              | 🤖 SUGERENCIA DE IA               |
+| Caja #1: $ 1,240,000 COP          | 3 Clientes superaron el 80% cupo  | "Sugerencia: Producir 200 paquetes|
+| [Efectivo / Nequi / Datafono]     | [Cliente Rest. El Rancho: $1.2M]  | de Chorizo para cubrir viernes"   |
++-----------------------------------+-----------------------------------+-----------------------------------+
+
+Micro-interacciones:
+Click en alerta FEFO abre directo el modal de traslado a POS o descuento de lote.
+Hover sobre barras de rendimiento de producción revela el consumo real vs. receta base.
+2. Terminal POS & Cocina
+Enfoque: Interfaz híbrida para pantallas táctiles de 15" a 22". División de inventario entre productos listos para venta de mostrador y consumo en cocina de asados.
++-------------------------------------------------------------+---------------------------------------------+
+| CATÁLOGO DE PRODUCTOS (Grid Táctil 4x3 con imágenes)        | TICKET DE VENTA ACTUAL (Orden #1042)        |
++-------------------------------------------------------------+---------------------------------------------+
+| +-------------------+ +-------------------+                 | 1x Picada Quatrera XL       $ 45,000        |
+| | [Img Chorizo]     | | [Img Rellena]     |                 | 2x Chorizo Individual       $ 12,000        |
+| | Chorizo Porción   | | Rellena Tradic.   |                 | 1x Gaseosa 1.5L             $  7,000        |
+| | $ 6,000 (Stock:42)| | $ 5,500 (Stock:18)|                 | ------------------------------------------- |
+| +-------------------+ +-------------------+                 | Subtotal:                   $ 64,000        |
+| +-------------------+ +-------------------+                 | Impuestos incluidos:        $      0        |
+| | [Img Paquete 10u] | | [Img Asado Mix]   |                 | TOTAL A PAGAR:              $ 64,000        |
+| | Paq. Chorizo x10  | | Combo Parrillero  |                 +---------------------------------------------+
+| | $ 52,000 (Stk:15) | | $ 38,000 (Stk:8)  |                 | MÉTODO DE PAGO MIXTO [POS-01]               |
+| +-------------------+ +-------------------+                 | [ $ Efectivo ]   [ 📲 Nequi / PSE ]        |
+| ⚡ [BOTÓN: ABRIR PAQUETE EN COSTA] (Desglose 1 Paq -> 10u)   | [ 💳 Débito/Crédito ] [ 🤝 Crédito Cliente] |
++-------------------------------------------------------------+---------------------------------------------+
+| 👨‍🍳 MONITOR DE COCINA (Barra Inferior de Estado)            | [ CANCELAR ]   [ 🖨️ COBRAR E IMPRIMIR ]     |
+|  - Conteo Inicial/Final de Cocina | Merma Teórica calculada | (Botón Verde Gigante $64,000)                |
++-------------------------------------------------------------+---------------------------------------------+
+
+Flujo & UI Key:
+Desglose Rápido: Si un producto individual se agota, el cajero presiona el botón "Abrir Paquete"; el sistema descuenta 1 paquete del inventario y suma 10 unidades individuales al POS en un toque.
+Pago Mixto: Modal flotante para ingresar parciales (ej. $20,000 Efectivo + $44,000 Nequi) con cálculo automático de cambio.
+3. Portal Móvil de Distribución (Repartidores / Reparto)
+Enfoque: Mobile-First (Pantalla vertical de smartphone). Operación rápida en calle.
++-----------------------------------+
+| 🚚 QUATREROS - DISTRIBUCIÓN       |
+| Repartidor: Carlos V. | 29 Oct    |
++-----------------------------------+
+| RUTAS DEL DÍA (4 Pedidos)         |
++-----------------------------------+
+| 🔴 PEDIDO #D-882 (EN RUTA)        |
+| Cliente: Restaurante Don Pedro    |
+| Dirección: Cl. 15 #4-20           |
+| Total: $ 480,000 COP (Contraentrega)|
+| Items: 10 Paq. Chorizo, 5 Rellena |
+| [ 📞 Llamar ]   [ 📍 Ver Mapa ]   |
+| +-------------------------------+ |
+| | [ REGISTRAR ENTREGA / COBRO ] | |
+| +-------------------------------+ |
++-----------------------------------+
+| 🟢 PEDIDO #D-881 (COMPLETADO)     |
+| Cliente: Asaderos El Sur - $210k  |
++-----------------------------------+
+Modal de Entrega Parcial / Devolución (Flujo Crítico en Calle)
++---------------------------------------------------+
+| 📦 REGISTRO DE ENTREGA - PEDIDO #D-882            |
++---------------------------------------------------+
+| Item: Paquete Chorizo x10                         |
+| Solicitado: 10 Paquetes                           |
+| Recibido:   [  8  ] (-2 rechazados por empaque)   |
+|                                                   |
+| Motivo Devolución: [ Empaque dañado / Rotura v ]  |
+| Destino Devolución: [ Inspección en Bodega   v ]  |
+|                                                   |
+| Recaudo Reajustado: $ 384,000 COP                 |
+| Método de Cobro: [ Efectivo / Nequi / Crédito ]   |
+|                                                   |
+| [ 📷 Tomar Foto Evidencia ]                       |
+| [ 🖊️ Firma Digital del Cliente ]                 |
+|                                                   |
+| [ CONFIRMAR ENTREGA PARCIAL ]                     |
++---------------------------------------------------+
+4. Módulo de Producción e Inventarios
+Enfoque: Trazabilidad visual de lotes, recetas base y control FEFO.
++---------------------------------------------------------------------------------------+
+| 🥩 ORDEN DE PRODUCCIÓN #OP-504 | Estado: En Proceso                                   |
++---------------------------------------------------------------------------------------+
+| Producto a Fabricar: Chorizo Santarrosano (Lote objetivo: 500 Kg)                     |
+| Fecha de Fabricación: 29/10/2026 | Vencimiento Estimado: 29/11/2026 (FEFO Auto-generated)|
++---------------------------------------------------------------------------------------+
+| RECETA BASE & CONSUMO DE MATERIA PRIMA (Salida por Lote Insumos FEFO)                  |
+|  - Carne de Cerdo Magra:  300 Kg  -> Lote Insumo #MP-882 (Vence 05/11)  [OK]          |
+|  - Tocino / Grasa:        150 Kg  -> Lote Insumo #MP-790 (Vence 02/11)  [OK]          |
+|  - Mix de Especias/Tripa:  50 Kg  -> Lote Insumo #MP-901 (Vence 15/12)  [OK]          |
++---------------------------------------------------------------------------------------+
+| 📈 METRICAS DE RENDIMIENTO DE BATCH                                                   |
+| Peso Teórico Esperado: 500.0 Kg                                                       |
+| Peso Real Ingresado:   488.5 Kg  | Merma de Proceso: 11.5 Kg (2.3%) [Dentro de Tolerancia]|
++---------------------------------------------------------------------------------------+
+| [ 🔄 AJUSTAR RECETA ]                        [ 🏭 FINALIZAR BATCH Y GENERAR LOTE ]   |
++---------------------------------------------------------------------------------------+
+5. Asistente de IA (Drawer / Floating Widget)
+Enfoque: Interfaz conversacional limpia con política estricta de "Human-in-the-Loop" y confirmación explícita de escritura.
++-----------------------------------------------------------------------+
+| 🤖 ASISTENTE QUATREROS (AI Drawer)                                [X] |
++-----------------------------------------------------------------------+
+| 👤 Usuario: "Registra una compra de 100kg de carne de cerdo a         |
+|             Distribuidora Cárnica del Valle por $1.500.000"           |
+|                                                                       |
+| 🤖 IA: "Entendido. He procesado la solicitud. Revisa el borrador      |
+|        a continuación para autorizar la orden de compra."             |
+|                                                                       |
+| +-------------------------------------------------------------------+ |
+| | ⚠️ REQUERE CONFIRMACIÓN DE ESCRITURA EN SISTEMA                   | |
+| |                                                                   | |
+| | • Tipo de Operación: Registro de Compra / Entrada de Materia Prima| |
+| | • Proveedor: Distribuidora Cárnica del Valle                      | |
+| | • Ítem: Carne de Cerdo Magra (100 Kg)                             | |
+| | • Valor Total: $ 1,500,000 COP ($15,000 / Kg)                     | |
+| | • Asignación: Bodega Principal                                    | |
+| | • Consecuencia: Se generará cuenta por pagar y entrada de inventario| |
+| |                                                                   | |
+| | [ ❌ CANCELAR / DESCARTAR ]    [ 🚀 CONFIRMAR Y GUARDAR DATO ]    | |
+| +-------------------------------------------------------------------+ |
++-----------------------------------------------------------------------+
+
+Micro-interacción: El botón "CONFIRMAR Y GUARDAR DATO" ejecuta la mutación en el backend de Express/PostgreSQL e imprime un toast flotante en verde: ✅ Compra #C-302 creada con éxito.
+
+

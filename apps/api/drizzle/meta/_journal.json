@@ -15,6 +15,20 @@
       "when": 1793294764002,
       "tag": "0001_append_only_and_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793298052917,
+      "tag": "0002_admin_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793298053612,
+      "tag": "0003_admin_grants",
+      "breakpoints": true
     }
   ]
 }

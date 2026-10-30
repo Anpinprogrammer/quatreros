@@ -14,12 +14,20 @@ export class ApiError extends Error {
   get code() {
     return this.problem.code;
   }
+  get status() {
+    return this.problem.status;
+  }
+  /** Mensaje de un campo concreto (errores de validación 422). */
+  fieldError(path: string): string | undefined {
+    return this.problem.errors?.find((e) => e.path === path)?.message;
+  }
 }
 
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   idempotencyKey?: string;
+  ifMatch?: string;
   signal?: AbortSignal;
 }
 
@@ -27,6 +35,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   if (options.idempotencyKey) headers[IDEMPOTENCY_HEADER] = options.idempotencyKey;
+  if (options.ifMatch) headers['If-Match'] = options.ifMatch;
 
   let response: Response;
   try {

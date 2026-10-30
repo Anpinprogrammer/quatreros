@@ -1,45 +1,62 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/atkinson-hyperlegible-next';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
 
-/* Tokens del sistema visual (apps/web/DESIGN.md) */
+/*
+ * Sistema de Diseño "Los Quatreros" (docs/05-design/sistema-de-diseno.md, DEC-086).
+ * Modo oscuro nativo. Ajustes AA en el Anexo A del documento.
+ */
 @theme {
-  --font-sans: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 
-  --color-ink: #1e2a24;
-  --color-ink-muted: #4f5d55;
-  --color-surface: #f5f7f6;
-  --color-panel: #ffffff;
-  --color-line: #d5ddd8;
-  --color-chimichurri: #2d6a4f;
-  --color-chimichurri-strong: #1b4332;
-  --color-chimichurri-soft: #e3efe8;
-  --color-brasa: #d99a0b;
-  --color-brasa-soft: #fbf1d9;
-  --color-alerta: #b3261e;
+  /* Paleta oficial */
+  --color-ember: #ea580c; /* Primary / Ember Orange */
+  --color-ember-hover: #c2410c; /* Primary Hover / Flame Red-Orange */
+  --color-terracotta: #f97316; /* Accent / Terracotta Gold */
+  --color-char: #09090b; /* Background / Char Black */
+  --color-smoke: #18181b; /* Surface Dark / Smoked Charcoal */
+  --color-grill: #27272a; /* Surface Border / Grill Gray */
+  --color-grill-strong: #3f3f46; /* Borde del botón secundario (UI Kit A) */
+  --color-chalk: #ffffff; /* Text Primary / Pure Chalk */
+  --color-ash: #a1a1aa; /* Text Muted / Ash Gray */
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  /* Anexo A: borde de campos con contraste ≥ 3:1 (WCAG 1.4.11) */
+  --color-control: #71717a;
 
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5625rem;
-  --text-2xl: 1.953rem;
-
-  --radius-control: 0.5rem;
-  --radius-panel: 0.75rem;
+  /* Escala tipográfica oficial */
+  --text-display: 1.75rem;
+  --text-display--line-height: 2rem;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.5rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  /* Anexo A: etiqueta del botón primario como texto grande (≥ 18,66 px en negrita) */
+  --text-action: 1.1875rem;
+  --text-action--line-height: 1.5rem;
 }
 
 @layer base {
   html {
-    color: var(--color-ink);
-    background: var(--color-surface);
+    color-scheme: dark;
+    color: var(--color-chalk);
+    background: var(--color-char);
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
   }
   body {
     margin: 0;
-    line-height: 1.5;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 500; /* Body Medium */
   }
   :focus-visible {
-    outline: 2px solid var(--color-chimichurri);
+    outline: 2px solid var(--color-ember);
     outline-offset: 2px;
   }
   .tabular {

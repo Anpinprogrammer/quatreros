@@ -57,17 +57,37 @@ jobs:
       - run: pnpm test:integration
 
   e2e:
-    name: E2E (Playwright)
+    name: E2E (Playwright, sistema completo)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres_ci # contenedor efímero de CI, no es un secreto
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 10
+    env:
+      # Mismo script que en local (infrastructure/scripts/reset-demo-db.sh): roles, base, migraciones y semilla demo.
+      PG_ADMIN_URL: postgres://postgres:postgres_ci@localhost:5432/postgres
+      OWNER_PW: owner_ci
+      APP_PW: app_ci
+      RO_PW: ro_ci
+      DATABASE_URL: postgres://quatreros_app:app_ci@localhost:5432/quatreros
+      APP_BASE_URL: http://localhost:3000
+      DEMO_PASSWORD: demo_password_ci # solo usuarios de demostración en base efímera
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
+      - run: pnpm db:reset:demo
+      - run: pnpm build
       - run: pnpm --filter @quatreros/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e
         env:
           CI: 'true'
+      # Siempre: el reporte trae las capturas de cada pantalla para la revisión visual del PR.
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: playwright-report
           path: apps/web/playwright-report

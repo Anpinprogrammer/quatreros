@@ -21,7 +21,8 @@
     "openapi:print": "tsx --conditions=development scripts/print-openapi.ts",
     "db:migrate:prod": "node dist/cli/migrate.js",
     "db:seed:prod": "node dist/cli/seed.js",
-    "deps:check": "depcruise src --config .dependency-cruiser.cjs"
+    "deps:check": "depcruise src --config .dependency-cruiser.cjs",
+    "db:seed:demo": "tsx --conditions=development --env-file-if-exists=../../.env src/cli/seed-demo.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",

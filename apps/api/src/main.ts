@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm';
 import { createApp } from './app.js';
 import { loadEnv } from './config/env.js';
 import { createAuth } from './platform/auth/auth.js';
+import { createAuthProvisioner } from './platform/auth/provisioner.js';
+import { isAuthUserBlocked, loadActor } from './modules/admin/application/public.js';
 import { createDb } from './platform/db/client.js';
 import { PgFeatureFlags } from './platform/features/flags.js';
 import { PgIdempotencyStore } from './platform/idempotency/store.js';
@@ -11,7 +13,11 @@ import { registerModules } from './modules/index.js';
 
 const env = loadEnv();
 const logger = createLogger(env.LOG_LEVEL);
-const { db, close } = createDb(env.DATABASE_URL, env.DATABASE_SSL);
+const { db, close } = createDb(env.DATABASE_URL, env.DATABASE_SSL, (err) => {
+  logger.warn({ err }, 'Conexión inactiva con la base de datos cerrada; el pool abrirá otra');
+});
+
+const auth = createAuth(db, env, { isBlocked: (authUserId) => isAuthUserBlocked(db, authUserId) });
 
 const app = createApp({
   env,
@@ -21,7 +27,10 @@ const app = createApp({
   },
   idempotency: new PgIdempotencyStore(db),
   flags: new PgFeatureFlags(db),
-  auth: createAuth(db, env),
+  auth,
+  db,
+  provisioner: createAuthProvisioner(auth, db),
+  resolveActor: (authUserId) => loadActor(db, authUserId),
   webDistDir: fileURLToPath(new URL('../../web/dist', import.meta.url)),
   registerModules,
 });
