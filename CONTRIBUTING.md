@@ -1,6 +1,6 @@
 # Cómo contribuir a Quatreros
 
-Resumen operativo de las convenciones (fuente completa: skill `quatreros-conventions` y `docs/02-architecture/`).
+Resumen operativo de las convenciones. Fuente completa: [`.claude/skills/quatreros-conventions`](.claude/skills/quatreros-conventions/SKILL.md), [`AGENTS.md`](AGENTS.md) y `docs/02-architecture/`. Paso a paso de una entrega: [`.claude/skills/quatreros-entrega`](.claude/skills/quatreros-entrega/SKILL.md).
 
 ## Flujo de trabajo (Spec-Driven Development)
 
@@ -8,7 +8,8 @@ Resumen operativo de las convenciones (fuente completa: skill `quatreros-convent
 2. **Rama** `feat/<alcance>-<descripcion-corta>` desde `main`.
 3. **Implementación vertical:** contrato Zod (`packages/contracts`) → dominio → caso de uso → repositorio/migración → ruta HTTP → pantalla → pruebas.
 4. **PR** con la plantilla: IDs trazables y verificaciones ejecutadas. CI debe pasar.
-5. **Cierre:** actualizar `docs/PROJECT-STATUS.md`, la matriz de trazabilidad y `apps/web/src/shared/modules.ts` si el módulo queda disponible.
+5. **Cierre:** actualizar `docs/PROJECT-STATUS.md`, la matriz de trazabilidad, `apps/web/src/shared/modules.ts` si el módulo queda disponible y `docs/HANDOFF.md`.
+6. **Interfaz:** solo con el sistema de diseño (`docs/05-design/sistema-de-diseno.md`, DEC-086); cada pantalla nueva en `apps/web/e2e/accesibilidad.spec.ts`.
 
 ## Reglas no negociables
 
