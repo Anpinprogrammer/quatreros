@@ -19,6 +19,8 @@ regexes = [
   # Valores de prueba ya retirados que siguen en el historial del commit inicial
   '''^local-dev-secret-not-for-production-0001$''',
   '''^test-secret-test-secret-test-secret-1234$''',
+  # Ejemplo de DEMO_PASSWORD que quedó en el historial de AGENTS.md (ya reemplazado por un marcador)
+  '''^elige-12-o-mas-caracteres$''',
 ]
 paths = [
   '''(^|/)pnpm-lock\.yaml$''',

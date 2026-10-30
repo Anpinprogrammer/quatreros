@@ -46,7 +46,7 @@ Con cualquiera de los dos, esto recrea desde cero la base demo (roles, migracion
 
 ```bash
 export PG_ADMIN_URL=postgres://postgres:postgres_local_dev@localhost:5432/postgres   # tu superusuario
-export DEMO_PASSWORD='elige-12-o-mas-caracteres'
+export DEMO_PASSWORD="<inventa una de 12+ caracteres>"
 pnpm db:reset:demo                 # infrastructure/scripts/reset-demo-db.sh (se niega en staging/producción)
 pnpm dev                           # API :3000 + web :5173
 ```
