@@ -9,30 +9,31 @@
 
 ## Índice
 
-| ADR     | Tema                                                               | Estado                     |
-| ------- | ------------------------------------------------------------------ | -------------------------- |
-| ADR-001 | Monolito modular                                                   | ACCEPTED                   |
-| ADR-002 | Monorepo con pnpm workspaces                                       | ACCEPTED                   |
-| ADR-003 | Node.js 24 LTS y TypeScript 6.0                                    | ACCEPTED                   |
-| ADR-004 | Express 5                                                          | ACCEPTED                   |
-| ADR-005 | Acceso a datos: Drizzle ORM + migraciones SQL                      | ACCEPTED                   |
-| ADR-006 | Validación y contratos: Zod 4 compartido + OpenAPI                 | ACCEPTED                   |
-| ADR-007 | Autenticación: Better Auth; autorización propia                    | ACCEPTED                   |
-| ADR-008 | Dinero y cantidades: `NUMERIC` + aritmética decimal                | ACCEPTED                   |
-| ADR-009 | Inventario: kardex inmutable + saldos con bloqueo                  | ACCEPTED                   |
-| ADR-010 | Idempotencia por clave en escrituras críticas                      | ACCEPTED                   |
-| ADR-011 | Outbox transaccional y trabajos en PostgreSQL (pg-boss)            | ACCEPTED                   |
-| ADR-012 | Auditoría append-only protegida en BD                              | ACCEPTED                   |
-| ADR-013 | Roles de base de datos de mínimo privilegio                        | ACCEPTED                   |
-| ADR-014 | Frontend: una SPA con tres "shells" (ERP, POS, Portal)             | ACCEPTED                   |
-| ADR-015 | Complementos IA y Telegram como módulos aislados con feature flags | ACCEPTED                   |
-| ADR-016 | Abstracción de proveedor de IA (AI SDK)                            | PROPOSED                   |
-| ADR-017 | Telegram con grammY y webhook                                      | ACCEPTED (si se contrata)  |
-| ADR-018 | Testing: Vitest + Testcontainers + Playwright                      | ACCEPTED                   |
-| ADR-019 | Logging y observabilidad: pino                                     | ACCEPTED                   |
-| ADR-020 | Hosting y almacenamiento                                           | **PROPOSED** (P-12, costo) |
-| ADR-021 | Contabilidad en dos capas                                          | ACCEPTED (aplica DEC-081)  |
-| ADR-022 | Lint y formato: ESLint + Prettier; hooks con lefthook              | ACCEPTED                   |
+| ADR     | Tema                                                                        | Estado                      |
+| ------- | --------------------------------------------------------------------------- | --------------------------- |
+| ADR-001 | Monolito modular                                                            | ACCEPTED                    |
+| ADR-002 | Monorepo con pnpm workspaces                                                | ACCEPTED                    |
+| ADR-003 | Node.js 24 LTS y TypeScript 6.0                                             | ACCEPTED                    |
+| ADR-004 | Express 5                                                                   | ACCEPTED                    |
+| ADR-005 | Acceso a datos: Drizzle ORM + migraciones SQL                               | ACCEPTED                    |
+| ADR-006 | Validación y contratos: Zod 4 compartido + OpenAPI                          | ACCEPTED                    |
+| ADR-007 | Autenticación: Better Auth; autorización propia                             | ACCEPTED                    |
+| ADR-008 | Dinero y cantidades: `NUMERIC` + aritmética decimal                         | ACCEPTED                    |
+| ADR-009 | Inventario: kardex inmutable + saldos con bloqueo                           | ACCEPTED                    |
+| ADR-010 | Idempotencia por clave en escrituras críticas                               | ACCEPTED                    |
+| ADR-011 | Outbox transaccional y trabajos en PostgreSQL (pg-boss)                     | ACCEPTED                    |
+| ADR-012 | Auditoría append-only protegida en BD                                       | ACCEPTED                    |
+| ADR-013 | Roles de base de datos de mínimo privilegio                                 | ACCEPTED                    |
+| ADR-014 | Frontend: una SPA con tres "shells" (ERP, POS, Portal)                      | ACCEPTED                    |
+| ADR-015 | Complementos IA y Telegram como módulos aislados con feature flags          | ACCEPTED                    |
+| ADR-016 | Abstracción de proveedor de IA (AI SDK)                                     | **REEMPLAZADO** por ADR-023 |
+| ADR-017 | Telegram con grammY y webhook                                               | ACCEPTED (si se contrata)   |
+| ADR-018 | Testing: Vitest + Testcontainers + Playwright                               | ACCEPTED                    |
+| ADR-019 | Logging y observabilidad: pino                                              | ACCEPTED                    |
+| ADR-020 | Hosting y almacenamiento                                                    | **PROPOSED** (P-12, costo)  |
+| ADR-021 | Contabilidad en dos capas                                                   | ACCEPTED (aplica DEC-081)   |
+| ADR-022 | Lint y formato: ESLint + Prettier; hooks con lefthook                       | ACCEPTED                    |
+| ADR-023 | Asistente sobre Anthropic Managed Agents, configurado como código con `ant` | ACCEPTED (DEC-087)          |
 
 ---
 
@@ -121,7 +122,9 @@
 - **Decisión:** módulos `assistant` y `telegram` en el mismo proceso, **sin que ningún módulo del núcleo los importe**. Interactúan con el núcleo solo a través de un **catálogo de herramientas** (`ToolGateway`) que invoca los mismos casos de uso de la capa de aplicación con el contexto del usuario. Activación por `platform.addon_settings`; con el complemento apagado sus rutas responden 404 y sus trabajos no se programan.
 - **Consecuencias:** pueden extraerse a otro proceso más adelante sin tocar el núcleo (PM §4.A–D).
 
-## ADR-016 — Abstracción del proveedor de IA (PROPOSED)
+## ADR-016 — Abstracción del proveedor de IA (REEMPLAZADO por ADR-023)
+
+> 2026-10-30: el responsable entregó el agente Quatreros AI sobre Anthropic Managed Agents (DEC-087). Este ADR queda como antecedente; la independencia del núcleo frente al proveedor se conserva por el `ToolGateway` (ADR-015), no por una capa de abstracción de modelos.
 
 - **Decisión propuesta:** **AI SDK (`ai` v7)** como capa de abstracción para llamadas con herramientas, con proveedores intercambiables (p. ej. OpenRouter vía `@openrouter/ai-sdk-provider` 3, o un proveedor directo). El modelo se elige tras el **benchmark** de la Etapa D (DEC-P13).
 - **Pendiente de aprobación:** costo del proveedor (P-14).
@@ -167,3 +170,17 @@ Tasa de referencia: **≈ $3.150 COP/USD** (dólar del 28-oct-2026 según [Infob
 ## ADR-022 — Lint, formato y hooks
 
 - **Decisión:** **ESLint 10 + typescript-eslint 8** (reglas de tipos) y **Prettier 3**; **dependency-cruiser** para fronteras entre módulos; **lefthook** para ejecutar lint y pruebas rápidas antes de commit (más liviano que husky + lint-staged). Biome se evaluó pero su chequeo de tipos es menor que typescript-eslint.
+
+## ADR-023 — Asistente sobre Anthropic Managed Agents, configurado como código
+
+- **Contexto:** el agente **Quatreros AI** ya existe en Anthropic Console y fue exportado a `quatreros-ai/` (agente, entorno y `claude-lock.json`). DEC-087 lo adopta como el asistente oficial.
+- **Decisión:**
+  1. El backend Express usa la API de Managed Agents con el SDK oficial `@anthropic-ai/sdk` (`client.beta.sessions`, encabezado beta `managed-agents-2026-04-01`, que el SDK agrega solo). Usa sesiones (`/v1/sessions`), eventos (`/v1/sessions/{id}/events`) y el flujo SSE (`/events/stream`).
+  2. Las herramientas de negocio se declaran en el agente como herramientas **`custom`**. Claude solo **solicita** la ejecución (`agent.custom_tool_use`). El backend la resuelve contra el `ToolGateway`, con la identidad y los permisos del empleado dueño de la sesión, y devuelve `user.custom_tool_result`.
+  3. El conjunto de herramientas integrado (`agent_toolset_20260401`) queda **apagado** (`default_config.enabled: false`). El entorno es `cloud` con red `limited` y sin hosts permitidos. El agente no puede ejecutar comandos ni conectarse al backend ni a la base de datos.
+  4. La configuración del agente se versiona en `quatreros-ai/` y se sincroniza con `ant apply` desde esa carpeta. `git push` no actualiza el agente y `ant apply` no despliega el backend.
+- **Consecuencias:**
+  - Proveedor único (Anthropic). La dependencia queda contenida en `src/addons/assistant/infrastructure/anthropic/`; el núcleo no la ve (dependency-cruiser).
+  - El costo incluye tokens **y** tiempo de ejecución de la sesión (`usage.active_seconds`); se mide con `session.usage` y `usage.list_cost` (ai-architecture §6).
+  - Managed Agents está en beta y no es elegible para Zero Data Retention (riesgos R-IA-08..12).
+- **Alternativas descartadas:** AI SDK con proveedores intercambiables (ADR-016) y orquestadores de terceros (Hermes, CrewAI, Mastra), por DEC-087.

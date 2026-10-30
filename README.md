@@ -17,6 +17,7 @@ quatreros/
 ├── packages/
 │   ├── contracts/           Esquemas Zod y tipos compartidos entre API y web
 │   └── config/              tsconfig base
+├── quatreros-ai/            Agente Quatreros AI (Anthropic Managed Agents) gestionado con la CLI `ant` (ADR-023)
 ├── infrastructure/
 │   ├── docker/              Dockerfile (imagen única) e init de PostgreSQL local
 │   └── scripts/             Roles de BD, respaldo, restauración, verificación de integridad

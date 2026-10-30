@@ -28,6 +28,12 @@
 - 22 E2E: flujos más accesibilidad axe en escritorio, tableta y celular.
 - CI en verde.
 
+### Quatreros AI (asistente, 2026-10-30)
+
+- El agente ya existe en Anthropic Console y su configuración está versionada en `quatreros-ai/` (DEC-087, ADR-023). Diseño de la integración: `docs/02-architecture/ai-architecture.md` v0.2.
+- **No está integrado funcionalmente.** No hay módulo `assistant` en el backend ni `ToolGateway`, y el agente no tiene herramientas: hoy solo puede conversar. La lista de lo que falta está en ai-architecture §15. Se construye en la entrega 8.
+- Desde la entrega 2, cada módulo nuevo debe dejar su caso de uso de lectura listo para envolverlo como herramienta (ai-architecture §2.1). **No declares herramientas en el agente ni ejecutes `ant apply`** sin autorización.
+
 ## 2. Siguiente tarea: entrega 2, catálogo e inventario
 
 **Objetivo demostrable:**
@@ -83,15 +89,17 @@ En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de 
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
-| Pendiente                                                                                                                                                     | Dónde                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Archivo del **isotipo** oficial para reemplazar el logotipo provisional (`shared/ui/Brand.tsx`, `public/favicon.svg`)                                         | Sistema de diseño, Anexo B                                                                       |
-| Confirmar las reglas provisionales Q-B-01..09 **antes del piloto**                                                                                            | `open-questions.md`                                                                              |
-| Hosting y operación: Q-C-01..06                                                                                                                               | `open-questions.md`                                                                              |
-| Cuestionario del contador: Q-CON-01..07, Q-POS-04, Q-SEC-03                                                                                                   | Bloquea contabilidad e impuestos                                                                 |
-| PR de Dependabot #6 (TypeScript 7 + `@types/node` 26): incompatible, falla el lint. Cerrarlo; Dependabot ya ignora esos saltos (#5 lo fusionó el responsable) | GitHub                                                                                           |
-| Texto de una línea por rol en "Crear usuario" (qué puede hacer cada uno)                                                                                      | Recomendación de la crítica de diseño; redactar desde `actors-permissions.md` y pedir aprobación |
-| Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                                                                 | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
+| Pendiente                                                                                                                                                                        | Dónde                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Archivo del **isotipo** oficial para reemplazar el logotipo provisional (`shared/ui/Brand.tsx`, `public/favicon.svg`)                                                            | Sistema de diseño, Anexo B                                                                       |
+| Confirmar las reglas provisionales Q-B-01..09 **antes del piloto**                                                                                                               | `open-questions.md`                                                                              |
+| Hosting y operación: Q-C-01..06                                                                                                                                                  | `open-questions.md`                                                                              |
+| Cuestionario del contador: Q-CON-01..07, Q-POS-04, Q-SEC-03                                                                                                                      | Bloquea contabilidad e impuestos                                                                 |
+| ~~PR de Dependabot #6~~: cerrado; Dependabot ignora TypeScript 7 y `@types/node` mayores hasta que haya soporte                                                                  | —                                                                                                |
+| Texto de una línea por rol en "Crear usuario" (qué puede hacer cada uno)                                                                                                         | Recomendación de la crítica de diseño; redactar desde `actors-permissions.md` y pedir aprobación |
+| Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                                                                                    | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
+| **Quatreros AI:** autorizar la primera sincronización con `ant apply` (adopta el agente y el entorno existentes); definir quién la ejecuta y el espacio de trabajo de producción | Q-IA-04, ai-architecture §11                                                                     |
+| **Quatreros AI:** retención de conversaciones en Anthropic y confirmación del modelo `claude-haiku-5-5`                                                                          | Q-IA-05, Q-IA-06                                                                                 |
 
 ## 4. Notas de entorno
 

@@ -116,14 +116,14 @@ await authz.require(ctx, 'dis.delivery.register', { siteId: dispatch.siteId, own
 
 ## 7. Secretos y configuración
 
-| Secreto                                         | Dónde vive                                           |
-| ----------------------------------------------- | ---------------------------------------------------- |
-| `DATABASE_URL` (por rol)                        | Gestor de variables del hosting                      |
-| `BETTER_AUTH_SECRET`                            | Ídem; rotación documentada                           |
-| `AI_PROVIDER_API_KEY`                           | Ídem; solo si el complemento está contratado         |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Ídem                                                 |
-| `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`      | Ídem; credenciales con permisos solo sobre el bucket |
-| `BACKUP_ENCRYPTION_KEY`                         | Fuera del proveedor de BD                            |
+| Secreto                                         | Dónde vive                                                                                         |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` (por rol)                        | Gestor de variables del hosting                                                                    |
+| `BETTER_AUTH_SECRET`                            | Ídem; rotación documentada                                                                         |
+| `ANTHROPIC_API_KEY`                             | Ídem; solo en el backend y solo si el complemento está contratado; una clave por entorno (ADR-023) |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Ídem                                                                                               |
+| `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`      | Ídem; credenciales con permisos solo sobre el bucket                                               |
+| `BACKUP_ENCRYPTION_KEY`                         | Fuera del proveedor de BD                                                                          |
 
 - `.env.example` con nombres y descripción, **sin valores**. Escaneo de secretos en CI y en hook de pre-commit.
 
@@ -140,3 +140,10 @@ await authz.require(ctx, 'dis.delivery.register', { siteId: dispatch.siteId, own
 - Datos provenientes de la BD (nombres, notas) se tratan como **datos, no instrucciones**; las herramientas no aceptan texto libre como comando.
 - Lista blanca de herramientas de escritura; operaciones excluidas por defecto: cambios de precio, permisos, crédito, ajustes, contabilidad, anulaciones (propuesta para Q-IA-03).
 - Telegram: acciones sensibles exigen confirmación en el ERP web o código TOTP (DEC-P08, propuesto).
+- **Quatreros AI (Managed Agents, ADR-023):**
+  - Herramientas solo de tipo `custom`, resueltas por el backend.
+  - Herramientas integradas apagadas y entorno sin red útil: el agente no ejecuta comandos ni alcanza el backend o PostgreSQL.
+  - **Una sesión por empleado y canal.** La identidad sale del vínculo sesión → usuario y se recarga en cada herramienta; nunca de los argumentos del modelo (ai-architecture §6).
+  - La clave de Anthropic jamás llega al navegador ni a Telegram.
+  - Transcripciones en Anthropic sin Zero Data Retention: archivar y borrar sesiones según Q-IA-05.
+  - El `claude-lock.json` solo contiene IDs y huellas, no secretos. Credenciales de servidores MCP, si algún día se usan, van en _vaults_ de Anthropic, nunca en los archivos del agente.

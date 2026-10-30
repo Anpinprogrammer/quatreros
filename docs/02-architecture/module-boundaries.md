@@ -92,6 +92,20 @@
 
 - **Hacen:** ver `ai-architecture.md` y `telegram-architecture.md`.
 - **Límite duro:** sin acceso a BD del núcleo; sin importación desde el núcleo hacia ellos.
+- **Estructura prevista de `src/addons/assistant/`** (ADR-023; sigue las capas de los módulos del núcleo):
+
+```
+src/addons/assistant/
+├── domain/                  propuesta y sus estados, política de presupuesto, límites por turno (puro)
+├── application/             SessionService, TurnRunner, ToolDispatcher, ProposalService, UsageMeter, BudgetGuard
+├── infrastructure/
+│   ├── schema.ts            esquema `assistant` (conversations, tool_calls, proposals, requests)
+│   └── anthropic/           AnthropicClient: @anthropic-ai/sdk (beta.sessions), stream SSE, reintentos
+└── http/                    /assistant/conversations, /messages, /stream (SSE), /proposals/{id}/confirm|cancel, /usage
+```
+
+- El SDK de Anthropic **solo** se importa desde `infrastructure/anthropic/`; ningún otro archivo del backend lo conoce.
+- El asistente no tiene casos de uso de negocio propios: toda herramienta resuelve a un caso de uso existente a través de `src/addons/tool-gateway/`.
 
 ## 3. Dependencias permitidas
 
