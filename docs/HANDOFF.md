@@ -83,15 +83,15 @@ En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de 
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
-| Pendiente                                                                                                             | Dónde                                                                                            |
-| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Archivo del **isotipo** oficial para reemplazar el logotipo provisional (`shared/ui/Brand.tsx`, `public/favicon.svg`) | Sistema de diseño, Anexo B                                                                       |
-| Confirmar las reglas provisionales Q-B-01..09 **antes del piloto**                                                    | `open-questions.md`                                                                              |
-| Hosting y operación: Q-C-01..06                                                                                       | `open-questions.md`                                                                              |
-| Cuestionario del contador: Q-CON-01..07, Q-POS-04, Q-SEC-03                                                           | Bloquea contabilidad e impuestos                                                                 |
-| PRs de Dependabot #5 y #6: no fusionar sin aprobación                                                                 | GitHub                                                                                           |
-| Texto de una línea por rol en "Crear usuario" (qué puede hacer cada uno)                                              | Recomendación de la crítica de diseño; redactar desde `actors-permissions.md` y pedir aprobación |
-| Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                         | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
+| Pendiente                                                                                                                                                     | Dónde                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Archivo del **isotipo** oficial para reemplazar el logotipo provisional (`shared/ui/Brand.tsx`, `public/favicon.svg`)                                         | Sistema de diseño, Anexo B                                                                       |
+| Confirmar las reglas provisionales Q-B-01..09 **antes del piloto**                                                                                            | `open-questions.md`                                                                              |
+| Hosting y operación: Q-C-01..06                                                                                                                               | `open-questions.md`                                                                              |
+| Cuestionario del contador: Q-CON-01..07, Q-POS-04, Q-SEC-03                                                                                                   | Bloquea contabilidad e impuestos                                                                 |
+| PR de Dependabot #6 (TypeScript 7 + `@types/node` 26): incompatible, falla el lint. Cerrarlo; Dependabot ya ignora esos saltos (#5 lo fusionó el responsable) | GitHub                                                                                           |
+| Texto de una línea por rol en "Crear usuario" (qué puede hacer cada uno)                                                                                      | Recomendación de la crítica de diseño; redactar desde `actors-permissions.md` y pedir aprobación |
+| Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                                                                 | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
 
 ## 4. Notas de entorno
 

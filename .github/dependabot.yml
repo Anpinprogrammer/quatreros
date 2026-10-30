@@ -5,6 +5,14 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7: typescript-eslint aún no lo soporta (lint falla). Quitar cuando lo soporte
+      # (https://github.com/typescript-eslint/typescript-eslint/issues/10940) y actualizar AGENTS.md §6.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+      # Los tipos de Node deben coincidir con el runtime (Node 24 LTS, .nvmrc); se sube junto con Node.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       desarrollo:
         dependency-type: development
