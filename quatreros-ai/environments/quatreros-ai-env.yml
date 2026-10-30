@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://platform.claude.com/schemas/ant/beta/environment.json
+name: quatreros-ai-env
+metadata: {}
+scope: organization
+config:
+  type: cloud
+  packages:
+    pip: []
+    npm: []
+    apt: []
+    cargo: []
+    gem: []
+    go: []
+  networking:
+    type: limited
+    allow_mcp_servers: false
+    allow_package_managers: false
+    allowed_hosts: []

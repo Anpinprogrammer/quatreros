@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "resources": {
+    "./agents/quatreros-ai.md": {
+      "kind": "agent",
+      "id": "agent_01GV2jHLsN47nJTehwGUARBi",
+      "version": "1",
+      "hash": ""
+    },
+    "./environments/quatreros-ai-env.yml": {
+      "kind": "environment",
+      "id": "env_01BMhUH2mXL7U5UoC3ayJ1jf",
+      "hash": ""
+    }
+  }
+}
