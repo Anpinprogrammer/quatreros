@@ -103,6 +103,7 @@ CI (`.github/workflows/ci.yml`) corre todo esto, más gitleaks, `pnpm audit` y l
 | Playwright no puede descargar navegadores (entornos aislados) | `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/ruta/a/chromium pnpm test:e2e`                                                                                                                                                |
 | Texto del botón primario "sin contraste" en axe               | Blanco sobre Ember solo cumple como texto grande en negrita (Anexo A). No cambies `text-action font-bold` del botón primario.                                                                                  |
 | CI "Secretos y dependencias" falla por gitleaks               | Un ejemplo con forma de contraseña en código o documentación cuenta como secreto. Usa marcadores (`<12+ caracteres>`) y valores `*_local_dev` o `*_ci`. Antes de subir: `gitleaks git --config .gitleaks.toml` |
+| Workflow "Deploy" en rojo o saltado en `main`                 | El despliegue está apagado hasta contratar hosting (DEC-084, Q-C-01). Se activa con la variable de repositorio `DEPLOY_ENABLED=true` y los secretos `RENDER_DEPLOY_HOOK_*` (ver `deployment-design.md`)        |
 | `pkill -f "...main.js"` mata tu propia shell                  | Usa un patrón anclado: `pkill -f "^node apps/api/dist/main.js"`.                                                                                                                                               |
 
 ## 7. Commits y PRs

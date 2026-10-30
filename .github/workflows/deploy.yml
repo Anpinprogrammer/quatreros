@@ -21,7 +21,8 @@ permissions:
 
 jobs:
   staging:
-    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || inputs.target == 'staging' }}
+    # Apagado hasta contratar hosting (DEC-084, Q-C-01): activar con la variable de repositorio DEPLOY_ENABLED=true.
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || inputs.target == 'staging') }}
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -30,7 +31,7 @@ jobs:
 
   production:
     # Producción solo manual y con aprobación del entorno protegido en GitHub.
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'production' }}
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && github.event_name == 'workflow_dispatch' && inputs.target == 'production' }}
     runs-on: ubuntu-latest
     environment: production
     steps:
