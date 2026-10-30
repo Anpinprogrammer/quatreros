@@ -16,6 +16,8 @@
 
 El módulo `telegram` consulta `platform.addon_settings` en cada mensaje: si el asistente está apagado, nunca lo invoca.
 
+**Con Quatreros AI (ADR-023):** Telegram nunca habla con Anthropic. Entrega el texto (o la transcripción) al `SessionService` del asistente con el usuario interno vinculado y `channel = telegram`. Ese usuario tiene su **propia** sesión de Managed Agents, distinta de la del chat web. Las respuestas, propuestas y resultados vuelven por el bot. Las funciones de Telegram sin IA siguen PENDING (P-13, Q-C-04).
+
 ## 2. Componentes
 
 ```mermaid
@@ -29,7 +31,7 @@ flowchart LR
   ID --> CMD[Comandos deterministas]
   ID --> NL[Lenguaje natural / voz]
   CMD --> GW[ToolGateway]
-  NL -->|solo si IA activa| AST[assistant.Orquestador]
+  NL -->|solo si IA activa| AST[assistant: SessionService\nsesión Managed Agents del usuario vinculado]
   NL -->|voz| STT[Transcripción\nPENDING]
   AST --> GW
   GW --> CORE[Casos de uso del núcleo]
@@ -54,7 +56,7 @@ sequenceDiagram
   API-->>ERP: código de 8 caracteres, expira en 10 min, un solo uso
   U->>BOT: /vincular ABCD1234
   BOT->>API: valida código (no usado, no vencido)
-  API->>API: crea telegram.links(user_id, chat_id); marca código usado; auditoría
+  API->>API: crea telegram.links(user_id, chat_id), marca código usado y audita
   BOT-->>U: "Cuenta vinculada a <nombre>. Rol: Cajero, sede POS-1"
 ```
 

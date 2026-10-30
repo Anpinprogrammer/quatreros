@@ -50,6 +50,7 @@ Si una regla de negocio no tiene origen en DM o en una `DEC-###` CONFIRMED (o `P
 - Existencias solo cambian mediante movimientos inmutables del kardex (DEC-P21).
 - Dinero: `NUMERIC` o enteros en pesos; nunca `float` (DEC-P22). Cantidades con unidad explícita, convertidas a unidad base.
 - Escrituras con efecto financiero o de inventario son idempotentes (DEC-P23) y transaccionales.
+- Asistente **Quatreros AI** (DEC-087, ADR-023): agente de Anthropic Managed Agents configurado en `quatreros-ai/`. Sus herramientas son `custom` y las resuelve el backend con la identidad de la sesión (nunca con argumentos del modelo). Las escrituras solo se **preparan**: se ejecutan con confirmación humana persistida. `ant apply` solo con autorización del responsable; `claude-lock.json` no se edita a mano. Memoria e historial del agente no son fuente de verdad (DEC-088).
 - Contabilidad: la capa de motor genérico se puede construir; las reglas de contabilización por operación están BLOCKED hasta P-01..P-04 (DEC-081).
 
 ## Nombres

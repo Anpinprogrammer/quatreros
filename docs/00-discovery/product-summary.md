@@ -65,11 +65,11 @@ El objetivo es digitalizar de forma integrada el ciclo completo: **abastecimient
 
 ### 4.2 Complementos opcionales
 
-| Complemento  | Qué hace                                                                                      | Estado                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Asistente IA | Consultas, alertas, propuestas de registro con resumen + confirmación; demo medible en el MVP | Opcional comercial, CONFIRMED como demo (IA-01, IA-02); precios/límites PENDING (P-14) |
-| Telegram     | Canal remoto: consultas, registros remotos, voz                                               | Contratación independiente CONFIRMED (TG-01); funciones sin IA PENDING (P-13)          |
-| Landing page | Sitio de presentación                                                                         | PENDING (P-15, LAN-01) — fuera de compromisos                                          |
+| Complemento                                                                    | Qué hace                                                                                      | Estado                                                                                 |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Asistente IA (agente **Quatreros AI** sobre Anthropic Managed Agents, DEC-087) | Consultas, alertas, propuestas de registro con resumen + confirmación; demo medible en el MVP | Opcional comercial, CONFIRMED como demo (IA-01, IA-02); precios/límites PENDING (P-14) |
+| Telegram                                                                       | Canal remoto: consultas, registros remotos, voz                                               | Contratación independiente CONFIRMED (TG-01); funciones sin IA PENDING (P-13)          |
+| Landing page                                                                   | Sitio de presentación                                                                         | PENDING (P-15, LAN-01) — fuera de compromisos                                          |
 
 ### 4.3 Fuera del compromiso actual (DM §2.3)
 

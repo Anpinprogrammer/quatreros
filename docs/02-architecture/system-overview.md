@@ -1,7 +1,7 @@
 # Visión general del sistema
 
 > Etapa C · v0.1 · 2026-10-29
-> Arquitectura: **monolito modular** (ADR-001) en Node.js/Express/TypeScript con PostgreSQL, SPA React con tres shells (ADR-014), complementos IA y Telegram aislados (ADR-015).
+> Arquitectura: **monolito modular** (ADR-001) en Node.js/Express/TypeScript con PostgreSQL, SPA React con tres shells (ADR-014), complementos IA y Telegram aislados (ADR-015). El asistente es el agente **Quatreros AI** sobre Anthropic Managed Agents (ADR-023); su configuración vive en `quatreros-ai/`.
 
 ---
 
@@ -37,7 +37,7 @@ flowchart TB
 
   DB[("PostgreSQL\nun esquema por módulo")]
   R2[("Almacenamiento privado\nCloudflare R2")]
-  LLM["Proveedor de IA\n(intercambiable)"]
+  LLM["Anthropic API · Managed Agents\nagente Quatreros AI (quatreros-ai/)"]
   STT["Transcripción de voz\n(PENDING)"]
   TGAPI["Telegram Bot API"]
   FISC["Facturación electrónica\n(BLOCKED P-02)"]
@@ -54,7 +54,7 @@ flowchart TB
   TGM --> GW
   TGM -.->|si IA activa| AST
   GW -->|mismos casos de uso| CORE
-  AST --> LLM
+  AST -->|sesiones y eventos · herramientas custom resueltas por el backend| LLM
   TGM --> STT
   TGU --> TGAPI -->|webhook| TGM
   JOBS -->|notificaciones| TGAPI
@@ -68,6 +68,33 @@ flowchart TB
 2. Un módulo del núcleo solo llama a otro a través de su **servicio público** (`<modulo>/application/public.ts`), nunca a sus repositorios ni tablas.
 3. `domain/` no importa Express, Drizzle ni librerías de infraestructura.
 4. Los complementos no acceden a la base de datos; solo usan `ToolGateway`.
+
+### 1.1 Vista conceptual con Quatreros AI y Telegram
+
+```text
+                         QUATREROS
+                             |
+            +----------------+----------------+
+            |                |                |
+           ERP              POS          Distribución          Telegram (canal independiente,
+            |                |                |                 contratación aparte, DEC-076)
+            +----------------+----------------+                       |
+                             |                                        |
+                      Backend Express  <------------------------------+
+                             |
+            +----------------+-----------------+
+            |                                  |
+   Servicios empresariales          Integración de IA (src/addons/assistant)
+   (casos de uso + ToolGateway)                |
+            |                           Anthropic API
+        PostgreSQL                             |
+   (fuente de verdad, DEC-088)       Quatreros AI · Managed Agent
+                                     (configuración en quatreros-ai/)
+```
+
+- Las conexiones son **conceptuales**: el módulo de IA y el `ToolGateway` todavía no están implementados (ai-architecture §14).
+- **Telegram** usa los servicios empresariales para comandos y notificaciones sin IA (alcance PENDING, P-13 / Q-C-04). Solo cuando el asistente está contratado, activo y el usuario autorizado, Telegram reenvía mensajes libres a la integración de IA (`channel = telegram`). Cualquiera de los dos complementos puede estar encendido o apagado sin afectar al otro ni al núcleo.
+- Quatreros AI nunca llama al backend ni a PostgreSQL. **El backend** abre las sesiones, recibe las solicitudes de herramientas y las resuelve contra los servicios empresariales.
 
 ## 2. Capas de un módulo
 

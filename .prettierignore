@@ -4,3 +4,5 @@ pnpm-lock.yaml
 **/drizzle/meta
 docs/Quatreros_Documento_Maestro_v1.0.pdf
 playwright-report
+# Archivos gestionados por la CLI `ant` (Anthropic): no se reformatean (ADR-023)
+quatreros-ai/

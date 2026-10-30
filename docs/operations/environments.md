@@ -17,6 +17,7 @@ La lista completa, con descripción, está en [`/.env.example`](../../.env.examp
 - En `staging` y `production`, `BETTER_AUTH_SECRET` es obligatoria (≥ 32 caracteres).
 - `DATABASE_URL` usa siempre el rol `quatreros_app`; `DATABASE_MIGRATIONS_URL` (rol dueño) solo existe en el paso de migraciones del despliegue.
 - La activación efectiva de IA y Telegram está en la base de datos (`platform.addon_settings`), no en variables.
+- **Quatreros AI:** `ANTHROPIC_API_KEY` y los IDs del agente y del entorno son **por ambiente**. Hoy solo existe el espacio de trabajo de **desarrollo** (`quatreros-ai/claude-lock.json`). Staging y producción necesitan su clave y sus IDs; producción, además, su propio espacio de trabajo y lockfile (Q-IA-04). Publicar el backend no cambia el agente: el agente se sincroniza aparte con `ant apply` (deployment-design §7.1).
 
 ## Primer despliegue en un ambiente nuevo
 

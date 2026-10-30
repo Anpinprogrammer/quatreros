@@ -15,7 +15,7 @@ flowchart LR
   WEB --> R2[("Cloudflare R2\narchivos privados")]
   CRON["Trabajo diario\npg_dump cifrado"] --> R2B[("R2 bucket de respaldos\n(otra cuenta/credencial)")]
   PG --> CRON
-  WEB -.->|opcional| LLM[Proveedor IA]
+  WEB -.->|opcional · sesiones Managed Agents| LLM[Anthropic API\nQuatreros AI]
   TG[Telegram] -.->|webhook| WEB
   MON[Monitor de disponibilidad\nexterno gratuito] --> WEB
 ```
@@ -87,35 +87,46 @@ Sin modo offline (DEC-061). Propuesta:
 
 ## 7. Variables de entorno (principales)
 
-| Variable                                                                  | Descripción                                             | Secreto     |
-| ------------------------------------------------------------------------- | ------------------------------------------------------- | ----------- |
-| `NODE_ENV`                                                                | `development` / `staging` / `production`                | No          |
-| `APP_BASE_URL`                                                            | URL pública                                             | No          |
-| `DATABASE_URL`                                                            | Conexión rol `quatreros_app`                            | Sí          |
-| `DATABASE_MIGRATIONS_URL`                                                 | Conexión rol `quatreros_owner` (solo CI/CD)             | Sí          |
-| `BETTER_AUTH_SECRET`                                                      | Firma de sesiones                                       | Sí          |
-| `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`    | Archivos                                                | Sí (claves) |
-| `MAIL_PROVIDER_API_KEY`, `MAIL_FROM`                                      | Correo transaccional                                    | Sí (clave)  |
-| `ADDON_ASSISTANT_ENABLED`                                                 | Bandera de arranque (la activación efectiva está en BD) | No          |
-| `AI_PROVIDER`, `AI_MODEL`, `AI_PROVIDER_API_KEY`, `AI_MONTHLY_BUDGET_USD` | Asistente                                               | Sí (clave)  |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`                           | Telegram                                                | Sí          |
-| `LOG_LEVEL`                                                               | `info` por defecto                                      | No          |
-| `TZ_BUSINESS`                                                             | `America/Bogota`                                        | No          |
+| Variable                                                                                                                           | Descripción                                                                                                              | Secreto            |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `NODE_ENV`                                                                                                                         | `development` / `staging` / `production`                                                                                 | No                 |
+| `APP_BASE_URL`                                                                                                                     | URL pública                                                                                                              | No                 |
+| `DATABASE_URL`                                                                                                                     | Conexión rol `quatreros_app`                                                                                             | Sí                 |
+| `DATABASE_MIGRATIONS_URL`                                                                                                          | Conexión rol `quatreros_owner` (solo CI/CD)                                                                              | Sí                 |
+| `BETTER_AUTH_SECRET`                                                                                                               | Firma de sesiones                                                                                                        | Sí                 |
+| `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`                                                             | Archivos                                                                                                                 | Sí (claves)        |
+| `MAIL_PROVIDER_API_KEY`, `MAIL_FROM`                                                                                               | Correo transaccional                                                                                                     | Sí (clave)         |
+| `ADDON_ASSISTANT_ENABLED`                                                                                                          | Bandera de arranque (la activación efectiva está en BD)                                                                  | No                 |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_AGENT_ID`, `ANTHROPIC_AGENT_VERSION`, `ANTHROPIC_ENVIRONMENT_ID`, `ASSISTANT_SESSION_BUDGET_CENTS` | Asistente Quatreros AI (ai-architecture §12). IDs tomados de `quatreros-ai/claude-lock.json` del entorno correspondiente | Sí (solo la clave) |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`                                                                                    | Telegram                                                                                                                 | Sí                 |
+| `LOG_LEVEL`                                                                                                                        | `info` por defecto                                                                                                       | No                 |
+| `TZ_BUSINESS`                                                                                                                      | `America/Bogota`                                                                                                         | No                 |
 
 Se documentan en `.env.example` sin valores (Etapa F).
 
+## 7.1 Dos publicaciones independientes: backend y agente
+
+| Qué se publica                                              | Cómo                                                                                                                       | Qué **no** hace                                        |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Backend Express + SPA                                       | CI en verde en `main` → workflow Deploy (apagado hasta tener hosting: `DEPLOY_ENABLED`)                                    | No cambia el agente en Anthropic                       |
+| Agente Quatreros AI (prompt, modelo, herramientas, entorno) | `cd quatreros-ai && ant apply --dry-run .` → revisión → `ant apply .` → commit de `claude-lock.json` (ai-architecture §11) | No despliega el backend; `git push` tampoco lo ejecuta |
+
+- **Orden:** al agregar herramientas, primero el backend con su manejador y después `ant apply`; al quitarlas, al revés.
+- **Entornos:** el lockfile actual corresponde al espacio de trabajo de **desarrollo** (metadato `environment: development`). Producción usará otro espacio de trabajo, otra clave y otro lockfile (`--lock-file`), según Q-IA-04.
+- No se automatiza `ant apply` en CI sin aprobación. Si se aprueba, se haría con Workload Identity Federation, ejecuciones de a una y un entorno protegido en GitHub.
+
 ## 8. Costos (resumen)
 
-| Concepto                               | Estimado mensual             | Fuente                     |
-| -------------------------------------- | ---------------------------- | -------------------------- |
-| Hosting API + SPA (Render Starter)     | USD 7                        | ADR-020                    |
-| Postgres Basic + 5 GB                  | ≈ USD 7,50                   | ADR-020                    |
-| R2 (≤ 10 GB)                           | USD 0                        | ADR-020                    |
-| Monitoreo y errores (planes gratuitos) | USD 0                        | —                          |
-| CI (GitHub Actions, cuota gratuita)    | USD 0 (verificar)            | —                          |
-| **Total núcleo**                       | **≈ USD 15 ≈ $47.000 COP**   | TRM ≈ $3.150 (28-oct-2026) |
-| Dominio, correo transaccional          | Aparte (Q-INF-02b)           | —                          |
-| IA, transcripción, Telegram            | Incremental, medido (RF-344) | DEC-082                    |
-| Facturación electrónica                | Aparte, depende de P-02      | INT-01                     |
+| Concepto                               | Estimado mensual                                                                                                     | Fuente                     |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Hosting API + SPA (Render Starter)     | USD 7                                                                                                                | ADR-020                    |
+| Postgres Basic + 5 GB                  | ≈ USD 7,50                                                                                                           | ADR-020                    |
+| R2 (≤ 10 GB)                           | USD 0                                                                                                                | ADR-020                    |
+| Monitoreo y errores (planes gratuitos) | USD 0                                                                                                                | —                          |
+| CI (GitHub Actions, cuota gratuita)    | USD 0 (verificar)                                                                                                    | —                          |
+| **Total núcleo**                       | **≈ USD 15 ≈ $47.000 COP**                                                                                           | TRM ≈ $3.150 (28-oct-2026) |
+| Dominio, correo transaccional          | Aparte (Q-INF-02b)                                                                                                   | —                          |
+| IA, transcripción, Telegram            | Incremental, medido (RF-344). La IA cobra tokens **y** tiempo de ejecución de sesión (`list_cost`, `active_seconds`) | DEC-082, ADR-023           |
+| Facturación electrónica                | Aparte, depende de P-02                                                                                              | INT-01                     |
 
 Los precios provienen de fuentes de terceros fechadas (ADR-020) y deben verificarse en la página del proveedor al contratar.
