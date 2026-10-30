@@ -65,7 +65,7 @@ export function hasPermission(me: MeResponse, permission: string): boolean {
 export function FullPageMessage({ children }: { children: ReactNode }) {
   return (
     <main className="grid min-h-dvh place-items-center p-6">
-      <p className="text-ink-muted">{children}</p>
+      <p className="text-ash">{children}</p>
     </main>
   );
 }

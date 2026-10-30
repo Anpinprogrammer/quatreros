@@ -39,12 +39,12 @@ Todos usan la contraseña de `DEMO_PASSWORD`.
 ## 4. Guion sugerido (entrega 1, ~5 minutos)
 
 1. **Caja en tableta**: ingresa como `caja@` → queda directo en la pantalla de Caja, con su nombre y el indicador de conexión.
-2. **Repartidor en celular**: ingresa como `reparto@` → portal de Ruta, una columna.
+2. **Repartidor en celular**: ingresa como `reparto@` → portal de Distribución, una columna.
 3. **Seguridad**: contraseña equivocada → mensaje genérico (no revela si el correo existe).
 4. **Administrador**: ingresa como `admin@` → el sistema exige configurar la verificación en dos pasos (QR con Google/Microsoft Authenticator) y entrega códigos de respaldo.
-5. **Usuarios**: menú _Usuarios y permisos_ → crear un repartidor nuevo con sede "Bodega principal" → cerrar sesión → ese usuario ya ingresa a Ruta.
+5. **Usuarios**: pestaña _08. Administración_ → _Usuarios y permisos_ → crear un repartidor nuevo con sede "Bodega principal" → cerrar sesión → ese usuario ya ingresa a Ruta.
 6. **Protecciones**: intentar desactivarse a sí mismo o dejar el sistema sin administrador → el sistema lo impide.
-7. Señalar en el menú los módulos "En construcción" y los que "Esperan decisión P-xx".
+7. **Command Center**: el tablero muestra qué entrega activa cada indicador; en cada pestaña, los módulos "En construcción" y los que "Esperan decisión P-xx".
 
 ## 5. Volver a empezar
 

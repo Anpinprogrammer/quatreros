@@ -1,29 +1,46 @@
 import type { MeResponse } from '@quatreros/contracts';
-import { Link } from 'react-router';
+import { Badge } from '../../shared/ui/Badge';
+import { Brand } from '../../shared/ui/Brand';
+import { Card } from '../../shared/ui/Card';
 import { ServerStatus } from '../../shared/ui/ServerStatus';
 import { UserMenu } from '../../shared/ui/UserMenu';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 
-/** Shell del portal del distribuidor (ADR-014, RF-182): una columna, botones grandes, uso en celular. */
+const today = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'America/Bogota',
+});
+
+/** Portal móvil de distribución (sistema de diseño Parte 2 §3): mobile-first, una columna. */
 export function RutaShell({ me }: { me: MeResponse }) {
-  useDocumentTitle('Ruta');
+  useDocumentTitle('Distribución');
   return (
-    <div className="mx-auto min-h-dvh max-w-md bg-surface px-4 py-4">
-      <header className="mb-6 space-y-2">
+    <div className="mx-auto min-h-dvh max-w-md bg-char">
+      <header className="border-b border-grill bg-smoke px-4 py-3">
         <div className="flex items-center justify-between gap-3">
-          <Link to="/" className="font-bold whitespace-nowrap text-chimichurri-strong">
-            Quatreros <span className="ml-1 font-normal text-ink-muted">Ruta</span>
-          </Link>
-          <UserMenu me={me} />
+          <Brand to="/" area="Distribución" />
+          <UserMenu me={me} compact />
         </div>
-        <ServerStatus />
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-caption text-ash">
+            Repartidor: <span className="font-semibold text-chalk">{me.user.fullName}</span> ·{' '}
+            {today.format(new Date())}
+          </p>
+          <ServerStatus />
+        </div>
       </header>
-      <main>
-        <h1 className="text-xl font-bold">Despachos de hoy</h1>
-        <p className="mt-2 text-ink-muted">
-          Aquí verás los pedidos asignados, con dirección y valor a cobrar. Se habilita con el módulo de
-          despachos.
-        </p>
+      <main className="px-4 py-5">
+        <h1 className="text-title font-semibold">Rutas del día</h1>
+        <Card className="mt-4">
+          <p className="text-ash">
+            Aquí verás tus pedidos asignados con cliente, dirección, total a cobrar y el botón para registrar
+            la entrega o el cobro.
+          </p>
+          <div className="mt-4">
+            <Badge>Se activa con la entrega 5</Badge>
+          </div>
+        </Card>
       </main>
     </div>
   );

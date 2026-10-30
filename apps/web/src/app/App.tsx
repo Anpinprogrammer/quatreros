@@ -14,8 +14,8 @@ const RutaShell = lazy(() => import('../shells/ruta/RutaShell').then((m) => ({ d
 function NotFound() {
   return (
     <main className="p-10">
-      <h1 className="text-xl font-bold">Esta página no existe</h1>
-      <a className="mt-2 inline-block text-chimichurri underline" href="/">
+      <h1 className="text-display font-bold">Esta página no existe</h1>
+      <a className="mt-3 inline-block text-ember underline underline-offset-4" href="/">
         Volver al inicio
       </a>
     </main>

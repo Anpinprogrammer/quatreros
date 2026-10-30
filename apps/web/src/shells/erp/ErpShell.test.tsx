@@ -1,6 +1,6 @@
 import type { MeResponse } from '@quatreros/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ErpShell } from './ErpShell';
@@ -18,11 +18,11 @@ const admin: MeResponse = {
   homeShell: 'erp',
 };
 
-function renderShell(me: MeResponse) {
+function renderShell(me: MeResponse, path = '/erp') {
   vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise(() => undefined)));
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/erp']}>
+      <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path="/erp/*" element={<ErpShell me={me} />} />
         </Routes>
@@ -32,37 +32,44 @@ function renderShell(me: MeResponse) {
 }
 
 describe('ErpShell', () => {
-  it('muestra los módulos bloqueados con la clave de la decisión pendiente', () => {
+  it('muestra las pestañas del encabezado y el Command Center sin cifras inventadas', () => {
     renderShell(admin);
-    expect(screen.getByRole('navigation', { name: 'Módulos' })).toBeInTheDocument();
-    expect(screen.getByText('Espera decisión P-06')).toBeInTheDocument();
-    expect(screen.getByText('Espera decisión P-01 a P-04')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Hola, Ana' })).toBeInTheDocument();
+    const tabs = screen.getByRole('navigation', { name: 'Secciones' });
+    expect(within(tabs).getByRole('link', { name: /Command Center/ })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(within(tabs).getByRole('link', { name: /Producción/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Command Center' })).toBeInTheDocument();
+    expect(screen.getByText('Hola, Ana')).toBeInTheDocument();
+    // Las tarjetas del tablero dicen qué entrega las activa.
+    expect(screen.getAllByText(/Se activa con la entrega/).length).toBeGreaterThan(0);
   });
 
-  it('el administrador ve el enlace a Usuarios; quien no tiene permiso, no', () => {
+  it('una sección muestra sus módulos con la clave de la decisión pendiente', () => {
+    renderShell(admin, '/erp/seccion/produccion');
+    expect(screen.getByRole('heading', { name: 'Producción' })).toBeInTheDocument();
+    expect(screen.getByText('Espera decisión P-06')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('navigation', { name: 'Secciones' })).getByRole('link', { name: /Producción/ }),
+    ).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('el administrador tiene acceso directo a Usuarios', () => {
     renderShell(admin);
-    const nav = screen.getByRole('navigation', { name: 'Módulos' });
-    expect(within(nav).getByRole('link', { name: /Usuarios y permisos/ })).toHaveAttribute(
+    const shortcuts = screen.getByRole('region', { name: 'Puedes usar' });
+    expect(within(shortcuts).getByRole('link', { name: /Usuarios y permisos/ })).toHaveAttribute(
       'href',
       '/erp/usuarios',
     );
-    // El inicio ofrece acceso directo a lo que el usuario sí puede usar.
-    expect(screen.getByRole('heading', { name: 'Puedes usar' })).toBeInTheDocument();
-  });
-
-  it('en pantallas pequeñas el menú se abre y se cierra con su botón', () => {
-    renderShell(admin);
-    const toggle = screen.getByRole('button', { name: 'Menú' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    fireEvent.click(toggle);
-    expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('sin permiso adm.user.read el módulo se muestra sin enlace', () => {
-    renderShell({ ...admin, roles: [{ code: 'PROD', name: 'Productor' }], permissions: {} });
+    renderShell(
+      { ...admin, roles: [{ code: 'PROD', name: 'Productor' }], permissions: {} },
+      '/erp/seccion/administracion',
+    );
     expect(screen.queryByRole('link', { name: /Usuarios y permisos/ })).toBeNull();
     expect(screen.getByText('Usuarios y permisos')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Puedes usar' })).toBeNull();
   });
 });

@@ -1,8 +1,12 @@
+import type { MeResponse } from '@quatreros/contracts';
+import { hasPermission } from './auth/session';
+
 /**
- * Catálogo de módulos del ERP con su estado real de construcción.
- * Se actualiza al terminar cada funcionalidad vertical (docs/PROJECT-STATUS.md).
+ * Secciones del ERP (pestañas del encabezado, sistema de diseño Parte 2 + Anexo B) y sus módulos con el
+ * estado real de construcción. Se actualiza al terminar cada entrega (docs/03-planning/roadmap-prototipo.md).
  */
-export type ModuleStatus = { kind: 'available' } | { kind: 'pending' } | { kind: 'blocked'; by: string };
+export type ModuleStatus =
+  { kind: 'available' } | { kind: 'pending'; delivery: number } | { kind: 'blocked'; by: string };
 
 export interface ModuleEntry {
   id: string;
@@ -11,71 +15,60 @@ export interface ModuleEntry {
   status: ModuleStatus;
   /** Ruta dentro del ERP cuando el módulo está disponible. */
   path?: string;
-  /** Permiso necesario para verlo en el menú. */
+  /** Permiso necesario para abrirlo. */
   permission?: string;
 }
 
-export interface ModuleGroup {
-  process: string;
+export interface Section {
+  id: string;
+  /** Número de pestaña como en el boceto ("01. Command Center"). */
+  number: string;
+  name: string;
+  path: string;
   modules: ModuleEntry[];
 }
 
-const pending: ModuleStatus = { kind: 'pending' };
+const soon = (delivery: number): ModuleStatus => ({ kind: 'pending', delivery });
 
-export const MODULE_GROUPS: ModuleGroup[] = [
+export const SECTIONS: Section[] = [
+  { id: 'inicio', number: '01', name: 'Command Center', path: '/erp', modules: [] },
   {
-    process: 'Abastecimiento',
+    id: 'pos',
+    number: '02',
+    name: 'POS/Cocina',
+    path: '/erp/seccion/pos',
     modules: [
       {
-        id: 'compras',
-        name: 'Compras y recepción',
-        description: 'Proveedores, compras y lotes de materia prima',
-        status: pending,
+        id: 'caja',
+        name: 'Caja: turnos y arqueos',
+        description: 'Ventas, pagos mixtos, cierre de turno y revisión de diferencias',
+        status: soon(6),
+      },
+      {
+        id: 'mermas-cocina',
+        name: 'Mermas de cocina',
+        description: 'Clasificación de mermas del punto de asados',
+        status: { kind: 'blocked', by: 'P-07' },
       },
     ],
   },
   {
-    process: 'Producción',
-    modules: [
-      {
-        id: 'produccion',
-        name: 'Órdenes de producción',
-        description: 'Recetas, consumo real, lotes y rendimiento',
-        status: pending,
-      },
-    ],
-  },
-  {
-    process: 'Inventario',
-    modules: [
-      {
-        id: 'existencias',
-        name: 'Existencias y traslados',
-        description: 'Lotes, vencimientos, FEFO y trazabilidad',
-        status: pending,
-      },
-      {
-        id: 'paquetes',
-        name: 'Apertura de paquetes',
-        description: 'Convertir paquetes en unidades',
-        status: { kind: 'blocked', by: 'P-06' },
-      },
-    ],
-  },
-  {
-    process: 'Ventas y reparto',
+    id: 'reparto',
+    number: '03',
+    name: 'Reparto',
+    path: '/erp/seccion/reparto',
     modules: [
       {
         id: 'pedidos',
         name: 'Clientes y pedidos',
         description: 'Pedidos, crédito y pendientes',
-        status: pending,
+        status: soon(5),
       },
       {
         id: 'despachos',
         name: 'Despachos y entregas',
         description: 'Asignación, entregas parciales y devoluciones',
-        status: pending,
+        status: soon(5),
       },
       {
         id: 'liquidacion',
@@ -86,13 +79,70 @@ export const MODULE_GROUPS: ModuleGroup[] = [
     ],
   },
   {
-    process: 'Dinero',
+    id: 'produccion',
+    number: '04',
+    name: 'Producción',
+    path: '/erp/seccion/produccion',
+    modules: [
+      {
+        id: 'ordenes',
+        name: 'Órdenes de producción',
+        description: 'Recetas, consumo real por lote y rendimiento',
+        status: soon(4),
+      },
+      {
+        id: 'existencias',
+        name: 'Existencias y traslados',
+        description: 'Lotes, vencimientos, FEFO y trazabilidad',
+        status: soon(2),
+      },
+      {
+        id: 'paquetes',
+        name: 'Apertura de paquetes',
+        description: 'Convertir paquetes en unidades',
+        status: { kind: 'blocked', by: 'P-06' },
+      },
+    ],
+  },
+  {
+    id: 'ia',
+    number: '05',
+    name: 'IA Log',
+    path: '/erp/seccion/ia',
+    modules: [
+      {
+        id: 'asistente',
+        name: 'Asistente de IA',
+        description: 'Consultas en lenguaje natural y registros con confirmación',
+        status: soon(8),
+      },
+    ],
+  },
+  {
+    id: 'compras',
+    number: '06',
+    name: 'Compras',
+    path: '/erp/seccion/compras',
+    modules: [
+      {
+        id: 'compras',
+        name: 'Compras y recepción',
+        description: 'Proveedores, compras y lotes de materia prima',
+        status: soon(3),
+      },
+    ],
+  },
+  {
+    id: 'dinero',
+    number: '07',
+    name: 'Cartera y contabilidad',
+    path: '/erp/seccion/dinero',
     modules: [
       {
         id: 'cartera',
         name: 'Cartera y recaudos',
         description: 'Cupos, abonos y conciliación',
-        status: pending,
+        status: soon(7),
       },
       {
         id: 'contabilidad',
@@ -103,7 +153,10 @@ export const MODULE_GROUPS: ModuleGroup[] = [
     ],
   },
   {
-    process: 'Administración',
+    id: 'administracion',
+    number: '08',
+    name: 'Administración',
+    path: '/erp/seccion/administracion',
     modules: [
       {
         id: 'usuarios',
@@ -117,13 +170,32 @@ export const MODULE_GROUPS: ModuleGroup[] = [
   },
 ];
 
+/** Sección a la que pertenece una ruta del ERP (para marcar la pestaña activa). */
+export function sectionForPath(pathname: string): Section | undefined {
+  if (pathname === '/erp' || pathname === '/erp/') return SECTIONS[0];
+  return SECTIONS.find(
+    (s) =>
+      s.id !== 'inicio' &&
+      (pathname.startsWith(s.path) || s.modules.some((m) => m.path && pathname.startsWith(m.path))),
+  );
+}
+
 export function statusLabel(status: ModuleStatus): string {
   switch (status.kind) {
     case 'available':
       return 'Disponible';
     case 'pending':
-      return 'En construcción';
+      return `En construcción · entrega ${String(status.delivery)}`;
     case 'blocked':
       return `Espera decisión ${status.by}`;
   }
+}
+
+/** Un módulo se puede abrir si está construido y el usuario tiene el permiso (el servidor vuelve a validar). */
+export function isUsable(module: ModuleEntry, me: MeResponse): boolean {
+  return (
+    module.status.kind === 'available' &&
+    Boolean(module.path) &&
+    (!module.permission || hasPermission(me, module.permission))
+  );
 }

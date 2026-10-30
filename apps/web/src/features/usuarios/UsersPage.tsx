@@ -1,6 +1,8 @@
 import { ROLE_NAMES, RoleCode, type MeResponse, type UserSummary } from '@quatreros/contracts';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { newIdempotencyKey, type ApiError } from '../../shared/api/client';
+import { Link } from 'react-router';
+import { Badge } from '../../shared/ui/Badge';
 import { Alert, Button, CheckboxGroup, TextField } from '../../shared/ui/form';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 import { useCreateUser, useSetActive, useSites, useUpdateUser, useUsers } from './api';
@@ -32,10 +34,26 @@ export function UsersPage({ me }: { me: MeResponse }) {
 
   return (
     <section aria-labelledby="usuarios-titulo">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 id="usuarios-titulo" ref={headingRef} tabIndex={-1} className="text-2xl font-bold outline-none">
-          Usuarios
-        </h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <Link
+            to="/erp/seccion/administracion"
+            className="inline-flex min-h-6 items-center gap-1 text-caption font-semibold tracking-wider text-ash uppercase hover:text-chalk"
+          >
+            <span aria-hidden className="font-mono">
+              08.
+            </span>
+            Administración
+          </Link>
+          <h1
+            id="usuarios-titulo"
+            ref={headingRef}
+            tabIndex={-1}
+            className="text-display font-bold outline-none"
+          >
+            Usuarios
+          </h1>
+        </div>
         {canCreate && !editing ? (
           <Button
             onClick={() => {
@@ -50,7 +68,7 @@ export function UsersPage({ me }: { me: MeResponse }) {
 
       {notice ? (
         <div className="mt-4">
-          <Alert tone={notice.tone}>{notice.text}</Alert>
+          <Alert tone={notice.tone === 'info' ? 'success' : 'error'}>{notice.text}</Alert>
         </div>
       ) : null}
 
@@ -76,23 +94,21 @@ export function UsersPage({ me }: { me: MeResponse }) {
         />
       </div>
 
-      {users.isPending ? <p className="mt-6 text-ink-muted">Cargando usuarios…</p> : null}
+      {users.isPending ? <p className="mt-6 text-ash">Cargando usuarios…</p> : null}
       {users.error ? (
         <div className="mt-6">
           <Alert>{users.error.message}</Alert>
         </div>
       ) : null}
       {users.data?.length === 0 ? (
-        <p className="mt-6 text-ink-muted">
-          {q ? 'Nadie coincide con la búsqueda.' : 'Todavía no hay usuarios.'}
-        </p>
+        <p className="mt-6 text-ash">{q ? 'Nadie coincide con la búsqueda.' : 'Todavía no hay usuarios.'}</p>
       ) : null}
 
       {users.data && users.data.length > 0 ? (
-        <div className="mt-6 overflow-x-auto rounded-panel border border-line bg-panel">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-grill bg-smoke shadow-xl">
           <table className="w-full min-w-[44rem] text-left">
             <caption className="sr-only">Usuarios del sistema, con su rol, sedes y estado</caption>
-            <thead className="border-b border-line text-sm text-ink-muted">
+            <thead className="border-b border-grill text-caption tracking-wider text-ash uppercase">
               <tr>
                 <th scope="col" className="px-4 py-3 font-semibold">
                   Persona
@@ -113,20 +129,20 @@ export function UsersPage({ me }: { me: MeResponse }) {
             </thead>
             <tbody>
               {users.data.map((u) => (
-                <tr key={u.id} className="border-b border-line last:border-0">
+                <tr key={u.id} className="border-b border-grill last:border-0">
                   <th scope="row" className="px-4 py-3 font-normal">
                     <span className="block font-semibold">{u.fullName}</span>
-                    <span className="text-sm text-ink-muted">{u.email}</span>
+                    <span className="text-caption text-ash">{u.email}</span>
                   </th>
                   <td className="px-4 py-3">{u.roles.map((r) => ROLE_NAMES[r]).join(', ')}</td>
                   <td className="px-4 py-3">{u.sites.map((s) => s.name).join(', ') || '—'}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span
-                      className={`rounded-control px-1.5 text-sm ${u.isActive ? 'bg-chimichurri-soft text-chimichurri-strong' : 'bg-surface text-ink-muted ring-1 ring-control'}`}
-                    >
-                      {u.isActive ? 'Activo' : 'Desactivado'}
+                  <td className="px-4 py-3">
+                    <span className="flex flex-wrap gap-1.5">
+                      <Badge tone={u.isActive ? 'success' : 'neutral'}>
+                        {u.isActive ? 'Activo' : 'Desactivado'}
+                      </Badge>
+                      {u.mfaEnabled ? <Badge tone="info">Dos pasos</Badge> : null}
                     </span>
-                    {u.mfaEnabled ? <span className="ml-2 text-sm text-ink-muted">Dos pasos</span> : null}
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {canUpdate && confirming === u.id ? (
@@ -170,7 +186,7 @@ export function UsersPage({ me }: { me: MeResponse }) {
                         </Button>
                         {u.id !== me.user.id ? (
                           <Button
-                            variant="quiet"
+                            variant="ghost"
                             className="ml-1"
                             aria-label={`${u.isActive ? 'Desactivar' : 'Reactivar'} a ${u.fullName}`}
                             onClick={() => {
@@ -220,7 +236,7 @@ function ConfirmToggle({
         if (e.key === 'Escape') onCancel();
       }}
     >
-      <p className="max-w-60 text-sm">
+      <p className="max-w-64 text-body">
         {deactivating
           ? `¿Desactivar a ${user.fullName}? Se cerrarán sus sesiones y no podrá ingresar.`
           : `¿Reactivar a ${user.fullName}? Podrá volver a ingresar.`}
@@ -304,14 +320,14 @@ function UserForm({
   return (
     <form
       ref={formRef}
-      className="mt-6 flex max-w-2xl flex-col gap-4 rounded-panel border border-line bg-panel p-5"
+      className="mt-6 flex max-w-2xl flex-col gap-5 rounded-2xl border border-grill bg-smoke p-5 shadow-xl md:p-6"
       onSubmit={submit}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onCancel();
       }}
       aria-label={existing ? `Editar a ${existing.fullName}` : 'Crear usuario'}
     >
-      <h2 ref={titleRef} tabIndex={-1} className="scroll-mt-4 text-xl font-bold outline-none">
+      <h2 ref={titleRef} tabIndex={-1} className="scroll-mt-4 text-title font-semibold outline-none">
         {existing ? `Editar a ${existing.fullName}` : 'Nuevo usuario'}
       </h2>
       {error && !error.problem.errors && !emailTaken ? <Alert>{error.message}</Alert> : null}
@@ -385,13 +401,13 @@ function UserForm({
           error={error?.fieldError('siteIds')}
         />
       ) : (
-        <p className="text-ink-muted">Cargando sedes…</p>
+        <p className="text-ash">Cargando sedes…</p>
       )}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={busy}>
           {busy ? 'Guardando…' : existing ? 'Guardar cambios' : 'Crear usuario'}
         </Button>
-        <Button variant="secondary" onClick={onCancel}>
+        <Button variant="ghost" onClick={onCancel}>
           Cancelar
         </Button>
       </div>

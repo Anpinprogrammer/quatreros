@@ -25,7 +25,7 @@ test('contraseña incorrecta muestra un mensaje genérico', async ({ page }) => 
 test('el repartidor entra al portal de Ruta', async ({ page }) => {
   await signIn(page, 'reparto@quatreros.example');
   await expect(page).toHaveURL(/\/ruta$/);
-  await expect(page.getByRole('heading', { name: 'Despachos de hoy' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Rutas del día' })).toBeVisible();
 });
 
 test('administrador: configura el segundo factor, crea un repartidor y este ingresa', async ({
@@ -46,10 +46,13 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await page.getByRole('button', { name: 'Ya los guardé, continuar' }).click();
 
   await expect(page).toHaveURL(/\/erp$/);
+  await expect(page.getByRole('heading', { name: 'Command Center' })).toBeVisible();
+  // Navegación por pestañas del encabezado → sección Administración → módulo Usuarios.
   await page
-    .getByRole('navigation', { name: 'Módulos' })
-    .getByRole('link', { name: /Usuarios y permisos/ })
+    .getByRole('navigation', { name: 'Secciones' })
+    .getByRole('link', { name: /Administración/ })
     .click();
+  await page.getByRole('link', { name: /Usuarios y permisos/ }).click();
   await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
 
   const email = `juan.${String(Date.now())}@quatreros.example`;
@@ -76,8 +79,9 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await expect(page).toHaveURL(/\/erp$/);
 
   // Desactivar con confirmación dentro de la fila; la persona ya no puede ingresar.
+  // Acceso directo desde el Command Center.
   await page
-    .getByRole('navigation', { name: 'Módulos' })
+    .getByRole('region', { name: 'Puedes usar' })
     .getByRole('link', { name: /Usuarios y permisos/ })
     .click();
   await page.getByRole('button', { name: 'Desactivar a Juan Repartidor' }).click();

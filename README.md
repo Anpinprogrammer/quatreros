@@ -58,6 +58,7 @@ pnpm dev                           # API en :3000 y web en :5173 (con proxy a la
 
 - Web: http://localhost:5173 · Salud: http://localhost:3000/health · Documentación API: http://localhost:3000/api/docs
 - Usuarios demo y guion para mostrar el prototipo: [`docs/operations/demo-local.md`](docs/operations/demo-local.md)
+- Sistema de diseño (base visual única, DEC-086): [`docs/05-design/sistema-de-diseno.md`](docs/05-design/sistema-de-diseno.md)
 
 ## Comandos
 

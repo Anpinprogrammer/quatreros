@@ -13,10 +13,10 @@ export function ServerStatus() {
 
   const state = isPending ? 'checking' : isError ? 'offline' : 'online';
   const text = { checking: 'Verificando conexión', offline: 'Sin conexión', online: 'Conectado' }[state];
-  const dot = { checking: 'bg-line', offline: 'bg-alerta', online: 'bg-chimichurri' }[state];
+  const dot = { checking: 'bg-ash', offline: 'bg-danger', online: 'bg-success' }[state];
 
   return (
-    <p role="status" className="flex items-center gap-2 text-sm text-ink-muted">
+    <p role="status" className="flex items-center gap-2 text-caption whitespace-nowrap text-ash">
       <span aria-hidden className={`inline-block size-2.5 rounded-full ${dot}`} />
       {text}
       {data ? <span className="sr-only">versión {data.version}</span> : null}

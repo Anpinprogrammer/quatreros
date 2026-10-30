@@ -31,7 +31,7 @@ export function BackupCodes({ codes }: { codes: string[] }) {
     <div className="flex flex-col gap-3">
       <ul
         aria-label="Códigos de respaldo"
-        className="grid grid-cols-2 gap-2 rounded-control bg-surface p-3 font-mono text-base font-semibold"
+        className="grid grid-cols-2 gap-2 rounded-xl border border-grill bg-char p-4 font-mono text-base font-semibold"
       >
         {codes.map((c) => (
           <li key={c}>{c}</li>
@@ -45,7 +45,7 @@ export function BackupCodes({ codes }: { codes: string[] }) {
           Descargar
         </Button>
       </div>
-      <p role="status" className="text-sm text-ink-muted">
+      <p role="status" className="text-caption text-ash">
         {copied === 'ok' ? 'Códigos copiados.' : copied === 'fail' ? 'No se pudo copiar; usa Descargar.' : ''}
       </p>
     </div>

@@ -3,6 +3,7 @@ import { useRef, useState, type SubmitEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router';
 import { authClient } from '../../shared/auth/client';
 import { FullPageMessage, ME_KEY, useSession } from '../../shared/auth/session';
+import { BrandMark } from '../../shared/ui/Brand';
 import { Alert, Button, PasswordField, TextField } from '../../shared/ui/form';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 
@@ -78,14 +79,17 @@ export function LoginPage() {
   };
 
   return (
-    <main className="grid min-h-dvh place-items-center px-4 py-10">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-chimichurri-strong">Quatreros</h1>
-        <p className="mt-1 text-ink-muted">
+    <main className="flex min-h-dvh items-center justify-center bg-char px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="flex items-center gap-3">
+          <BrandMark size="lg" />
+          <h1 className="text-display font-bold tracking-tight">Quatreros</h1>
+        </div>
+        <p className="mt-3 text-ash">
           {step === 'credentials' ? 'Ingresa con tu correo de trabajo.' : 'Verificación en dos pasos.'}
         </p>
 
-        <div className="mt-6 rounded-panel border border-line bg-panel p-5">
+        <div className="mt-6 rounded-2xl border border-grill bg-smoke p-5 shadow-xl md:p-6">
           {reason && REASONS[reason] && step === 'credentials' ? (
             <div className="mb-4">
               <Alert>{REASONS[reason]}</Alert>
@@ -98,7 +102,7 @@ export function LoginPage() {
           ) : null}
 
           {step === 'credentials' ? (
-            <form className="flex flex-col gap-4" onSubmit={(e) => void submitCredentials(e)}>
+            <form className="flex flex-col gap-5" onSubmit={(e) => void submitCredentials(e)}>
               <TextField
                 label="Correo"
                 type="email"
@@ -126,7 +130,7 @@ export function LoginPage() {
               </Button>
             </form>
           ) : (
-            <form className="flex flex-col gap-4" onSubmit={(e) => void submitCode(e)}>
+            <form className="flex flex-col gap-5" onSubmit={(e) => void submitCode(e)}>
               <TextField
                 ref={codeRef}
                 label="Código de 6 dígitos"
@@ -138,7 +142,7 @@ export function LoginPage() {
                 required
                 autoFocus
                 aria-invalid={error ? true : undefined}
-                className="tabular tracking-widest"
+                className="font-mono text-title tracking-[0.4em]"
                 value={code}
                 onChange={(e) => {
                   setCode(e.target.value.replace(/\D/g, ''));
@@ -148,7 +152,7 @@ export function LoginPage() {
                 {busy ? 'Verificando…' : 'Verificar'}
               </Button>
               <Button
-                variant="secondary"
+                variant="ghost"
                 onClick={() => {
                   setStep('credentials');
                   setCode('');
