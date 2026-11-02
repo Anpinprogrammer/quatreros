@@ -73,7 +73,7 @@
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
 - **Asistente:** burbuja y panel de Quatreros AI implementados como **vista previa** (15 % del ancho en escritorio, pantalla completa con "Volver" en móvil). El compositor está deshabilitado hasta la entrega 8; no hay respuestas simuladas.
 - **Ingreso:** rediseño luminoso 52/48, logo oficial, personaje de Los 4 Treros, formulario de 52 px con iconos y control de contraseña integrado. La atmósfera clara se conserva aunque el sistema esté en oscuro.
-- **Command Center y header:** KPIs reales de pedidos, producción y FEFO (ventas del día en estado vacío), operación con pedidos/producción y atención requerida, accesos rápidos compactos. El header agrupa colapso, migas, búsqueda, sedes, notificaciones y menú de usuario; tema y cierre de sesión viven en el menú. Se retiró el panel de plan del dashboard.
+- **Command Center y header:** dos pestañas accesibles, **Módulos** y **Tablero del día**. Módulos reorganiza los accesos en un grid compacto de tres columnas; el tablero concentra KPI reales de pedidos/producción/FEFO, pedidos recientes, producción, estado de reparto y el estado de caja/cartera/IA. El header agrupa colapso, migas, búsqueda, sedes, notificaciones y menú de usuario; tema y cierre de sesión viven en el menú. Se retiró el panel de plan del dashboard.
 
 ## 2. Siguiente tarea: entrega 6, caja (POS)
 
