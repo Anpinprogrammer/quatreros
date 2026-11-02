@@ -92,6 +92,18 @@ La semilla deja el traslado `T-0001` ya recibido (2 paquetes de PT-2026-0001 de 
 5. **Novedad**: repite con otra cantidad y confirma menos de lo enviado. El traslado queda _Recibido con novedad_ y la diferencia permanece en tránsito.
 6. **Command Center**: la tarjeta _Alertas FEFO_ muestra hasta 3 lotes vendibles que vencen en 7 días. Si estás como `compras@`, solo ves las sedes de su alcance.
 
+## 4.5 Compras y recepción (entrega 3, ~4 minutos)
+
+La semilla deja dos proveedores y la compra `C-0001` pendiente: 40 kg de carne de cerdo magra a $18.000/kg y 20 kg de tocino a $14.000/kg, total $1.000.000 sin impuestos.
+
+1. **Comprador**: _06. Compras_ → _Compras y recepción_. Abre `C-0001`; verás las líneas, el total sin impuestos y el saldo pendiente.
+2. **Proveedores**: pestaña _Proveedores_ → _Nuevo proveedor_. Crea uno con NIT ficticio; una identificación repetida se rechaza.
+3. **Registrar compra**: _Nueva compra_ → proveedor, sede, materia prima, cantidad y costo. El total se calcula en vivo y la compra queda _Pendiente de recepción_. El inventario no cambia.
+4. **Recepción parcial**: en el detalle, elige la ubicación "Principal", recibe 25 kg de carne con vencimiento futuro. Se crea el lote `MP-2026-0005` y la compra queda _Recibida parcialmente_ con 15 kg pendientes.
+5. **Completar**: recibe el saldo. La compra queda _Recibida_ y el kardex muestra las entradas con su proveedor y recepción.
+6. **Trazabilidad**: abre el lote recibido en _04. Producción_ → _Existencias y traslados_ → _Lotes_; la ficha muestra el origen en la compra y el proveedor.
+7. **Bloqueado**: los impuestos y el desglose fiscal no se capturan (P-02). Una cantidad mayor a la pendiente se rechaza: la confirmación con motivo requiere el motor de aprobaciones (RF-007).
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

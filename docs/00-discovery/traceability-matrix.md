@@ -97,7 +97,7 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | -------------------------------------------------------- | ---------------------------------- | ----------------------------------------------- | -------------------------------------------- |
 | Gestión de usuarios, roles, sedes, auditoría             | DEC-040..044                       | P-10 (solo matriz final; motor construible)     | 🟨                                           |
 | Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091 | P-06 (apertura), P-09 (descuentos)              | 🟨                                           |
-| Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080          | Impuestos en compras P-02                       | 🟨                                           |
+| Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080, DEC-094 | Impuestos en compras P-02, anulación P-09       | 🟨 (entrega 3 lista; RF-053 pendiente)       |
 | Receta → orden de producción → lote                      | DEC-010..013, DEC-092              | P-03 (solo costeo)                              | 🟨 (entrega 4)                               |
 | Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089 | P-05 (vencidos), RF-113 (aprobaciones)          | 🟨 (2b y 2c listos; RF-113 pendiente)        |
 | Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                       | Q-COM-04                                        | 🟨                                           |

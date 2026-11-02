@@ -71,13 +71,13 @@
 
 ## 3. Compras (COMP) — BR-040–059
 
-| ID     | Regla                                                                                                                                              | Ejemplo                                                       | Estado          | Fuente                        | Aprueba     |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------- | ----------------------------- | ----------- |
-| BR-040 | Toda compra está asociada a **un proveedor registrado**.                                                                                           | Compra sin proveedor → rechazada.                             | CONFIRMED       | DM §6                         | —           |
-| BR-041 | La materia prima solo ingresa al inventario mediante una **recepción**; la compra por sí sola no altera existencias.                               | Compra registrada, aún no recibida → existencia sin cambio.   | CONFIRMED       | DM §4.1                       | —           |
-| BR-042 | Cada recepción crea un **lote de materia prima** con proveedor, fecha de recepción, cantidad, costo unitario de compra y, si aplica, vencimiento.  | Recepción de 50 kg de carne a $18.000/kg → lote MP-2026-0153. | PROPOSED        | DM §7.1 ("origen de insumos") | Responsable |
-| BR-043 | Una compra puede recibirse en **varias recepciones parciales**; queda abierta mientras tenga saldo por recibir o se cierre manualmente con motivo. | Compra de 100 kg, se reciben 60 → saldo 40 pendiente.         | PROPOSED [Amp.] | —                             | Responsable |
-| BR-044 | El tratamiento de **impuestos** en las compras se aplica según la política fiscal aprobada.                                                        | —                                                             | BLOCKED (P-02)  | DM §9.1                       | Contador    |
+| ID     | Regla                                                                                                                                              | Ejemplo                                                       | Estado                | Fuente                        | Aprueba     |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------- | ----------------------------- | ----------- |
+| BR-040 | Toda compra está asociada a **un proveedor registrado**.                                                                                           | Compra sin proveedor → rechazada.                             | CONFIRMED             | DM §6                         | —           |
+| BR-041 | La materia prima solo ingresa al inventario mediante una **recepción**; la compra por sí sola no altera existencias.                               | Compra registrada, aún no recibida → existencia sin cambio.   | CONFIRMED             | DM §4.1                       | —           |
+| BR-042 | Cada recepción crea un **lote de materia prima** con proveedor, fecha de recepción, cantidad, costo unitario de compra y, si aplica, vencimiento.  | Recepción de 50 kg de carne a $18.000/kg → lote MP-2026-0153. | PROVISIONAL → DEC-094 | DM §7.1 ("origen de insumos") | Responsable |
+| BR-043 | Una compra puede recibirse en **varias recepciones parciales**; queda abierta mientras tenga saldo por recibir o se cierre manualmente con motivo. | Compra de 100 kg, se reciben 60 → saldo 40 pendiente.         | PROVISIONAL → DEC-094 | —                             | Responsable |
+| BR-044 | El tratamiento de **impuestos** en las compras se aplica según la política fiscal aprobada.                                                        | —                                                             | BLOCKED (P-02)        | DM §9.1                       | Contador    |
 
 ## 4. Producción (PROD) — BR-060–079
 

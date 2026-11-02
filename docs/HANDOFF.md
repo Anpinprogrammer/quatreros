@@ -11,7 +11,8 @@
 | G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md` |
 | Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                 |
 | **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                   |
-| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas; sigue la entrega 3 (compras)         |
+| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                       |
+| **Entrega 3**: compras y recepción                                            | **Terminada.** Sigue la entrega 4 (producción)                            |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -70,38 +71,40 @@
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
 
-## 2. Siguiente tarea: entrega 3, compras y recepción
+## 2. Siguiente tarea: entrega 4, producción
 
-**Estado al 2026-11-02:** entregas 1, 2a, 2b y 2c terminadas y verificadas. Sigue la 3: compra a proveedor y recepción que crea lotes de materia prima.
+**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c y 3 terminadas y verificadas. Sigue la 4: recetas, orden de producción, consumo real y lote terminado.
 
-### Hecho en 2c: FEFO y traslados
+### Hecho en 3: compras y recepción
 
-- Especificación en `docs/04-specifications/inv/fefo-traslados.md`.
-- `allocateFefo()` ordena por vencimiento, excluye lotes vencidos o bloqueados, reparte entre lotes y falla con `409 INSUFFICIENT_STOCK`.
-- `inventory.transfers` y `transfer_lines` con consecutivo `T-0001`, envío a la ubicación "En tránsito", recepción completa o con novedad y auditoría; la diferencia de una novedad permanece en tránsito hasta resolverse.
-- Traslados en **04. Producción → Existencias y traslados**, con detalle y recepción; tarjeta "Alertas FEFO" del Command Center con datos reales.
-- Alcance por sede en saldos, disponibilidad, lotes, kardex, resumen y traslados; la ficha de un lote ajeno responde `404`.
-- Semilla: `T-0001` ya recibido (2 paquetes de PT-2026-0001 de Bodega principal a Productos del punto).
-- **RF-113 (excepción FEFO) queda pendiente del motor de aprobaciones (RF-007).** No se implementó un bypass ni un umbral.
+- Especificación en `docs/04-specifications/comp/compras.md`; DEC-094 aprueba la recepción parcial y el lote MP por recepción como `PROVISIONAL`.
+- Proveedores con identificación única, contacto, edición con `If-Match` e inactivación (nunca borrado).
+- Compras con consecutivo `C-0001`, líneas de materia prima, total calculado sin impuestos y estado pendiente/parcial/recibida.
+- Recepción total o parcial con consecutivo `R-0001`; cada línea crea un lote `MP-AAAA-####` con proveedor, recepción, costo y vencimiento, y un movimiento `receipt` en la misma transacción.
+- Se rechaza recibir más de lo pendiente, recibir en una ubicación de otra sede y vencimientos pasados o faltantes. La confirmación con motivo para sobre-recepción espera RF-007.
+- Pantallas **06. Compras → Compras y recepción** y **Proveedores**; detalle con líneas, recepciones y formulario de recepción.
+- Semilla: dos proveedores y `C-0001` pendiente (40 kg de carne y 20 kg de tocino, total $1.000.000 sin impuestos).
 
-### Objetivo demostrable de la entrega 3
+### Objetivo demostrable de la entrega 4
 
-- Registrar proveedores y compras con líneas de materia prima, cantidad y costo.
-- Recibir total o parcialmente una compra: crear el lote de materia prima y el movimiento de entrada en la misma transacción.
-- Ver la compra pendiente, lo recibido y el saldo por recibir.
-- Mantener bloqueados los impuestos y el desglose fiscal (BR-044, P-02): se registra el total pagado sin inventar reglas contables.
-- Resolver en la especificación el alcance de la recepción parcial (RF-052 figura como PROPOSED para el lote de MP): no ampliarlo sin decisión.
+- Recetas con versiones e ingredientes por producto (RF-033, movida desde la entrega 2 por DEC-092).
+- Orden de producción con producto, cantidad, versión de receta, sede y responsable.
+- Consumo real por lote de materia prima, con FEFO sugerido, que descuenta existencias y vincula los lotes.
+- Cierre con lote de producto terminado, fecha de fabricación/vencimiento y rendimiento real frente al esperado.
+- Dejar fuera la anulación de orden (RF-084) hasta que exista su flujo de aprobación.
 
-### RF de la entrega 3
+### RF de la entrega 4
 
-| RF     | Tema                       | Estado                                 | Ojo con                                                               |
-| ------ | -------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
-| RF-050 | Gestión de proveedores     | CONFIRMED                              | Identificación duplicada                                              |
-| RF-051 | Registro de compra         | CONFIRMED · impuestos BLOCKED (BR-044) | Solo total pagado; no desglose fiscal                                 |
-| RF-052 | Recepción de materia prima | CONFIRMED · parcial PROPOSED (lote MP) | Transacción única con lote y movimiento; vencimiento pasado rechazado |
-| RF-053 | Anulación de compra        | PROPOSED                               | Depende de P-09: **no implementar**                                   |
+| RF     | Tema                                | Estado               | Ojo con                                                 |
+| ------ | ----------------------------------- | -------------------- | ------------------------------------------------------- |
+| RF-033 | Recetas y versiones                 | Movido por DEC-092   | Ingredientes por materia prima; versión vigente         |
+| RF-080 | Sugerencias de producción y compra  | CONFIRMED · Q-PRO-03 | Requiere puntos de reorden; no inventar umbrales        |
+| RF-081 | Creación de orden de producción     | CONFIRMED            | Advertencia si falta MP, pero no bloquea crearla        |
+| RF-082 | Registro de consumo real            | CONFIRMED            | Lote por lote; FEFO sugerido; no permite saldo negativo |
+| RF-083 | Cierre y lote de producto terminado | CONFIRMED            | Rendimiento y motivo si sale de tolerancia (BR-066)     |
+| RF-084 | Anulación de orden                  | PROPOSED             | Requiere aprobación (RF-007/P-09); no implementar       |
 
-Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/comp/compras.md` y esperar aprobación.
+Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/prod/produccion.md` y esperar aprobación.
 
 En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
 

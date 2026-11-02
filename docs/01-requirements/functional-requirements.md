@@ -233,7 +233,7 @@
 - Reglas relacionadas: BR-041, BR-042, BR-043, BR-008
 - Dependencias: RF-051
 - Prioridad sugerida: Alta
-- Estado: CONFIRMED (recepción) · PROPOSED (parcial, lote MP)
+- Estado: CONFIRMED (recepción) · PROVISIONAL (parcial y lote MP, DEC-094)
 - Fuente: DM §4.1, §7.1
 
 ### RF-053 — Anulación de compra o recepción

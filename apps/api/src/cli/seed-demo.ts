@@ -9,6 +9,7 @@ import {
 import { users } from '../modules/admin/infrastructure/schema.js';
 import { seedDemoCatalog } from '../modules/catalog/infrastructure/seed.js';
 import { seedDemoInventory, seedDemoTransfer } from '../modules/inventory/infrastructure/seed.js';
+import { seedDemoPurchasing } from '../modules/purchasing/infrastructure/seed.js';
 import { createAuth } from '../platform/auth/auth.js';
 import { createAuthProvisioner } from '../platform/auth/provisioner.js';
 import { createDb } from '../platform/db/client.js';
@@ -45,6 +46,7 @@ try {
   await seedDemoCatalog(handle.db, admin.id);
   await seedDemoInventory(handle.db, admin.id);
   await seedDemoTransfer(handle.db, admin.id);
+  await seedDemoPurchasing(handle.db, admin.id);
   process.stdout.write(`Sedes de demostración listas. Usuarios nuevos: ${String(created.length)}\n`);
   for (const u of DEMO_USERS) process.stdout.write(`  ${u.role.padEnd(5)} ${u.email}\n`);
   process.stdout.write('Contraseña: la definida en DEMO_PASSWORD.\n');

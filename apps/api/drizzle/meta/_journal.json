@@ -71,6 +71,27 @@
       "when": 1793636987618,
       "tag": "0009_transfer_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793638831745,
+      "tag": "0010_pale_nemesis",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793638837405,
+      "tag": "0011_purchasing_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793638850698,
+      "tag": "0012_purchasing_schema_usage",
+      "breakpoints": true
     }
   ]
 }

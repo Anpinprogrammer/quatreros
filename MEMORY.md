@@ -13,6 +13,7 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 | F: monorepo, CI/CD, Docker, respaldos                            | Completa                                                      |
 | **Entrega 1**: ingreso, usuarios, roles y sedes                  | ✅ Terminada                                                  |
 | **Entrega 2**: catálogo e inventario                             | ✅ Terminada: 2a catálogo, 2b existencias y 2c FEFO/traslados |
+| **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción   |
 | Entrega 8: Quatreros AI                                          | Configurada, sin integración funcional                        |
 
 ## 2. Dónde estamos (2026-11-02)
@@ -27,7 +28,8 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
   - `2d95eab` — especificación de existencias, kardex y trazabilidad (2b).
   - `077a6ca` — implementación 2b (lotes, existencias, kardex y trazabilidad).
   - `3363038` — isotipo oficial en la marca y el ingreso.
-- Entorno local recreado, migraciones `0000`–`0009` aplicadas y semilla demo cargada (incluye el traslado `T-0001`).
+  - `38d7094` — FEFO y traslados con tránsito (entrega 2c).
+- Entorno local recreado, migraciones `0000`–`0012` aplicadas y semilla demo cargada (incluye el traslado `T-0001` y la compra `C-0001`).
 
 ### Entrega 2a (hecha)
 
@@ -55,11 +57,23 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Verificación: 71 unitarias, 60 integración (PGlite y PostgreSQL 17 real) y 48 E2E con axe.
 - **RF-113 (excepción FEFO) queda pendiente del motor de aprobaciones (RF-007).**
 
-### Siguiente: entrega 3 (compras y recepción)
+### Entrega 3 (hecha)
 
-- RF-050 (proveedores), RF-051 (compra) y RF-052 (recepción que crea lotes de MP); RF-053 queda PROPOSED por P-09.
-- Impuestos y desglose fiscal siguen bloqueados (BR-044, P-02).
-- La especificación `docs/04-specifications/comp/compras.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
+- Proveedores con identificación única, contacto, edición con `If-Match` e inactivación.
+- Compras con consecutivo `C-0001`, líneas de materia prima, total sin impuestos y estados pendiente/parcial/recibida.
+- Recepción total o parcial con consecutivo `R-0001`: cada línea crea un lote `MP-AAAA-####` con proveedor, costo y vencimiento, y un movimiento `receipt` en la misma transacción.
+- Rechaza sobre-recepción, ubicación de otra sede y vencimiento faltante o pasado; la confirmación con motivo espera RF-007.
+- Pantallas **06. Compras → Compras y recepción** y **Proveedores**.
+- Semilla: dos proveedores y `C-0001` pendiente (40 kg de carne y 20 kg de tocino por $1.000.000 sin impuestos).
+- Migraciones `0010`–`0012`; **DEC-094** aprueba la recepción parcial y el lote MP por recepción como `PROVISIONAL`.
+- Verificación: 76 unitarias, 66 integración (PGlite y PostgreSQL 17 real) y 52 E2E con axe.
+
+### Siguiente: entrega 4 (producción)
+
+- RF-033 recetas y versiones (movido por DEC-092), RF-081 orden, RF-082 consumo real y RF-083 cierre con lote PT y rendimiento.
+- RF-080 sugerencias depende de puntos de reorden (Q-PRO-03); no inventar umbrales.
+- RF-084 anulación queda PROPOSED hasta que exista aprobación (RF-007/P-09).
+- La especificación `docs/04-specifications/prod/produccion.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
 - RF-117 (bloqueo de lotes) sigue PROPOSED/P-05: no implementar.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
@@ -150,7 +164,7 @@ docs/                  descubrimiento, requerimientos, arquitectura, specs, dise
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. No hay trabajo de negocio sin commitear; la siguiente tarea es la entrega 3.
+El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. La entrega 3 se commitea con este cierre; la siguiente tarea es la entrega 4.
 
 El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
@@ -166,4 +180,4 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Sigue la entrega 3: compras y recepción.
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada; sigue la entrega 4 (producción).

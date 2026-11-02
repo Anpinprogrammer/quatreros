@@ -13,3 +13,6 @@ export {
 } from './inventory.js';
 export type { InventoryDeps } from './inventory.js';
 export { createTransfer, getTransfer, listTransfers, receiveTransfer, simulateFefo } from './transfers.js';
+export { createRawMaterialLot } from './receipts.js';
+export type { RawMaterialLotInput, RawMaterialLotResult } from './receipts.js';
+export { businessToday } from '../domain/inventory.js';

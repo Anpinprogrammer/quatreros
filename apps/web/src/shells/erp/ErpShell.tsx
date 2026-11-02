@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { CatalogPage } from '../../features/catalogo/CatalogPage';
 import { ProductPage } from '../../features/catalogo/ProductPage';
+import { PurchasePage } from '../../features/compras/PurchasePage';
+import { PurchasesPage } from '../../features/compras/PurchasesPage';
 import { ExistenciasPage } from '../../features/existencias/ExistenciasPage';
 import { LotePage } from '../../features/existencias/LotePage';
 import { TransferPage } from '../../features/existencias/TransferPage';
@@ -101,6 +103,12 @@ export function ErpShell({ me }: { me: MeResponse }) {
               ) : null}
               {hasPermission(me, 'inv.stock.read') ? (
                 <Route path="existencias/traslados/:id" element={<TransferPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'comp.purchase.read') ? (
+                <Route path="compras" element={<PurchasesPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'comp.purchase.read') ? (
+                <Route path="compras/:id" element={<PurchasePage me={me} />} />
               ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>

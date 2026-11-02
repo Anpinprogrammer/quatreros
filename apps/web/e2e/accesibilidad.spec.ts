@@ -95,6 +95,18 @@ test('ERP: existencias, lotes y kardex', async ({ page }, info) => {
   await audit(page, info, 'traslado');
 });
 
+test('ERP: compras y recepción', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/compras');
+  await audit(page, info, 'compras');
+  await page.getByRole('tab', { name: 'Proveedores' }).click();
+  await audit(page, info, 'compras-proveedores');
+  await page.getByRole('tab', { name: 'Compras' }).click();
+  await page.getByRole('link', { name: 'C-0001' }).first().click();
+  await audit(page, info, 'compra-detalle');
+});
+
 test('ERP: trazabilidad de lote', async ({ page }, info) => {
   await signIn(page, 'produccion@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);

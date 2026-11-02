@@ -138,6 +138,11 @@ beforeAll(async () => {
     'inv.traceability.read',
     'inv.transfer.create',
     'inv.transfer.receive',
+    'comp.supplier.read',
+    'comp.supplier.manage',
+    'comp.purchase.read',
+    'comp.purchase.create',
+    'comp.receipt.create',
   ]);
   const readerRole = await ensureRole('INV_TEST_READ', ['inv.stock.read']);
 
@@ -537,5 +542,268 @@ describe('FEFO y traslados (RF-112, RF-114)', () => {
     expect(rows.length).toBeGreaterThan(0);
     expect(rows.every((row) => row.siteName === 'Bodega principal')).toBe(true);
     expect((await agent.get(`/api/v1/inventory/lots/${pointLotId}`)).status).toBe(404);
+  });
+});
+
+describe('compras y recepción (RF-050..052, DEC-094)', () => {
+  let supplierId = '';
+  let wineMaterialId = '';
+  let fatMaterialId = '';
+  let warehouseSiteId = '';
+  let posSiteId = '';
+  let warehouseLocationId = '';
+  let posLocationId = '';
+  let purchaseId = '';
+  let carneLineId = '';
+  let fatLineId = '';
+
+  beforeAll(async () => {
+    const refs = await db.execute(sql`
+      select
+        (select id from catalog.raw_materials where name = 'Carne de cerdo magra') as "carne",
+        (select id from catalog.raw_materials where name = 'Tocino y grasa') as "tocino",
+        (select id from admin.sites where name = 'Bodega principal') as "warehouseSite",
+        (select id from admin.sites where name = 'Punto de asados') as "posSite",
+        (select id from admin.locations where name = 'Principal') as "warehouseLocation",
+        (select id from admin.locations where name = 'Productos del punto') as "posLocation"
+    `);
+    const ref = refs.rows[0] as {
+      carne: string;
+      tocino: string;
+      warehouseSite: string;
+      posSite: string;
+      warehouseLocation: string;
+      posLocation: string;
+    };
+    wineMaterialId = ref.carne;
+    fatMaterialId = ref.tocino;
+    warehouseSiteId = ref.warehouseSite;
+    posSiteId = ref.posSite;
+    warehouseLocationId = ref.warehouseLocation;
+    posLocationId = ref.posLocation;
+
+    const supplier = await admin
+      .post('/api/v1/purchasing/suppliers')
+      .set('Idempotency-Key', randomUUID())
+      .send({ name: 'Proveedor de prueba', taxId: `NIT-${randomUUID().slice(0, 8)}`, phone: '555' });
+    expect(supplier.status).toBe(201);
+    supplierId = (supplier.body as { data: { id: string } }).data.id;
+  });
+
+  it('registra proveedores y rechaza la identificación duplicada', async () => {
+    const taxId = `NIT-${randomUUID().slice(0, 8)}`;
+    const first = await admin
+      .post('/api/v1/purchasing/suppliers')
+      .set('Idempotency-Key', randomUUID())
+      .send({ name: `Proveedor ${taxId}`, taxId });
+    expect(first.status).toBe(201);
+
+    const duplicate = await admin
+      .post('/api/v1/purchasing/suppliers')
+      .set('Idempotency-Key', randomUUID())
+      .send({ name: `Otro ${taxId}`, taxId });
+    expect(duplicate.status).toBe(409);
+    expect((duplicate.body as { code: string }).code).toBe('TAX_ID_TAKEN');
+
+    const list = await admin.get('/api/v1/purchasing/suppliers?status=active');
+    expect(list.status).toBe(200);
+    expect(
+      (list.body as { data: { name: string }[] }).data.some((s) => s.name === 'Proveedor de prueba'),
+    ).toBe(true);
+  });
+
+  it('la compra calcula el total y no mueve inventario', async () => {
+    const before = await inventoryCounts();
+    const key = randomUUID();
+    const create = await admin
+      .post('/api/v1/purchasing/purchases')
+      .set('Idempotency-Key', key)
+      .send({
+        supplierId,
+        siteId: warehouseSiteId,
+        lines: [
+          { rawMaterialId: wineMaterialId, quantity: '10.000', unitCost: '18000.0000' },
+          { rawMaterialId: fatMaterialId, quantity: '5.000', unitCost: '14000.0000' },
+        ],
+      });
+    expect(create.status).toBe(201);
+    const purchase = (
+      create.body as {
+        data: {
+          id: string;
+          number: string;
+          total: string;
+          status: string;
+          lines: { id: string; rawMaterialId: string }[];
+        };
+      }
+    ).data;
+    purchaseId = purchase.id;
+    expect(purchase.number).toBe('C-0001');
+    expect(purchase.total).toBe('250000.00');
+    expect(purchase.status).toBe('pending_receipt');
+    carneLineId = purchase.lines.find((line) => line.rawMaterialId === wineMaterialId)?.id ?? '';
+    fatLineId = purchase.lines.find((line) => line.rawMaterialId === fatMaterialId)?.id ?? '';
+    expect(await inventoryCounts()).toEqual(before);
+
+    const repeated = await admin
+      .post('/api/v1/purchasing/purchases')
+      .set('Idempotency-Key', key)
+      .send({
+        supplierId,
+        siteId: warehouseSiteId,
+        lines: [
+          { rawMaterialId: wineMaterialId, quantity: '10.000', unitCost: '18000.0000' },
+          { rawMaterialId: fatMaterialId, quantity: '5.000', unitCost: '14000.0000' },
+        ],
+      });
+    expect(repeated.status).toBe(201);
+    expect((repeated.body as { data: { id: string } }).data.id).toBe(purchaseId);
+    const rows = await db.execute(sql`select count(*)::int as total from purchasing.purchases`);
+    expect((rows.rows[0] as { total: number }).total).toBe(1);
+  });
+
+  it('la recepción parcial crea lote, movimiento y deja saldo pendiente', async () => {
+    const res = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        locationId: warehouseLocationId,
+        lines: [{ purchaseLineId: carneLineId, quantity: '6.000', expiresOn: '2027-12-31' }],
+      });
+    expect(res.status).toBe(201);
+    const detail = (
+      res.body as {
+        data: {
+          status: string;
+          receipts: { number: string; lines: { lotCode: string }[] }[];
+          lines: { id: string; receivedQuantity: string; pendingQuantity: string }[];
+        };
+      }
+    ).data;
+    expect(detail.status).toBe('partially_received');
+    expect(detail.receipts[0]?.number).toBe('R-0001');
+    const lotCode = detail.receipts[0]?.lines[0]?.lotCode ?? '';
+    expect(lotCode).toMatch(/^MP-\d{4}-\d{4}$/);
+    expect(detail.lines.find((line) => line.id === carneLineId)?.pendingQuantity).toBe('4.000');
+    expect(detail.lines.find((line) => line.id === fatLineId)?.pendingQuantity).toBe('5.000');
+
+    const lot = await db.execute(sql`
+      select l.id, l.supplier_id as "supplierId", l.receipt_id as "receiptId",
+             l.unit_cost as "unitCost", l.expires_on as "expiresOn"
+      from inventory.lots l where l.code = ${lotCode}
+    `);
+    const lotRow = lot.rows[0] as {
+      id: string;
+      supplierId: string;
+      receiptId: string;
+      unitCost: string;
+      expiresOn: string;
+    };
+    expect(lotRow.supplierId).toBe(supplierId);
+    expect(lotRow.expiresOn).toBe('2027-12-31');
+    expect(lotRow.unitCost).toBe('18000.0000');
+
+    const balance = await db.execute(sql`
+      select quantity from inventory.stock_balances
+      where lot_id = ${lotRow.id} and location_id = ${warehouseLocationId}
+    `);
+    expect((balance.rows[0] as { quantity: string }).quantity).toBe('6.000');
+
+    const kardex = await db.execute(sql`
+      select movement_type as "movementType", source_type as "sourceType"
+      from inventory.stock_movements
+      where lot_id = ${lotRow.id} and location_id = ${warehouseLocationId}
+    `);
+    expect(kardex.rows[0]).toEqual({ movementType: 'receipt', sourceType: 'purchasing.receipt' });
+  });
+
+  it('rechaza sobre-recepción, ubicación de otra sede y vencimiento inválido', async () => {
+    const over = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        locationId: warehouseLocationId,
+        lines: [{ purchaseLineId: carneLineId, quantity: '5.000', expiresOn: '2027-12-31' }],
+      });
+    expect(over.status).toBe(422);
+    expect((over.body as { code: string }).code).toBe('RECEIPT_EXCEEDS_PENDING');
+
+    const wrongSite = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        locationId: posLocationId,
+        lines: [{ purchaseLineId: carneLineId, quantity: '1.000', expiresOn: '2027-12-31' }],
+      });
+    expect(wrongSite.status).toBe(422);
+    expect((wrongSite.body as { code: string }).code).toBe('LOCATION_NOT_IN_PURCHASE_SITE');
+
+    const noExpiry = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ locationId: warehouseLocationId, lines: [{ purchaseLineId: carneLineId, quantity: '1.000' }] });
+    expect(noExpiry.status).toBe(422);
+
+    const pastExpiry = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        locationId: warehouseLocationId,
+        lines: [{ purchaseLineId: carneLineId, quantity: '1.000', expiresOn: '2020-01-01' }],
+      });
+    expect(pastExpiry.status).toBe(422);
+    expect((pastExpiry.body as { code: string }).code).toBe('EXPIRY_IN_PAST');
+  });
+
+  it('completa la compra y no permite recibir dos veces', async () => {
+    const complete = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        locationId: warehouseLocationId,
+        lines: [
+          { purchaseLineId: carneLineId, quantity: '4.000', expiresOn: '2027-12-31' },
+          { purchaseLineId: fatLineId, quantity: '5.000', expiresOn: '2027-12-31' },
+        ],
+      });
+    expect(complete.status).toBe(201);
+    expect((complete.body as { data: { status: string } }).data.status).toBe('received');
+
+    const again = await admin
+      .post(`/api/v1/purchasing/purchases/${purchaseId}/receipts`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        locationId: warehouseLocationId,
+        lines: [{ purchaseLineId: carneLineId, quantity: '1.000', expiresOn: '2027-12-31' }],
+      });
+    expect(again.status).toBe(409);
+    expect((again.body as { code: string }).code).toBe('PURCHASE_ALREADY_RECEIVED');
+  });
+
+  it('un usuario con alcance SITE no ve compras de otra sede', async () => {
+    const posPurchase = await admin
+      .post('/api/v1/purchasing/purchases')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        supplierId,
+        siteId: posSiteId,
+        lines: [{ rawMaterialId: wineMaterialId, quantity: '1.000', unitCost: '1000.0000' }],
+      });
+    expect(posPurchase.status).toBe(201);
+    const posPurchaseId = (posPurchase.body as { data: { id: string } }).data.id;
+
+    const roleId = await ensureRole('COMP_TEST_SITE', ['comp.purchase.read'], 'SITE');
+    const suffix = randomUUID().slice(0, 8);
+    const userId = await createUser(`comp-site-${suffix}@test.example`, roleId);
+    await db.insert(userSites).values({ userId, siteId: warehouseSiteId });
+    const agent = await signIn(`comp-site-${suffix}@test.example`);
+
+    const list = await agent.get('/api/v1/purchasing/purchases?limit=100');
+    expect(list.status).toBe(200);
+    const ids = (list.body as { data: { id: string }[] }).data.map((purchase) => purchase.id);
+    expect(ids).toContain(purchaseId);
+    expect(ids).not.toContain(posPurchaseId);
+    expect((await agent.get(`/api/v1/purchasing/purchases/${posPurchaseId}`)).status).toBe(404);
   });
 });
