@@ -23,7 +23,9 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
   - `33428b4` — implementación 2a (catálogo, precios, materias primas).
   - `4e9d495` — interruptor de desarrollo para la exigencia de MFA.
   - `80f58ed` — orígenes 5173/3000 aceptados en desarrollo.
-- Entorno local recreado, migraciones `0000`–`0005` aplicadas y semilla demo cargada.
+  - `1ad7041` — rediseño visual v1.1 (DEC-093), App Shell y kit de componentes.
+  - `2d95eab` — especificación de existencias, kardex y trazabilidad (2b).
+- Entorno local recreado, migraciones `0000`–`0005` aplicadas y semilla demo cargada; la 2b en curso agrega `0006`–`0007`.
 
 ### Entrega 2a (hecha)
 
@@ -33,13 +35,20 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Semilla: Chorizo Santarrosano, Rellena Mixta, Picada Quatreros XL, cuatro materias primas y un precio histórico.
 - Verificación: 59 unitarias, 41 integración (incluida concurrencia en PostgreSQL 17), 32 E2E con axe.
 
-### Siguiente: 2b (lotes, existencias y kardex)
+### Entrega 2b (hecha)
 
-- Especificación escrita y pendiente de aprobación: `docs/04-specifications/inv/existencias.md`.
-- RF-110 (existencias), RF-111 (kardex, aprobado por DEC-089) y RF-118 (trazabilidad).
-- Implementar `InventoryUsage` (hoy devuelve `false`) contra `stock_balances` y `stock_movements`.
-- Sembrar existencias con movimientos `opening_balance`, nunca insertando saldos.
-- Después, 2c: FEFO y traslados (RF-112–114), tarjeta "Alertas FEFO" del Command Center.
+- Esquema `inventory`: lotes, kardex inmutable (trigger append-only), saldos con `CHECK >= 0` y `lot_inputs`.
+- `recordMovement` es la única vía de cambio de saldo; la semilla usa `opening_balance` y fechas relativas a hoy.
+- `InventoryUsage` real conectado al catálogo; API de existencias, disponibilidad, lotes, kardex, trazabilidad y resumen.
+- Pantallas en **04. Producción → Existencias y traslados**, con pestañas Existencias/Lotes/Kardex y ficha de lote.
+- Verificación: 71 unitarias, 55 integración (PGlite y PostgreSQL 17 real) y 47 E2E con axe.
+
+### Siguiente: 2c (FEFO y traslados)
+
+- RF-112 (asignación FEFO), RF-113 (excepción con aprobación) y RF-114 (traslado con tránsito y recepción).
+- Especificación pendiente: `docs/04-specifications/inv/fefo-traslados.md`.
+- Implementar `allocateFefo()` con bloqueo determinista, `transfer()`/`receive()` y la tarjeta "Alertas FEFO" del Command Center.
+- RF-117 (bloqueo de lotes) sigue PROPOSED/P-05: no implementar.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
 
@@ -129,9 +138,9 @@ docs/                  descubrimiento, requerimientos, arquitectura, specs, dise
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-Hay un **rediseño de la interfaz** sin commitear en `apps/web`: `styles.css`, `main.tsx`, `AppHeader`, `AppSidebar`, `CommandPalette`, `theme.tsx` y varios componentes nuevos de `shared/ui`. No forma parte de los commits de la entrega 2a. No lo sobrescribas ni lo mezcles en un commit sin que el responsable lo pida.
+El **rediseño v1.1 ya está commiteado** (`1ad7041`). Sobre esa base hay 2b en curso **sin commitear**: `modules/inventory`, migraciones `0006`–`0007`, `features/existencias`, cambios en `modules.ts`, `ErpShell` y `ProductionPage`. No mezcles ese trabajo con cambios de presentación ni lo deshagas.
 
-El commit `33428b4` usa versiones mínimas de `modules.ts` y `form.tsx` sobre la base anterior; el árbol de trabajo conserva el rediseño. Si se consolidan ambos, hay que adaptar las pantallas de catálogo a los componentes nuevos.
+El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
 ## 8. Reglas para el próximo agente
 
@@ -145,4 +154,4 @@ El commit `33428b4` usa versiones mínimas de `modules.ts` y `form.tsx` sobre la
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado. Especificación 2b escrita, pendiente de aprobación.
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada; sigue 2c. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`).

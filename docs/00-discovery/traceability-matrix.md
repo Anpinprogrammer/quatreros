@@ -99,7 +99,7 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091 | P-06 (apertura), P-09 (descuentos)              | 🟨                                           |
 | Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080          | Impuestos en compras P-02                       | 🟨                                           |
 | Receta → orden de producción → lote                      | DEC-010..013, DEC-092              | P-03 (solo costeo)                              | 🟨 (entrega 4)                               |
-| Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089 | P-05 (vencidos)                                 | ✅                                           |
+| Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089 | P-05 (vencidos)                                 | 🟨 (2b listo; 2c pendiente)                  |
 | Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                       | Q-COM-04                                        | 🟨                                           |
 | Recaudo y liquidación de distribuidor                    | DEC-027                            | **P-08**                                        | 🟨                                           |
 | Crédito, cartera, abonos                                 | DEC-021, DEC-022                   | Q-COM-04                                        | 🟨                                           |
@@ -121,7 +121,7 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | CAT      | BR-020–025             | RF-030–033             | RF-030–032 implementados (entrega 2a); RF-033 → entrega 4 (DEC-092); BR-024 (Q-COM-03)              |
 | COMP     | BR-040–044             | RF-050–053             | BR-044 (P-02)                                                                                       |
 | PROD     | BR-060–068             | RF-080–084             | BR-067 (Q-PRO-03), BR-068 (P-03)                                                                    |
-| INV      | BR-080–093             | RF-110–119             | BR-087/RF-119 (P-05), BR-090/RF-116 (P-06)                                                          |
+| INV      | BR-080–093             | RF-110–119             | RF-110/111/118 implementados (2b); RF-112–114 → 2c; RF-116/RF-119 bloqueados (P-06/P-05)            |
 | COM      | BR-110–114             | RF-150–153             | BR-113/114, RF-153 (P-09)                                                                           |
 | DIS      | BR-120–128             | RF-180–186             | BR-127/RF-186 (P-08), BR-128 (Q-DIS-02)                                                             |
 | POS      | BR-140–150             | RF-220–227             | BR-149/RF-227 (P-07), BR-150 (P-02)                                                                 |

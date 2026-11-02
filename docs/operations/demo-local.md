@@ -70,6 +70,17 @@ Si vas a repetir ingresos durante las pruebas, agrega también `AUTH_RATE_LIMIT_
 
 En desarrollo se aceptan como origen tanto `http://localhost:5173` (Vite, con recarga en caliente) como `http://localhost:3000` (app compilada servida por la API). Usa 5173 para ver los cambios al instante.
 
+## 4.3 Existencias, lotes y kardex (entrega 2b, ~4 minutos)
+
+La semilla crea 8 lotes y 12 saldos con movimientos `opening_balance`; las fechas son relativas al día de la carga.
+
+1. **Compras o Producción**: pestaña _04. Producción_ → _Existencias y traslados_.
+2. **Resumen**: productos con saldo, materias primas, lotes por vencer en 7 días y lotes vencidos.
+3. **Existencias**: tabla por producto, presentación, lote y ubicación. Filtra por "Principal" o por estado; abre el lote `PT-2026-0001` desde su código.
+4. **Ficha de lote**: saldo total en unidad base (360 unidades entre Unidad y Paquete x10), saldos por ubicación y últimos movimientos.
+5. **Kardex**: pestaña _Kardex_; verifica la carga inicial, el usuario y el documento de origen. Filtra por tipo o rango de fechas.
+6. **Trazabilidad**: entra como `produccion@` y abre el lote; verás las secciones "Hacia atrás" y "Hacia adelante" con los vacíos que activan las entregas 3, 4 y 5. Como `compras@` no se consulta trazabilidad, pero sí existencias y kardex.
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

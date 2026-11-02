@@ -4,3 +4,4 @@
  */
 export { getProduct, listProducts, listRawMaterials } from './catalog.js';
 export type { CatalogDeps } from './catalog.js';
+export type { InventoryUsage } from './ports.js';

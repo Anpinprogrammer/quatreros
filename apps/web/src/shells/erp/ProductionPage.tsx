@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { useProducts } from '../../features/catalogo/api';
+import { useInventorySummary } from '../../features/existencias/api';
 import { formatMoney } from '../../features/catalogo/format';
 import { hasPermission } from '../../shared/auth/session';
 import { SECTIONS } from '../../shared/modules';
@@ -34,7 +35,9 @@ const section = SECTIONS.find((s) => s.id === 'produccion');
 export function ProductionPage({ me }: { me: MeResponse }) {
   useDocumentTitle('Producción');
   const canCatalog = hasPermission(me, 'cat.product.read');
+  const canInventory = hasPermission(me, 'inv.stock.read');
   const products = useProducts({ status: 'active' }, { enabled: canCatalog });
+  const inventory = useInventorySummary({ enabled: canInventory });
   const list = products.data?.data ?? [];
   const activeCount = products.data
     ? `${String(list.length)}${products.data.page.nextCursor ? '+' : ''}`
@@ -99,14 +102,18 @@ export function ProductionPage({ me }: { me: MeResponse }) {
           />
           <StatCard
             label="Lotes próximos a vencer"
-            value="—"
-            hint="Se activa con existencias (entrega 2b)"
+            value={inventory.data ? String(inventory.data.lotsNearExpiry) : '—'}
+            hint={canInventory ? 'Vencen en los próximos 7 días' : 'Requiere permiso de existencias'}
+            tone={inventory.data && inventory.data.lotsNearExpiry > 0 ? 'warning' : 'neutral'}
             icon={<CalendarClock className="size-4" />}
           />
           <StatCard
-            label="Existencias críticas"
-            value="—"
-            hint="Se activa con existencias (entrega 2b)"
+            label="Lotes vencidos"
+            value={inventory.data ? String(inventory.data.expiredLots) : '—'}
+            hint={
+              canInventory ? 'Excluidos de disponible; retiro según P-05' : 'Requiere permiso de existencias'
+            }
+            tone={inventory.data && inventory.data.expiredLots > 0 ? 'warning' : 'neutral'}
             icon={<TriangleAlert className="size-4" />}
           />
         </div>

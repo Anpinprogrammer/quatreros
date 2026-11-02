@@ -184,7 +184,6 @@ export const ROLES: RoleDefinition[] = [
         'prod.suggestion.read',
         'inv.stock.read',
         'inv.count.create',
-        'inv.traceability.read',
         'rep.operational.read',
       ]),
     },

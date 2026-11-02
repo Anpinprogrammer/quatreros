@@ -1,8 +1,10 @@
 import type { Router } from 'express';
 import type { AppDeps } from '../app.js';
 import { adminRouter } from './admin/http/router.js';
-import { noInventoryUsage, type InventoryUsage } from './catalog/application/ports.js';
+import type { InventoryUsage } from './catalog/application/ports.js';
 import { catalogRouter } from './catalog/http/router.js';
+import { inventoryRouter } from './inventory/http/router.js';
+import { SqlInventoryUsage } from './inventory/infrastructure/repository.js';
 
 /**
  * Registro de módulos verticales (ADR-001, module-boundaries.md).
@@ -21,11 +23,13 @@ export interface ModuleOverrides {
 export function registerModules(api: Router, deps: AppDeps, overrides: ModuleOverrides = {}): void {
   if (!deps.db || !deps.provisioner) return;
   api.use(adminRouter({ db: deps.db, provisioner: deps.provisioner, idempotency: deps.idempotency }));
+  const inventoryUsage = overrides.inventoryUsage ?? new SqlInventoryUsage(deps.db);
   api.use(
     catalogRouter({
       db: deps.db,
       idempotency: deps.idempotency,
-      inventoryUsage: overrides.inventoryUsage ?? noInventoryUsage,
+      inventoryUsage,
     }),
   );
+  api.use(inventoryRouter({ db: deps.db }));
 }

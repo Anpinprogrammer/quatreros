@@ -120,9 +120,11 @@ export const SECTIONS: Section[] = [
       {
         id: 'existencias',
         name: 'Existencias y traslados',
-        description: 'Lotes, vencimientos, FEFO y trazabilidad',
-        status: soon(2),
+        description: 'Lotes, vencimientos, kardex y trazabilidad',
+        status: { kind: 'available' },
         icon: 'boxes',
+        path: '/erp/existencias',
+        permission: 'inv.stock.read',
       },
       {
         id: 'paquetes',

@@ -6,3 +6,4 @@ export * from './auth.js';
 export * from './platform.js';
 export * from '../../../modules/admin/infrastructure/schema.js';
 export * from '../../../modules/catalog/infrastructure/schema.js';
+export * from '../../../modules/inventory/infrastructure/schema.js';

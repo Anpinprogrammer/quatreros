@@ -1,9 +1,9 @@
 # Especificación — Entrega 2b: lotes, existencias y kardex
 
-> Estado: **BORRADOR para revisión del responsable** · 2026-11-02
+> Estado: **APROBADA E IMPLEMENTADA** · 2026-11-02
 > Cubre RF-110, RF-111 y RF-118. Decisiones aplicables: DEC-P21, ADR-009, DEC-089, DEC-090.
 > Reglas `PROVISIONAL` (DEC-083): Q-B-08 (sin existencias negativas) y la definición de disponible de BR-085.
-> La implementación no empieza hasta que esta especificación esté aprobada.
+> Aprobada por el responsable al autorizar la construcción de la entrega 2b.
 
 ## 1. Objetivo y alcance
 
@@ -159,8 +159,9 @@ Prefijo `/api/v1`. Lecturas con `inv.stock.read`, salvo trazabilidad que exige `
 - El kardex se ordena por `created_at DESC, id DESC` (más reciente primero).
 - La trazabilidad devuelve `{ lot, backward: { inputs, supplier }, forward: { dispatches, sales }, pending: [...] }`; los bloques sin datos traen `pending` con la entrega que los activa.
 - En 2b no hay escrituras de inventario: la semilla es la única fuente de movimientos.
+- Cada movimiento incluye `baseUnit` para mostrar la cantidad base sin ambigüedad de presentación.
 
-**Permisos efectivos:** `inv.stock.read` lo tienen ADM, MGR, COMP, PROD, CAJ (su POS), CONT y DIST (su carga). `inv.traceability.read` lo tienen ADM, MGR, PROD y CONT.
+**Permisos efectivos:** `inv.stock.read` lo tienen ADM, MGR, COMP, PROD, CAJ (su POS), CONT y DIST (su carga). `inv.traceability.read` lo tienen ADM, MGR, PROD y CONT; el Comprador consulta existencias y kardex, pero no trazabilidad.
 
 ## 5. Pantallas
 
@@ -257,7 +258,7 @@ Escenario: carga inicial idempotente
 
 ## 9. Datos de demostración
 
-Fechas relativas al 2026-11-02. Todos los costos quedan `NULL` (P-03).
+Fechas ilustrativas al 2026-11-02, calculadas por la semilla de forma relativa al día de la carga (`businessToday()`), para que el demo no envejezca. Todos los costos quedan `NULL` (P-03).
 
 | Lote         | Ítem                 | Tipo | Ubicación        | Fabricado  | Vence      | Saldos                      |
 | ------------ | -------------------- | ---- | ---------------- | ---------- | ---------- | --------------------------- |
@@ -286,7 +287,11 @@ Cada saldo nace de un movimiento `opening_balance` positivo con `source_type = '
 - `pnpm check`, integración con PGlite y PostgreSQL real, build y E2E en verde.
 - `PROJECT-STATUS.md`, roadmap, matriz de trazabilidad, `demo-local.md`, `HANDOFF.md` y `MEMORY.md` actualizados.
 
-## 11. Decisiones y huecos que necesitan respuesta
+**Verificación al cierre (2026-11-02):** 71 pruebas unitarias; 55 de integración (PGlite y PostgreSQL 17 real, incluida concurrencia de precios); 47 E2E con axe en escritorio, tableta y móvil; `pnpm check`, build y migraciones 0006/0007 desde una base vacía.
+
+## 11. Decisiones aprobadas al iniciar la implementación
+
+Aprobadas por el responsable el 2026-11-02 al autorizar la construcción.
 
 1. **Disponible (BR-085, PROPOSED):** en 2b se calcula como saldos de lotes `available` no vencidos. No hay reservas todavía. ¿Se aprueba así para el prototipo?
 2. **Lotes vencidos (BR-086, PROPOSED / P-05):** se muestran y se excluyen de disponible, pero no se descartan ni se ejecuta retiro. ¿Correcto?

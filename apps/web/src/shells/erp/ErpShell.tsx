@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { CatalogPage } from '../../features/catalogo/CatalogPage';
 import { ProductPage } from '../../features/catalogo/ProductPage';
+import { ExistenciasPage } from '../../features/existencias/ExistenciasPage';
+import { LotePage } from '../../features/existencias/LotePage';
 import { UsersPage } from '../../features/usuarios/UsersPage';
 import { hasPermission } from '../../shared/auth/session';
 import { EmptyState } from '../../shared/ui/EmptyState';
@@ -89,6 +91,12 @@ export function ErpShell({ me }: { me: MeResponse }) {
               ) : null}
               {hasPermission(me, 'cat.product.read') ? (
                 <Route path="catalogo/productos/:id" element={<ProductPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'inv.stock.read') ? (
+                <Route path="existencias" element={<ExistenciasPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'inv.stock.read') ? (
+                <Route path="existencias/lotes/:id" element={<LotePage me={me} />} />
               ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>

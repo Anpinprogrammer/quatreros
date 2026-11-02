@@ -251,6 +251,10 @@ export async function updateProduct(
 ): Promise<ProductView> {
   authorize(ctx, 'cat.product.manage');
   const input = UpdateProductRequest.parse(raw);
+  // La consulta de uso se hace fuera de la transacción: en PGlite hay una sola sesión y
+  // abrir otra conexión dentro de la transacción produce un bloqueo.
+  const productHasUsage =
+    input.baseUnit !== undefined ? await deps.inventoryUsage.hasStockOrMovementsForProduct(id) : false;
 
   await deps.db.transaction(async (tx) => {
     const before = await lockProductRow(tx, id);
@@ -258,7 +262,7 @@ export async function updateProduct(
     if (expectedVersion !== undefined && expectedVersion !== before.version) throw precondition();
 
     if (input.baseUnit !== undefined && input.baseUnit !== before.baseUnit) {
-      if (!canChangeUnit(await deps.inventoryUsage.hasStockOrMovementsForProduct(id))) throw unitLocked();
+      if (!canChangeUnit(productHasUsage)) throw unitLocked();
     }
 
     const nextShelfLife = input.shelfLifeDays !== undefined ? input.shelfLifeDays : before.shelfLifeDays;
@@ -354,6 +358,8 @@ export async function updatePresentation(
 ): Promise<PresentationView> {
   authorize(ctx, 'cat.product.manage');
   const input = UpdatePresentationRequest.parse(raw);
+  const presentationHasUsage =
+    input.unitsPer !== undefined ? await deps.inventoryUsage.hasStockOrMovementsForPresentation(id) : false;
 
   await deps.db.transaction(async (tx) => {
     const before = await lockPresentationWithProduct(tx, id);
@@ -361,8 +367,7 @@ export async function updatePresentation(
     if (expectedVersion !== undefined && expectedVersion !== before.version) throw precondition();
 
     if (input.unitsPer !== undefined && input.unitsPer !== before.unitsPer) {
-      if (!canChangeComposition(await deps.inventoryUsage.hasStockOrMovementsForPresentation(id)))
-        throw presentationLocked();
+      if (!canChangeComposition(presentationHasUsage)) throw presentationLocked();
     }
 
     if (input.name !== undefined && input.name !== before.name) {
@@ -544,6 +549,8 @@ export async function updateRawMaterial(
 ): Promise<RawMaterialView> {
   authorize(ctx, 'cat.raw_material.manage');
   const input = UpdateRawMaterialRequest.parse(raw);
+  const rawMaterialHasUsage =
+    input.unit !== undefined ? await deps.inventoryUsage.hasStockOrMovementsForRawMaterial(id) : false;
 
   const row = await deps.db.transaction(async (tx) => {
     const before = await lockRawMaterialRow(tx, id);
@@ -551,7 +558,7 @@ export async function updateRawMaterial(
     if (expectedVersion !== undefined && expectedVersion !== before.version) throw precondition();
 
     if (input.unit !== undefined && input.unit !== before.unit) {
-      if (!canChangeUnit(await deps.inventoryUsage.hasStockOrMovementsForRawMaterial(id))) throw unitLocked();
+      if (!canChangeUnit(rawMaterialHasUsage)) throw unitLocked();
     }
 
     if (input.name !== undefined && input.name !== before.name) {
