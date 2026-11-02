@@ -44,21 +44,23 @@
 
 Procedimiento: skill `.claude/skills/quatreros-entrega`.
 
+**Estado al 2026-11-02:** entorno local recreado y línea base en verde (`pnpm check`, 26 pruebas de integración). Decisiones DEC-089 (pantalla de kardex), DEC-090 (vida útil fija por producto) y DEC-091 (catálogo dentro de 04. Producción) registradas. Especificación 2a en **borrador para revisión**: `docs/04-specifications/cat/catalogo.md`. Falta aprobarla y decidir si RF-033 va en 2a o se mueve a la entrega 4.
+
 ### RF incluidos y su estado
 
-| RF     | Tema                       | Estado                                    | Ojo con                                                                                                                          |
-| ------ | -------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| RF-030 | Productos y presentaciones | CONFIRMED                                 | Q-PRO-04                                                                                                                         |
-| RF-031 | Materias primas            | CONFIRMED                                 | Empaques como insumo no alimentario: confirmar término en el glosario                                                            |
-| RF-032 | Precios con histórico      | CONFIRMED                                 | Q-COM-03 (efecto en pedidos abiertos)                                                                                            |
-| RF-033 | Recetas con versiones      | CONFIRMED                                 | Q-PRO-01 (subproductos). Puede pasar a la entrega 4 si alarga la 2                                                               |
-| RF-110 | Consulta de existencias    | CONFIRMED                                 | —                                                                                                                                |
-| RF-111 | Kardex                     | PROPOSED                                  | El mecanismo inmutable ya está aprobado (DEC-P21 / ADR-009); la **pantalla** de consulta necesita el visto bueno del responsable |
-| RF-112 | Asignación FEFO            | CONFIRMED                                 | —                                                                                                                                |
-| RF-113 | Excepción FEFO             | CONFIRMED                                 | Q-INV-03; usa aprobaciones (RF-007)                                                                                              |
-| RF-114 | Traslado entre ubicaciones | CONFIRMED · tránsito PROVISIONAL (Q-B-07) | Q-POS-01                                                                                                                         |
-| RF-117 | Bloqueo de lotes           | PROPOSED                                  | Depende de P-05: **no implementar** más allá de lo conceptual                                                                    |
-| RF-118 | Trazabilidad de lote       | CONFIRMED                                 | —                                                                                                                                |
+| RF     | Tema                       | Estado                                    | Ojo con                                                               |
+| ------ | -------------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
+| RF-030 | Productos y presentaciones | CONFIRMED                                 | DEC-090: vida útil fija por producto, editable con permiso            |
+| RF-031 | Materias primas            | CONFIRMED                                 | Empaques como insumo no alimentario: confirmar término en el glosario |
+| RF-032 | Precios con histórico      | CONFIRMED                                 | Q-COM-03 (efecto en pedidos abiertos)                                 |
+| RF-033 | Recetas con versiones      | CONFIRMED                                 | Q-PRO-01 (subproductos). Puede pasar a la entrega 4 si alarga la 2    |
+| RF-110 | Consulta de existencias    | CONFIRMED                                 | —                                                                     |
+| RF-111 | Kardex                     | CONFIRMED (DEC-089)                       | —                                                                     |
+| RF-112 | Asignación FEFO            | CONFIRMED                                 | —                                                                     |
+| RF-113 | Excepción FEFO             | CONFIRMED                                 | Q-INV-03; usa aprobaciones (RF-007)                                   |
+| RF-114 | Traslado entre ubicaciones | CONFIRMED · tránsito PROVISIONAL (Q-B-07) | Q-POS-01                                                              |
+| RF-117 | Bloqueo de lotes           | PROPOSED                                  | Depende de P-05: **no implementar** más allá de lo conceptual         |
+| RF-118 | Trazabilidad de lote       | CONFIRMED                                 | —                                                                     |
 
 **Fuera de la entrega 2 (bloqueado):**
 
@@ -77,7 +79,7 @@ Impleméntalas configurables y señalizadas.
 1. **2a. Catálogo:** RF-030 a RF-032 (y RF-033 si cabe).
    - Especificación en `docs/04-specifications/cat/catalogo.md`.
    - Módulo `modules/catalog`, contratos y semilla demo con productos reales de la empresa según el Documento Maestro: chorizo, rellena, paquete x10…
-   - Pantallas bajo la pestaña "04. Producción" o una sección de catálogo; acordarlo con el sistema de diseño.
+   - Pantallas bajo la pestaña "04. Producción" (DEC-091).
 2. **2b. Lotes, existencias y kardex:** RF-110, RF-111 y RF-118.
    - Especificación en `docs/04-specifications/inv/existencias.md`.
    - Movimientos inmutables y saldos derivados (ADR-009); las cantidades en unidad base (DEC-P22).
