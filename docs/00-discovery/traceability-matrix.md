@@ -93,25 +93,25 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 
 ## 4. Proceso → decisiones → bloqueos (vista por flujo de negocio)
 
-| Flujo de negocio                                         | Decisiones                         | Bloqueos de implementación                      | Disp. global                                 |
-| -------------------------------------------------------- | ---------------------------------- | ----------------------------------------------- | -------------------------------------------- |
-| Gestión de usuarios, roles, sedes, auditoría             | DEC-040..044                       | P-10 (solo matriz final; motor construible)     | 🟨                                           |
-| Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091 | P-06 (apertura), P-09 (descuentos)              | 🟨                                           |
-| Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080, DEC-094 | Impuestos en compras P-02, anulación P-09       | 🟨 (entrega 3 lista; RF-053 pendiente)       |
-| Receta → orden de producción → lote                      | DEC-010..013, DEC-092              | P-03 (solo costeo)                              | 🟨 (entrega 4)                               |
-| Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089 | P-05 (vencidos), RF-113 (aprobaciones)          | 🟨 (2b y 2c listos; RF-113 pendiente)        |
-| Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                       | Q-COM-04                                        | 🟨                                           |
-| Recaudo y liquidación de distribuidor                    | DEC-027                            | **P-08**                                        | 🟨                                           |
-| Crédito, cartera, abonos                                 | DEC-021, DEC-022                   | Q-COM-04                                        | 🟨                                           |
-| POS: turno → venta → pagos mixtos → cierre               | DEC-031..033                       | **P-02** (documento fiscal), P-09 (anulaciones) | 🟨                                           |
-| Cocina: conteos y consumo teórico                        | DEC-034                            | **P-07**                                        | 🟨                                           |
-| Contabilidad — capa (a) motor genérico                   | DEC-050, DEC-081                   | P-04 (plan de cuentas para cargar datos)        | 🟨                                           |
-| Contabilidad — capa (b) reglas de contabilización        | DEC-050, DEC-P09, DEC-081          | **P-01..P-04**                                  | ⛔                                           |
-| Asistente IA (consultas)                                 | DEC-070, DEC-071, DEC-073          | Q-IA-01                                         | ✅                                           |
-| Asistente IA (escrituras)                                | DEC-072, DEC-074                   | **P-10**                                        | 🟨                                           |
-| Quatreros AI: configuración del agente (`quatreros-ai/`) | DEC-087                            | Q-IA-04 (quién aplica y espacio de producción)  | ✅ versionada · ⛔ sin integración funcional |
-| Telegram                                                 | DEC-076..078                       | **P-13**                                        | 🟨                                           |
-| Carga inicial y piloto                                   | DEC-064, DEC-P14                   | P-04, P-16                                      | 🟨                                           |
+| Flujo de negocio                                         | Decisiones                          | Bloqueos de implementación                      | Disp. global                                     |
+| -------------------------------------------------------- | ----------------------------------- | ----------------------------------------------- | ------------------------------------------------ |
+| Gestión de usuarios, roles, sedes, auditoría             | DEC-040..044                        | P-10 (solo matriz final; motor construible)     | 🟨                                               |
+| Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091  | P-06 (apertura), P-09 (descuentos)              | 🟨                                               |
+| Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080, DEC-094  | Impuestos en compras P-02, anulación P-09       | 🟨 (entrega 3 lista; RF-053 pendiente)           |
+| Receta → orden de producción → lote                      | DEC-010..013, DEC-092, DEC-095..097 | P-03 (solo costeo), Q-PRO-03 (sugerencias)      | 🟨 (entrega 4 lista; RF-080 y RF-084 pendientes) |
+| Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089  | P-05 (vencidos), RF-113 (aprobaciones)          | 🟨 (2b y 2c listos; RF-113 pendiente)            |
+| Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                        | Q-COM-04                                        | 🟨                                               |
+| Recaudo y liquidación de distribuidor                    | DEC-027                             | **P-08**                                        | 🟨                                               |
+| Crédito, cartera, abonos                                 | DEC-021, DEC-022                    | Q-COM-04                                        | 🟨                                               |
+| POS: turno → venta → pagos mixtos → cierre               | DEC-031..033                        | **P-02** (documento fiscal), P-09 (anulaciones) | 🟨                                               |
+| Cocina: conteos y consumo teórico                        | DEC-034                             | **P-07**                                        | 🟨                                               |
+| Contabilidad — capa (a) motor genérico                   | DEC-050, DEC-081                    | P-04 (plan de cuentas para cargar datos)        | 🟨                                               |
+| Contabilidad — capa (b) reglas de contabilización        | DEC-050, DEC-P09, DEC-081           | **P-01..P-04**                                  | ⛔                                               |
+| Asistente IA (consultas)                                 | DEC-070, DEC-071, DEC-073           | Q-IA-01                                         | ✅                                               |
+| Asistente IA (escrituras)                                | DEC-072, DEC-074                    | **P-10**                                        | 🟨                                               |
+| Quatreros AI: configuración del agente (`quatreros-ai/`) | DEC-087                             | Q-IA-04 (quién aplica y espacio de producción)  | ✅ versionada · ⛔ sin integración funcional     |
+| Telegram                                                 | DEC-076..078                        | **P-13**                                        | 🟨                                               |
+| Carga inicial y piloto                                   | DEC-064, DEC-P14                    | P-04, P-16                                      | 🟨                                               |
 
 ## 5. Artefactos generados en Etapa B (2026-10-29)
 

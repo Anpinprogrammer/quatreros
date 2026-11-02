@@ -107,6 +107,20 @@ test('ERP: compras y recepción', async ({ page }, info) => {
   await audit(page, info, 'compra-detalle');
 });
 
+test('ERP: producción y recetas', async ({ page }, info) => {
+  await signIn(page, 'produccion@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/produccion');
+  await audit(page, info, 'produccion-ordenes');
+  await page.getByRole('link', { name: 'OP-0001' }).click();
+  await audit(page, info, 'produccion-orden');
+  await page.goto('/erp/produccion');
+  await page.getByRole('tab', { name: 'Recetas' }).click();
+  await audit(page, info, 'produccion-recetas');
+  await page.getByRole('link', { name: 'Abrir receta' }).first().click();
+  await audit(page, info, 'produccion-receta');
+});
+
 test('ERP: trazabilidad de lote', async ({ page }, info) => {
   await signIn(page, 'produccion@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);

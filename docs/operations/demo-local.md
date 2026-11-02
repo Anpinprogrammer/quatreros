@@ -104,6 +104,18 @@ La semilla deja dos proveedores y la compra `C-0001` pendiente: 40 kg de carne d
 6. **Trazabilidad**: abre el lote recibido en _04. Producción_ → _Existencias y traslados_ → _Lotes_; la ficha muestra el origen en la compra y el proveedor.
 7. **Bloqueado**: los impuestos y el desglose fiscal no se capturan (P-02). Una cantidad mayor a la pendiente se rechaza: la confirmación con motivo requiere el motor de aprobaciones (RF-007).
 
+## 4.6 Producción (entrega 4, ~5 minutos)
+
+La semilla deja las recetas de Chorizo Santarrosano y Rellena Mixta, y la orden `OP-0001` planificada para 100 unidades de chorizo. La orden no mueve inventario hasta el consumo.
+
+1. **Productor**: _04. Producción_ → _Órdenes de producción_. Abre `OP-0001`; verás la receta v1, el consumo teórico y la disponibilidad de cada materia prima.
+2. **Recetas**: pestaña _Recetas_ → abre la receta del chorizo. Revisa la versión vigente, sus ingredientes y el historial. Como manager o administrador puedes publicar una versión nueva; las órdenes existentes conservan la anterior.
+3. **Consumo**: en la orden, registra el consumo con los lotes sugeridos por vencimiento. Se descuentan las materias primas y la orden pasa a _En proceso_.
+4. **Cierre**: registra 50 unidades y 5 paquetes ×10. El sistema crea el lote `PT-2026-0005` con fabricación y vencimiento, calcula el rendimiento y lo vincula a los lotes de MP consumidos.
+5. **Rendimiento fuera de tolerancia**: repite con una orden nueva y cierra con 90 unidades. Como el rendimiento se aleja más de 3 puntos del esperado (98 %), el cierre exige un motivo.
+6. **Trazabilidad**: abre el lote PT en _Existencias y traslados_ → _Lotes_; la sección "Hacia atrás" muestra los lotes de materia prima usados.
+7. **Pendiente**: las sugerencias por punto de reorden (RF-080, Q-PRO-03) y la anulación de órdenes (RF-084, P-09) no se implementan. El costo oficial del lote sigue bloqueado (P-03).
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

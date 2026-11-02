@@ -143,6 +143,11 @@ beforeAll(async () => {
     'comp.purchase.read',
     'comp.purchase.create',
     'comp.receipt.create',
+    'prod.recipe.read',
+    'prod.recipe.manage',
+    'prod.order.read',
+    'prod.order.create',
+    'prod.order.execute',
   ]);
   const readerRole = await ensureRole('INV_TEST_READ', ['inv.stock.read']);
 
@@ -805,5 +810,329 @@ describe('compras y recepción (RF-050..052, DEC-094)', () => {
     expect(ids).toContain(purchaseId);
     expect(ids).not.toContain(posPurchaseId);
     expect((await agent.get(`/api/v1/purchasing/purchases/${posPurchaseId}`)).status).toBe(404);
+  });
+});
+
+describe('producción: recetas, consumo y cierre (RF-033, RF-081..083)', () => {
+  let productId = '';
+  let unitPresentationId = '';
+  let packagePresentationId = '';
+  let carneId = '';
+  let tocinoId = '';
+  let warehouseSiteId = '';
+  let posSiteId = '';
+  let recipeId = '';
+  let orderId = '';
+  let carneLotId = '';
+  let carneLocationId = '';
+  let tocinoLotId = '';
+  let tocinoLocationId = '';
+
+  beforeAll(async () => {
+    const refs = await db.execute(sql`
+      select
+        (select id from catalog.products where name = 'Chorizo Santarrosano') as "productId",
+        (select pr.id from catalog.presentations pr join catalog.products p on p.id = pr.product_id
+          where p.name = 'Chorizo Santarrosano' and pr.name = 'Unidad') as "unitPresentationId",
+        (select pr.id from catalog.presentations pr join catalog.products p on p.id = pr.product_id
+          where p.name = 'Chorizo Santarrosano' and pr.name = 'Paquete x10') as "packagePresentationId",
+        (select id from catalog.raw_materials where name = 'Carne de cerdo magra') as "carneId",
+        (select id from catalog.raw_materials where name = 'Tocino y grasa') as "tocinoId",
+        (select id from admin.sites where name = 'Bodega principal') as "warehouseSiteId",
+        (select id from admin.sites where name = 'Punto de asados') as "posSiteId",
+        null::uuid as "unused"
+    `);
+    const ref = refs.rows[0] as {
+      productId: string;
+      unitPresentationId: string;
+      packagePresentationId: string;
+      carneId: string;
+      tocinoId: string;
+      warehouseSiteId: string;
+      posSiteId: string;
+    };
+    productId = ref.productId;
+    unitPresentationId = ref.unitPresentationId;
+    packagePresentationId = ref.packagePresentationId;
+    carneId = ref.carneId;
+    tocinoId = ref.tocinoId;
+    warehouseSiteId = ref.warehouseSiteId;
+    posSiteId = ref.posSiteId;
+  });
+
+  it('publica recetas versionadas y rechaza una segunda receta para el producto', async () => {
+    const created = await admin
+      .post('/api/v1/catalog/recipes')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        productId,
+        baseOutputQty: '100.000',
+        lines: [
+          { rawMaterialId: carneId, quantity: '10.000' },
+          { rawMaterialId: tocinoId, quantity: '3.000' },
+        ],
+      });
+    expect(created.status).toBe(201);
+    const recipe = (
+      created.body as {
+        data: {
+          id: string;
+          currentVersion: { version: number; expectedYieldPct: string; tolerancePct: string };
+        };
+      }
+    ).data;
+    recipeId = recipe.id;
+    expect(recipe.currentVersion.version).toBe(1);
+    expect(recipe.currentVersion.expectedYieldPct).toBe('100.00');
+    expect(recipe.currentVersion.tolerancePct).toBe('3.00');
+
+    const versionTwo = await admin
+      .post(`/api/v1/catalog/recipes/${recipeId}/versions`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        baseOutputQty: '100.000',
+        expectedYieldPct: '98.00',
+        tolerancePct: '3.00',
+        lines: [
+          { rawMaterialId: carneId, quantity: '10.000' },
+          { rawMaterialId: tocinoId, quantity: '3.000' },
+        ],
+      });
+    expect(versionTwo.status).toBe(201);
+    const detail = versionTwo.body as {
+      data: { currentVersion: { version: number }; versions: { version: number; isCurrent: boolean }[] };
+    };
+    expect(detail.data.currentVersion.version).toBe(2);
+    expect(detail.data.versions.map((v) => [v.version, v.isCurrent])).toEqual([
+      [2, true],
+      [1, false],
+    ]);
+
+    const duplicate = await admin
+      .post('/api/v1/catalog/recipes')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        productId,
+        baseOutputQty: '100.000',
+        lines: [{ rawMaterialId: carneId, quantity: '10.000' }],
+      });
+    expect(duplicate.status).toBe(409);
+    expect((duplicate.body as { code: string }).code).toBe('RECIPE_EXISTS');
+  });
+
+  it('previsualiza el consumo y crea la orden con la versión vigente', async () => {
+    const preview = await admin.get(
+      `/api/v1/production/availability?productId=${productId}&siteId=${warehouseSiteId}&plannedQty=100.000`,
+    );
+    expect(preview.status).toBe(200);
+    const data = (
+      preview.body as {
+        data: {
+          recipeVersion: number;
+          theoreticalConsumption: {
+            rawMaterialName: string;
+            theoreticalQuantity: string;
+            sufficient: boolean;
+          }[];
+        };
+      }
+    ).data;
+    expect(data.recipeVersion).toBe(2);
+    const carne = data.theoreticalConsumption.find((line) => line.rawMaterialName === 'Carne de cerdo magra');
+    expect(carne?.theoreticalQuantity).toBe('10.000');
+    expect(carne?.sufficient).toBe(true);
+
+    const created = await admin
+      .post('/api/v1/production/orders')
+      .set('Idempotency-Key', randomUUID())
+      .send({ productId, siteId: warehouseSiteId, plannedQty: '100.000' });
+    expect(created.status).toBe(201);
+    const order = (
+      created.body as {
+        data: {
+          id: string;
+          number: string;
+          status: string;
+          recipeVersion: number;
+          theoreticalConsumption: { rawMaterialName: string; availableQuantity: string }[];
+          availableLots: { lotId: string; code: string; rawMaterialName: string; locationId: string }[];
+        };
+      }
+    ).data;
+    orderId = order.id;
+    expect(order.number).toBe('OP-0001');
+    expect(order.status).toBe('planned');
+    expect(order.recipeVersion).toBe(2);
+
+    const carneLot = order.availableLots.find((lot) => lot.rawMaterialName === 'Carne de cerdo magra');
+    const tocinoLot = order.availableLots.find((lot) => lot.rawMaterialName === 'Tocino y grasa');
+    expect(carneLot).toBeTruthy();
+    expect(tocinoLot).toBeTruthy();
+    carneLotId = carneLot?.lotId ?? '';
+    carneLocationId = carneLot?.locationId ?? '';
+    tocinoLotId = tocinoLot?.lotId ?? '';
+    tocinoLocationId = tocinoLot?.locationId ?? '';
+  });
+
+  it('consume por lote, descuenta existencias y cierra con lote PT', async () => {
+    const consumed = await admin
+      .post(`/api/v1/production/orders/${orderId}/consume`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        lines: [
+          { rawMaterialId: carneId, lotId: carneLotId, locationId: carneLocationId, quantity: '10.000' },
+          { rawMaterialId: tocinoId, lotId: tocinoLotId, locationId: tocinoLocationId, quantity: '3.000' },
+        ],
+      });
+    expect(consumed.status).toBe(200);
+    const afterConsume = (
+      consumed.body as {
+        data: { status: string; consumptions: { actualQuantity: string; theoreticalQuantity: string }[] };
+      }
+    ).data;
+    expect(afterConsume.status).toBe('in_progress');
+    expect(afterConsume.consumptions).toHaveLength(2);
+    expect(afterConsume.consumptions.map((line) => line.theoreticalQuantity).sort()).toEqual([
+      '10.000',
+      '3.000',
+    ]);
+
+    const balances = await db.execute(sql`
+      select l.code, b.quantity from inventory.stock_balances b
+      join inventory.lots l on l.id = b.lot_id
+      where l.id in (${carneLotId}, ${tocinoLotId})
+    `);
+    const balanceMap = new Map(
+      (balances.rows as unknown as { code: string; quantity: string }[]).map((row) => [
+        row.code,
+        row.quantity,
+      ]),
+    );
+    expect(balanceMap.get('MP-2026-0001')).toBe('70.000');
+    expect(balanceMap.get('MP-2026-0002')).toBe('37.000');
+
+    const closed = await admin
+      .post(`/api/v1/production/orders/${orderId}/close`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        outputs: [
+          { presentationId: unitPresentationId, quantity: '50.000' },
+          { presentationId: packagePresentationId, quantity: '5.000' },
+        ],
+      });
+    expect(closed.status).toBe(200);
+    const detail = (
+      closed.body as {
+        data: {
+          status: string;
+          actualQty: string;
+          yieldPct: string;
+          outputLotCode: string;
+          outputLotId: string;
+        };
+      }
+    ).data;
+    expect(detail.status).toBe('closed');
+    expect(detail.actualQty).toBe('100.000');
+    expect(detail.yieldPct).toBe('100.00');
+    expect(detail.outputLotCode).toMatch(/^PT-\d{4}-\d{4}$/);
+
+    const lot = await db.execute(sql`
+      select manufactured_on as "manufacturedOn", expires_on as "expiresOn", unit_cost as "unitCost"
+      from inventory.lots where id = ${detail.outputLotId}
+    `);
+    const lotRow = lot.rows[0] as { manufacturedOn: string; expiresOn: string; unitCost: string | null };
+    expect(lotRow.unitCost).toBeNull();
+    expect(lotRow.expiresOn).toBeTruthy();
+
+    const outputBalances = await db.execute(sql`
+      select pr.name, b.quantity from inventory.stock_balances b
+      join catalog.presentations pr on pr.id = b.presentation_id
+      where b.lot_id = ${detail.outputLotId}
+      order by pr.name
+    `);
+    expect(outputBalances.rows).toEqual([
+      { name: 'Paquete x10', quantity: '5.000' },
+      { name: 'Unidad', quantity: '50.000' },
+    ]);
+
+    const inputs = await db.execute(sql`
+      select count(*)::int as total from inventory.lot_inputs where output_lot_id = ${detail.outputLotId}
+    `);
+    expect((inputs.rows[0] as { total: number }).total).toBe(2);
+
+    const again = await admin
+      .post(`/api/v1/production/orders/${orderId}/close`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ outputs: [{ presentationId: unitPresentationId, quantity: '1.000' }] });
+    expect(again.status).toBe(409);
+  });
+
+  it('exige motivo cuando el rendimiento sale de tolerancia y no cierra sin consumo', async () => {
+    const created = await admin
+      .post('/api/v1/production/orders')
+      .set('Idempotency-Key', randomUUID())
+      .send({ productId, siteId: warehouseSiteId, plannedQty: '100.000' });
+    expect(created.status).toBe(201);
+    const secondOrderId = (created.body as { data: { id: string } }).data.id;
+
+    const noConsumption = await admin
+      .post(`/api/v1/production/orders/${secondOrderId}/close`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ outputs: [{ presentationId: unitPresentationId, quantity: '90.000' }] });
+    expect(noConsumption.status).toBe(409);
+    expect((noConsumption.body as { code: string }).code).toBe('CONSUMPTION_REQUIRED');
+
+    const consumed = await admin
+      .post(`/api/v1/production/orders/${secondOrderId}/consume`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        lines: [
+          { rawMaterialId: carneId, lotId: carneLotId, locationId: carneLocationId, quantity: '10.000' },
+          { rawMaterialId: tocinoId, lotId: tocinoLotId, locationId: tocinoLocationId, quantity: '3.000' },
+        ],
+      });
+    expect(consumed.status).toBe(200);
+
+    const withoutNote = await admin
+      .post(`/api/v1/production/orders/${secondOrderId}/close`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ outputs: [{ presentationId: unitPresentationId, quantity: '90.000' }] });
+    expect(withoutNote.status).toBe(422);
+    expect((withoutNote.body as { code: string }).code).toBe('YIELD_NOTE_REQUIRED');
+
+    const withNote = await admin
+      .post(`/api/v1/production/orders/${secondOrderId}/close`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        outputs: [{ presentationId: unitPresentationId, quantity: '90.000' }],
+        yieldNote: 'Ajuste de humedad en la mezcla',
+      });
+    expect(withNote.status).toBe(200);
+    expect((withNote.body as { data: { yieldNote: string } }).data.yieldNote).toBe(
+      'Ajuste de humedad en la mezcla',
+    );
+  });
+
+  it('un usuario con alcance SITE no ve órdenes de otra sede', async () => {
+    const posOrder = await admin
+      .post('/api/v1/production/orders')
+      .set('Idempotency-Key', randomUUID())
+      .send({ productId, siteId: posSiteId, plannedQty: '10.000' });
+    expect(posOrder.status).toBe(201);
+    const posOrderId = (posOrder.body as { data: { id: string } }).data.id;
+
+    const roleId = await ensureRole('PROD_TEST_SITE', ['prod.order.read'], 'SITE');
+    const suffix = randomUUID().slice(0, 8);
+    const userId = await createUser(`prod-site-${suffix}@test.example`, roleId);
+    await db.insert(userSites).values({ userId, siteId: warehouseSiteId });
+    const agent = await signIn(`prod-site-${suffix}@test.example`);
+
+    const list = await agent.get('/api/v1/production/orders?limit=100');
+    expect(list.status).toBe(200);
+    const ids = (list.body as { data: { id: string }[] }).data.map((order) => order.id);
+    expect(ids).toContain(orderId);
+    expect(ids).not.toContain(posOrderId);
+    expect((await agent.get(`/api/v1/production/orders/${posOrderId}`)).status).toBe(404);
   });
 });

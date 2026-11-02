@@ -99,7 +99,7 @@ export function SelectField({ label, error, hint, options, className = '', ...pr
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
         {...props}
-        className={`min-h-12 rounded-xl border bg-surface px-3 text-base text-ink transition-colors duration-200 hover:border-ink-3 focus:border-brand sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
+        className={`min-h-12 w-full min-w-0 rounded-xl border bg-surface px-3 text-base text-ink transition-colors duration-200 hover:border-ink-3 focus:border-brand sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

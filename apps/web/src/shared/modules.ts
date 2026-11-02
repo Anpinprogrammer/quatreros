@@ -114,8 +114,10 @@ export const SECTIONS: Section[] = [
         id: 'ordenes',
         name: 'Órdenes de producción',
         description: 'Recetas, consumo real por lote y rendimiento',
-        status: soon(4),
+        status: { kind: 'available' },
         icon: 'factory',
+        path: '/erp/produccion',
+        permission: 'prod.order.read',
       },
       {
         id: 'existencias',

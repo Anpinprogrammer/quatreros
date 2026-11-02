@@ -14,6 +14,7 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 | **Entrega 1**: ingreso, usuarios, roles y sedes                  | ✅ Terminada                                                  |
 | **Entrega 2**: catálogo e inventario                             | ✅ Terminada: 2a catálogo, 2b existencias y 2c FEFO/traslados |
 | **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción   |
+| **Entrega 4**: producción                                        | ✅ Terminada: recetas, consumo por lote y lote PT             |
 | Entrega 8: Quatreros AI                                          | Configurada, sin integración funcional                        |
 
 ## 2. Dónde estamos (2026-11-02)
@@ -29,7 +30,8 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
   - `077a6ca` — implementación 2b (lotes, existencias, kardex y trazabilidad).
   - `3363038` — isotipo oficial en la marca y el ingreso.
   - `38d7094` — FEFO y traslados con tránsito (entrega 2c).
-- Entorno local recreado, migraciones `0000`–`0012` aplicadas y semilla demo cargada (incluye el traslado `T-0001` y la compra `C-0001`).
+  - `6961043` — compras, proveedores y recepción con lote MP (entrega 3).
+- Entorno local recreado, migraciones `0000`–`0016` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001` y `OP-0001`).
 
 ### Entrega 2a (hecha)
 
@@ -68,13 +70,26 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Migraciones `0010`–`0012`; **DEC-094** aprueba la recepción parcial y el lote MP por recepción como `PROVISIONAL`.
 - Verificación: 76 unitarias, 66 integración (PGlite y PostgreSQL 17 real) y 52 E2E con axe.
 
-### Siguiente: entrega 4 (producción)
+### Entrega 4 (hecha)
 
-- RF-033 recetas y versiones (movido por DEC-092), RF-081 orden, RF-082 consumo real y RF-083 cierre con lote PT y rendimiento.
-- RF-080 sugerencias depende de puntos de reorden (Q-PRO-03); no inventar umbrales.
-- RF-084 anulación queda PROPOSED hasta que exista aprobación (RF-007/P-09).
-- La especificación `docs/04-specifications/prod/produccion.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
-- RF-117 (bloqueo de lotes) sigue PROPOSED/P-05: no implementar.
+- Recetas de producción versionadas por producto fabricado; la orden congela la versión vigente (DEC-095).
+- Orden planificada con consumo teórico y disponibilidad; advierte si falta MP, pero no bloquea crearla.
+- Consumo real por lote con sugerencia FEFO; descuenta existencias y registra teórico/real.
+- Cierre por presentación: lote `PT-AAAA-####` con fabricación/vencimiento, movimientos `production_output`, rendimiento y motivo fuera de tolerancia (DEC-096).
+- Trazabilidad N:M en `inventory.lot_inputs` (DEC-097).
+- Pantallas **04. Producción → Órdenes de producción** y **Recetas**.
+- Semilla: dos recetas y `OP-0001` planificada para 100 unidades de chorizo.
+- Migraciones `0013`–`0016`.
+- Verificación: 80 unitarias, 71 integración (PGlite y PostgreSQL 17 real) y 56 E2E con axe.
+- **RF-080 (sugerencias) pendiente de Q-PRO-03; RF-084 (anulación) de P-09; costo del lote BLOCKED (P-03).**
+
+### Siguiente: entrega 5 (pedidos y reparto)
+
+- RF-150 clientes, RF-151 pedido con precio/reserva, RF-152 seguimiento.
+- RF-180/181 despacho con FEFO y "en ruta", RF-182 portal móvil, RF-183 entrega parcial, RF-184 recaudo, RF-185 devolución a inspección.
+- RF-260/261 crédito y cupo; resolver reglas PROPOSED de crédito/reserva/entrega parcial.
+- RF-153 (cancelación/descuentos) queda PENDING P-09; RF-186 (liquidación) PENDING P-08.
+- La especificación `docs/04-specifications/com/pedidos-reparto.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
 
@@ -164,7 +179,7 @@ docs/                  descubrimiento, requerimientos, arquitectura, specs, dise
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. La entrega 3 se commitea con este cierre; la siguiente tarea es la entrega 4.
+El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. Las entregas 3 y 4 se commitean con este cierre; la siguiente tarea es la entrega 5.
 
 El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
@@ -180,4 +195,4 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada; sigue la entrega 4 (producción).
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada; sigue la entrega 5 (pedidos y reparto).

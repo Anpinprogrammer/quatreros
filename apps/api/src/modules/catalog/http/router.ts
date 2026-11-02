@@ -18,6 +18,7 @@ import {
   updateRawMaterial,
   type CatalogDeps,
 } from '../application/catalog.js';
+import { createRecipe, createRecipeVersion, getRecipe, listRecipes } from '../application/recipes.js';
 
 function id(raw: string | string[] | undefined): string {
   const parsed = Uuid.safeParse(Array.isArray(raw) ? raw[0] : raw);
@@ -83,6 +84,22 @@ export function catalogRouter(deps: CatalogDeps & { idempotency: IdempotencyStor
   router.post('/catalog/presentations/:id/prices', requireIdempotency(deps.idempotency), async (req, res) => {
     const price = await setPrice(deps, req.ctx, id(req.params.id), req.body);
     res.status(201).json({ data: price });
+  });
+
+  router.get('/catalog/recipes', async (req, res) => {
+    res.json(await listRecipes(deps, req.ctx, req.query));
+  });
+
+  router.get('/catalog/recipes/:id', async (req, res) => {
+    res.json({ data: await getRecipe(deps, req.ctx, id(req.params.id)) });
+  });
+
+  router.post('/catalog/recipes', requireIdempotency(deps.idempotency), async (req, res) => {
+    res.status(201).json({ data: await createRecipe(deps, req.ctx, req.body) });
+  });
+
+  router.post('/catalog/recipes/:id/versions', requireIdempotency(deps.idempotency), async (req, res) => {
+    res.status(201).json({ data: await createRecipeVersion(deps, req.ctx, id(req.params.id), req.body) });
   });
 
   router.get('/catalog/raw-materials', async (req, res) => {

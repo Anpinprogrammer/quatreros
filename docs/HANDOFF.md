@@ -12,7 +12,8 @@
 | Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                 |
 | **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                   |
 | **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                       |
-| **Entrega 3**: compras y recepción                                            | **Terminada.** Sigue la entrega 4 (producción)                            |
+| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                            |
+| **Entrega 4**: producción                                                     | **Terminada.** Sigue la entrega 5 (pedidos y reparto)                     |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -71,40 +72,51 @@
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
 
-## 2. Siguiente tarea: entrega 4, producción
+## 2. Siguiente tarea: entrega 5, pedidos y reparto
 
-**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c y 3 terminadas y verificadas. Sigue la 4: recetas, orden de producción, consumo real y lote terminado.
+**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3 y 4 terminadas y verificadas. Sigue la 5: clientes, pedidos, despachos, entregas, recaudos y devoluciones.
 
-### Hecho en 3: compras y recepción
+### Hecho en 4: producción
 
-- Especificación en `docs/04-specifications/comp/compras.md`; DEC-094 aprueba la recepción parcial y el lote MP por recepción como `PROVISIONAL`.
-- Proveedores con identificación única, contacto, edición con `If-Match` e inactivación (nunca borrado).
-- Compras con consecutivo `C-0001`, líneas de materia prima, total calculado sin impuestos y estado pendiente/parcial/recibida.
-- Recepción total o parcial con consecutivo `R-0001`; cada línea crea un lote `MP-AAAA-####` con proveedor, recepción, costo y vencimiento, y un movimiento `receipt` en la misma transacción.
-- Se rechaza recibir más de lo pendiente, recibir en una ubicación de otra sede y vencimientos pasados o faltantes. La confirmación con motivo para sobre-recepción espera RF-007.
-- Pantallas **06. Compras → Compras y recepción** y **Proveedores**; detalle con líneas, recepciones y formulario de recepción.
-- Semilla: dos proveedores y `C-0001` pendiente (40 kg de carne y 20 kg de tocino, total $1.000.000 sin impuestos).
+- Especificación en `docs/04-specifications/prod/produccion.md`; DEC-095/096/097 resuelven recetas versionadas, rendimiento con tolerancia y trazabilidad N:M.
+- Recetas de producción por producto fabricado, versionadas e inmutables; la orden congela la versión vigente al crearse.
+- Orden planificada con consumo teórico y disponibilidad; si falta MP advierte, pero no bloquea crearla.
+- Consumo real por lote, con lotes sugeridos por FEFO; descuenta existencias y registra teórico/real.
+- Cierre por presentación: lote PT `PT-AAAA-####` con fabricación, vencimiento (DEC-090) y movimientos `production_output`.
+- Rendimiento real/esperado y motivo obligatorio fuera de la tolerancia configurable (BR-066, DEC-096).
+- Trazabilidad `inventory.lot_inputs`: lote PT vinculado a todos los lotes de MP (DEC-097).
+- Pantallas **04. Producción → Órdenes de producción** y **Recetas**.
+- Semilla: dos recetas y `OP-0001` planificada para 100 unidades de chorizo.
+- **RF-080 (sugerencias) queda fuera por Q-PRO-03; RF-084 (anulación) por P-09. Costo oficial del lote BLOCKED (P-03).**
 
-### Objetivo demostrable de la entrega 4
+### Objetivo demostrable de la entrega 5
 
-- Recetas con versiones e ingredientes por producto (RF-033, movida desde la entrega 2 por DEC-092).
-- Orden de producción con producto, cantidad, versión de receta, sede y responsable.
-- Consumo real por lote de materia prima, con FEFO sugerido, que descuenta existencias y vincula los lotes.
-- Cierre con lote de producto terminado, fecha de fabricación/vencimiento y rendimiento real frente al esperado.
-- Dejar fuera la anulación de orden (RF-084) hasta que exista su flujo de aprobación.
+- Clientes con datos de entrega y crédito (cupo/plazo) cuando aplique.
+- Pedido con líneas, precio vigente, canal y modalidad de pago; reserva de cantidades al confirmar.
+- Despacho que agrupa pedidos, asigna distribuidor y sales FEFO a la ubicación "En ruta".
+- Portal móvil del distribuidor: despachos, direcciones, entrega total/parcial, recaudo y devolución.
+- Devolución a "En inspección" y su reincorporación/descarte (AP-08 si aplica).
+- Dejar fuera la liquidación del distribuidor (RF-186) y la anulación/descuentos (RF-153) hasta resolver P-08/P-09.
 
-### RF de la entrega 4
+### RF de la entrega 5
 
-| RF     | Tema                                | Estado               | Ojo con                                                 |
-| ------ | ----------------------------------- | -------------------- | ------------------------------------------------------- |
-| RF-033 | Recetas y versiones                 | Movido por DEC-092   | Ingredientes por materia prima; versión vigente         |
-| RF-080 | Sugerencias de producción y compra  | CONFIRMED · Q-PRO-03 | Requiere puntos de reorden; no inventar umbrales        |
-| RF-081 | Creación de orden de producción     | CONFIRMED            | Advertencia si falta MP, pero no bloquea crearla        |
-| RF-082 | Registro de consumo real            | CONFIRMED            | Lote por lote; FEFO sugerido; no permite saldo negativo |
-| RF-083 | Cierre y lote de producto terminado | CONFIRMED            | Rendimiento y motivo si sale de tolerancia (BR-066)     |
-| RF-084 | Anulación de orden                  | PROPOSED             | Requiere aprobación (RF-007/P-09); no implementar       |
+| RF     | Tema                              | Estado                          | Ojo con                                               |
+| ------ | --------------------------------- | ------------------------------- | ----------------------------------------------------- |
+| RF-150 | Gestión de clientes               | CONFIRMED                       | Datos de entrega; inactivar, no borrar                |
+| RF-151 | Registro de pedido                | CONFIRMED                       | Precio vigente; reserva; crédito según BR-171         |
+| RF-152 | Seguimiento de pedidos            | CONFIRMED                       | Estados y pendientes por línea                        |
+| RF-153 | Cancelación y descuentos          | PENDING (P-09)                  | **No implementar** sin decisión                       |
+| RF-180 | Despacho y asignación             | CONFIRMED                       | Agrupa pedidos confirmados con pendiente              |
+| RF-181 | Salida del despacho               | CONFIRMED · en ruta PROVISIONAL | FEFO y ubicación "En ruta" (Q-B-07)                   |
+| RF-182 | Portal móvil del distribuidor     | CONFIRMED                       | Solo sus despachos; una columna en celular            |
+| RF-183 | Entrega total o parcial           | CONFIRMED                       | Parcial deja saldo y motivo; obligación si es crédito |
+| RF-184 | Recaudo en ruta                   | CONFIRMED                       | Métodos y pendiente de conciliación                   |
+| RF-185 | Devolución e inspección           | CONFIRMED                       | En inspección; reincorporar/descartar con AP-08       |
+| RF-186 | Liquidación del distribuidor      | PENDING (P-08)                  | **No implementar** sin decisión                       |
+| RF-260 | Crédito por cliente               | CONFIRMED                       | Cupo y plazo; auditoría                               |
+| RF-261 | Control de cupo y cartera vencida | CONFIRMED                       | Aprobación si excede; no inventar umbrales            |
 
-Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/prod/produccion.md` y esperar aprobación.
+Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/com/pedidos-reparto.md` y esperar aprobación. Resolver en ella las reglas PROPOSED/PENDING de crédito, reservas, entrega parcial y devolución.
 
 En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
 
