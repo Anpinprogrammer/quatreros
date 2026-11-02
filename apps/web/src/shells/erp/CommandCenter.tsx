@@ -175,27 +175,31 @@ function KpiCard({
           : ''
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <span aria-hidden className={`grid size-8 place-items-center rounded-lg ${iconTone}`}>
+      <div className="flex items-start gap-3">
+        <span aria-hidden className={`grid size-8 shrink-0 place-items-center rounded-lg ${iconTone}`}>
           <Icon className="size-4" />
         </span>
-        {to ? (
-          <ArrowUpRight
-            aria-hidden
-            className="size-4 text-ink-3 transition-colors group-hover:text-brand-ink"
-          />
-        ) : null}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-ink-2 uppercase">{label}</p>
+            {to ? (
+              <ArrowUpRight
+                aria-hidden
+                className="size-4 shrink-0 text-ink-3 transition-colors group-hover:text-brand-ink"
+              />
+            ) : null}
+          </div>
+          {loading ? (
+            <>
+              <span aria-hidden className="mt-1.5 block h-7 w-12 animate-pulse rounded-lg bg-surface-3" />
+              <span className="sr-only">Consultando {label}</span>
+            </>
+          ) : (
+            <p className="tabular mt-0.5 font-display text-[1.5rem] leading-7 font-bold text-ink">{value}</p>
+          )}
+          <p className="mt-0.5 text-[11px] leading-4 text-ink-2">{loading ? 'Consultando…' : hint}</p>
+        </div>
       </div>
-      <p className="mt-3 text-[11px] font-semibold tracking-[0.08em] text-ink-2 uppercase">{label}</p>
-      {loading ? (
-        <>
-          <span aria-hidden className="mt-1.5 block h-7 w-12 animate-pulse rounded-lg bg-surface-3" />
-          <span className="sr-only">Consultando {label}</span>
-        </>
-      ) : (
-        <p className="tabular mt-1 font-display text-[1.5rem] leading-7 font-bold text-ink">{value}</p>
-      )}
-      <p className="mt-1 text-[11px] leading-4 text-ink-2">{loading ? 'Consultando…' : hint}</p>
     </Panel>
   );
 
@@ -607,12 +611,7 @@ function BoardTab({ me }: { me: MeResponse }) {
         />
       </section>
 
-      <section aria-labelledby="operacion">
-        <div className="mb-3">
-          <h2 id="operacion" className="font-display text-title font-bold text-ink">
-            Operación
-          </h2>
-        </div>
+      <section aria-label="Operación">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.9fr)]">
           <div className="space-y-3">
             <RecentOrdersCard
@@ -748,7 +747,7 @@ function BoardTab({ me }: { me: MeResponse }) {
                 <h4 id="otras-areas" className="text-body font-semibold text-ink">
                   Otras áreas
                 </h4>
-                <span className="text-[10px] text-ink-3">Módulos pendientes</span>
+                <span className="text-[10px] text-ink-3">Disponibilidad</span>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 <CapabilityTile icon={Wallet} title="Caja POS" status="Sin datos" />
@@ -810,7 +809,6 @@ export function CommandCenter({ me }: { me: MeResponse }) {
     <section aria-labelledby="inicio-titulo" className="space-y-4">
       <PageHeader
         titleId="inicio-titulo"
-        eyebrow={<span>Hola, {firstName}</span>}
         title="Command Center"
         description="Todo lo que sucede en tu negocio, en un solo lugar."
         actions={
@@ -868,7 +866,9 @@ export function CommandCenter({ me }: { me: MeResponse }) {
             );
           })}
         </div>
-        <p className="flex items-center gap-1.5 text-caption text-ink-2">
+        <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-caption text-ink-2">
+          <span>Hola, {firstName}</span>
+          <span aria-hidden>·</span>
           <CalendarDays aria-hidden className="size-3.5 text-brand-ink" />
           <span className="first-letter:uppercase">{today}</span>
           <span aria-hidden>·</span>

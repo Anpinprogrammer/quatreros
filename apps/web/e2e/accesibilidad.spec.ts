@@ -65,6 +65,11 @@ test('ERP: Command Center y secciones', async ({ page }, info) => {
   await page.keyboard.press('ArrowRight');
   await expect(boardTab).toHaveAttribute('aria-selected', 'true');
   await expect(boardTab).toBeFocused();
+  const boardPanel = page.getByRole('tabpanel', { name: 'Tablero del día' });
+  await expect(boardPanel).toBeVisible();
+  await boardPanel.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
   await audit(page, info, 'command-center-tablero');
   await page.goto('/erp/seccion/produccion');
   await audit(page, info, 'seccion-produccion');
@@ -88,7 +93,9 @@ test('ERP: catálogo y ficha de producto', async ({ page }, info) => {
 test('ERP: modo oscuro', async ({ page }, info) => {
   await signIn(page, 'compras@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);
-  await page.getByRole('button', { name: 'Usar modo oscuro' }).click();
+  await page.getByRole('button', { name: /Abrir menú de usuario/ }).click();
+  await page.getByRole('menuitemcheckbox', { name: 'Modo oscuro' }).click();
+  await page.keyboard.press('Escape');
   await audit(page, info, 'command-center-oscuro');
   await page.goto('/erp/seccion/produccion');
   await audit(page, info, 'produccion-oscuro');
@@ -193,4 +200,29 @@ test('ERP: menú de usuario y sedes', async ({ page }, info) => {
     await Promise.all(element.getAnimations().map((animation) => animation.finished));
   });
   await audit(page, info, 'sedes-autorizadas');
+});
+
+test('ERP: Command Center sin scroll vertical en escritorio', async ({ page }, info) => {
+  test.skip(info.project.name !== 'escritorio', 'Se valida en la resolución de escritorio objetivo');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+
+  const fits = async () =>
+    page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight + 1);
+
+  await expect(async () => {
+    expect(await fits()).toBe(true);
+  }).toPass();
+
+  await page.getByRole('tab', { name: 'Tablero del día' }).click();
+  const boardPanel = page.getByRole('tabpanel', { name: 'Tablero del día' });
+  await expect(boardPanel).toBeVisible();
+  await boardPanel.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  await page.waitForLoadState('networkidle');
+  await expect(async () => {
+    expect(await fits()).toBe(true);
+  }).toPass();
 });

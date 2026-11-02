@@ -23,7 +23,7 @@ export async function openSection(page: Page, name: RegExp | string) {
 }
 
 export async function signOut(page: Page) {
-  await page.getByRole('button', { name: /Abrir menú de usuario/ }).click();
+  await page.locator('button[aria-haspopup="menu"]').click();
   await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click();
   await expect(page).toHaveURL(/\/ingresar/);
 }

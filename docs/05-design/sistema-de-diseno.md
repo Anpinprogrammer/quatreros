@@ -292,7 +292,7 @@ La revisión conserva la identidad Ember y el Anexo A, pero cambia la preferenci
 
 **Ingreso.** Dos columnas 52/48 a altura completa: panel de marca luminoso con degradado crema-melocotón, logo oficial, mensaje "Toda tu operación. Un solo lugar." y el personaje como protagonista; formulario sobre superficie clara, ancho máximo 420 px, campos de 52 px con iconos, mostrar/ocultar contraseña dentro del input y botón primario de 52 px. La autenticación, los mensajes y las redirecciones no cambian.
 
-**Command Center.** Primero los indicadores operativos de pedidos, producción e inventario; después la actividad reciente y la atención requerida; los accesos rápidos quedan como sección secundaria. El panel de seguimiento del plan no vive en el dashboard. Las cifras sin fuente muestran un estado vacío explícito.
+**Command Center.** Dos vistas en un segmented control: **Módulos** (accesos compactos en tres columnas) y **Tablero del día** (KPI, operación y atención requerida). El tablero usa un bento compacto, prioriza FEFO y cabe sin scroll en escritorio con los datos de demostración; si el contenido crece, la página desplaza. Las capacidades pendientes (caja, cartera, IA) muestran su estado real. El panel de seguimiento del plan no vive en el dashboard.
 
 **Marca.** El isotipo oficial "Los 4 Treros" se usa completo y sin recolorear (aro naranja, personaje y tipografía propios). La versión de interfaz es un WebP de 256 px con transparencia, para que funcione sobre superficies claras y oscuras; el favicon y el icono de iOS se generan del mismo archivo.
 

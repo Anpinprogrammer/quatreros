@@ -107,13 +107,15 @@ export function UserMenu({
         }}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-labelledby={labelId}
+        {...(!showName ? { 'aria-labelledby': labelId } : {})}
         title={me.user.fullName}
         className={`flex min-h-11 items-center gap-2 rounded-xl px-1.5 transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 ${open ? 'bg-surface-2' : ''}`}
       >
-        <span id={labelId} className="sr-only">
-          Abrir menú de usuario de {me.user.fullName} ({me.roles.map((role) => role.name).join(', ')})
-        </span>
+        {!showName ? (
+          <span id={labelId} className="sr-only">
+            Abrir menú de usuario de {me.user.fullName} ({me.roles.map((role) => role.name).join(', ')})
+          </span>
+        ) : null}
         {!compact && showName ? (
           <span className="text-right">
             <span className="block max-w-32 truncate text-caption font-semibold text-ink">
