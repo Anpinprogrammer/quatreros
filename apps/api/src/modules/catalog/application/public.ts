@@ -5,3 +5,14 @@
 export { getProduct, listProducts, listRawMaterials } from './catalog.js';
 export type { CatalogDeps } from './catalog.js';
 export type { InventoryUsage } from './ports.js';
+export {
+  createRecipe,
+  createRecipeVersion,
+  getRecipe,
+  listRecipes,
+  loadCurrentProductionRecipe,
+  loadProductionRecipeVersion,
+} from './recipes.js';
+export type { ProductionRecipe, RecipeDeps } from './recipes.js';
+export { loadSalePresentation } from './sales.js';
+export type { SalePresentation } from './sales.js';

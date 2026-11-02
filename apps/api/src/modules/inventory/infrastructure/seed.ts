@@ -2,7 +2,7 @@ import { eq, sql } from 'drizzle-orm';
 import type { Database } from '../../../platform/db/client.js';
 import { baseQuantityFor, businessToday } from '../domain/inventory.js';
 import { recordMovement } from '../application/movements.js';
-import { lots } from './schema.js';
+import { lots, transferLines, transfers } from './schema.js';
 
 /**
  * Carga inicial de demostración (especificación inv/existencias §9).
@@ -305,5 +305,131 @@ export async function seedDemoInventory(db: Database, setByUserId: string): Prom
         });
       }
     }
+  });
+}
+
+/**
+ * Traslado de demostración ya recibido (T-0001): 2 paquetes de PT-2026-0001 de Bodega
+ * a Productos del punto. Deja la pantalla de traslados con un caso real e idempotente.
+ */
+export async function seedDemoTransfer(db: Database, setByUserId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select({ id: transfers.id })
+      .from(transfers)
+      .where(eq(transfers.number, 'T-0001'))
+      .limit(1);
+    if (existing) return;
+
+    const refResult = await tx.execute(sql`
+      select l.id as "lotId", pr.id as "presentationId", pr.units_per as "unitsPer",
+             fl.id as "fromId", tl.id as "toId", tr.id as "transitId"
+      from inventory.lots l
+      join catalog.products p on p.id = l.product_id
+      join catalog.presentations pr on pr.product_id = p.id and pr.name = 'Paquete x10'
+      join admin.locations fl on fl.name = 'Principal'
+      join admin.locations tl on tl.name = 'Productos del punto'
+      join admin.locations tr on tr.site_id = fl.site_id and tr.kind = 'in_transit'
+      where l.code = 'PT-2026-0001'
+      limit 1
+    `);
+    const ref = refResult.rows[0] as
+      | {
+          lotId: string;
+          presentationId: string;
+          unitsPer: string;
+          fromId: string;
+          toId: string;
+          transitId: string;
+        }
+      | undefined;
+    if (!ref) return;
+
+    const quantity = '2.000';
+    const baseQuantity = baseQuantityFor(quantity, ref.unitsPer);
+    const [transfer] = await tx
+      .insert(transfers)
+      .values({
+        number: 'T-0001',
+        fromLocationId: ref.fromId,
+        toLocationId: ref.toId,
+        transitLocationId: ref.transitId,
+        sentBy: setByUserId,
+      })
+      .returning({ id: transfers.id });
+    if (!transfer) throw new Error('No se pudo crear el traslado demo');
+
+    const [line] = await tx
+      .insert(transferLines)
+      .values({
+        transferId: transfer.id,
+        lotId: ref.lotId,
+        presentationId: ref.presentationId,
+        sentQty: quantity,
+      })
+      .returning({ id: transferLines.id });
+    if (!line) throw new Error('No se pudo crear la línea del traslado demo');
+
+    await recordMovement(tx, {
+      movementType: 'transfer_out',
+      lotId: ref.lotId,
+      presentationId: ref.presentationId,
+      locationId: ref.fromId,
+      quantity: `-${quantity}`,
+      baseQuantity: `-${baseQuantity}`,
+      sourceType: 'inventory.transfer',
+      sourceId: transfer.id,
+      createdBy: setByUserId,
+      reason: 'Traslado T-0001',
+    });
+    await recordMovement(tx, {
+      movementType: 'transfer_in',
+      lotId: ref.lotId,
+      presentationId: ref.presentationId,
+      locationId: ref.transitId,
+      quantity,
+      baseQuantity,
+      sourceType: 'inventory.transfer',
+      sourceId: transfer.id,
+      createdBy: setByUserId,
+      reason: 'Traslado T-0001 en tránsito',
+    });
+
+    await recordMovement(tx, {
+      movementType: 'transfer_out',
+      lotId: ref.lotId,
+      presentationId: ref.presentationId,
+      locationId: ref.transitId,
+      quantity: `-${quantity}`,
+      baseQuantity: `-${baseQuantity}`,
+      sourceType: 'inventory.transfer',
+      sourceId: transfer.id,
+      createdBy: setByUserId,
+      reason: 'Recepción T-0001',
+    });
+    await recordMovement(tx, {
+      movementType: 'transfer_in',
+      lotId: ref.lotId,
+      presentationId: ref.presentationId,
+      locationId: ref.toId,
+      quantity,
+      baseQuantity,
+      sourceType: 'inventory.transfer',
+      sourceId: transfer.id,
+      createdBy: setByUserId,
+      reason: 'Recepción T-0001',
+    });
+
+    await tx.update(transferLines).set({ receivedQty: quantity }).where(eq(transferLines.id, line.id));
+    await tx
+      .update(transfers)
+      .set({ status: 'received', receivedBy: setByUserId, receivedAt: new Date() })
+      .where(eq(transfers.id, transfer.id));
+    await tx.execute(sql`
+      insert into platform.document_sequences (doc_type, next_value)
+      values ('T', 2)
+      on conflict (doc_type) do update
+        set next_value = greatest(platform.document_sequences.next_value, 2)
+    `);
   });
 }

@@ -103,3 +103,61 @@ export const rawMaterials = catalogSchema.table(
   },
   (t) => [check('raw_materials_version_chk', sql`${t.version} > 0`)],
 );
+
+export const RECIPE_KINDS = ['production', 'dish'] as const;
+
+export const recipes = catalogSchema.table(
+  'recipes',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    kind: text({ enum: RECIPE_KINDS }).notNull().default('production'),
+    productId: uuid()
+      .notNull()
+      .references(() => products.id),
+  },
+  (t) => [unique('recipes_kind_product_uq').on(t.kind, t.productId)],
+);
+
+export const recipeVersions = catalogSchema.table(
+  'recipe_versions',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    recipeId: uuid()
+      .notNull()
+      .references(() => recipes.id),
+    version: integer().notNull(),
+    baseOutputQty: numeric({ precision: 14, scale: 3 }).notNull(),
+    expectedYieldPct: numeric({ precision: 5, scale: 2 }).notNull().default('100.00'),
+    tolerancePct: numeric({ precision: 5, scale: 2 }).notNull().default('3.00'),
+    isCurrent: boolean().notNull().default(false),
+    publishedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    publishedBy: uuid().notNull(),
+  },
+  (t) => [
+    unique('recipe_versions_recipe_version_uq').on(t.recipeId, t.version),
+    uniqueIndex('recipe_versions_current_uq')
+      .on(t.recipeId)
+      .where(sql`${t.isCurrent}`),
+    check('recipe_versions_version_chk', sql`${t.version} > 0`),
+    check('recipe_versions_base_qty_chk', sql`${t.baseOutputQty} > 0`),
+    check('recipe_versions_yield_chk', sql`${t.expectedYieldPct} > 0 AND ${t.expectedYieldPct} <= 100`),
+    check('recipe_versions_tolerance_chk', sql`${t.tolerancePct} >= 0`),
+  ],
+);
+
+export const recipeLines = catalogSchema.table(
+  'recipe_lines',
+  {
+    recipeVersionId: uuid()
+      .notNull()
+      .references(() => recipeVersions.id),
+    rawMaterialId: uuid()
+      .notNull()
+      .references(() => rawMaterials.id),
+    quantity: numeric({ precision: 14, scale: 3 }).notNull(),
+  },
+  (t) => [
+    unique('recipe_lines_version_material_uq').on(t.recipeVersionId, t.rawMaterialId),
+    check('recipe_lines_quantity_chk', sql`${t.quantity} > 0`),
+  ],
+);

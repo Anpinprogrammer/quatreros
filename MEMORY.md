@@ -7,13 +7,16 @@
 
 ERP a medida para una productora de embutidos de Cali: compras, producción por lotes, inventario con FEFO, pedidos y reparto, POS, cartera y contabilidad, con IA y Telegram opcionales. Se construye por Spec-Driven Development y está en **modo prototipo** (DEC-083): 8 entregas verticales demostrables, una a la vez.
 
-| Etapa                                                            | Estado                                                          |
-| ---------------------------------------------------------------- | --------------------------------------------------------------- |
-| A–E: descubrimiento, requerimientos, arquitectura, IA y Telegram | Completas                                                       |
-| F: monorepo, CI/CD, Docker, respaldos                            | Completa                                                        |
-| **Entrega 1**: ingreso, usuarios, roles y sedes                  | ✅ Terminada                                                    |
-| **Entrega 2**: catálogo e inventario                             | 🟡 En curso: **2a catálogo terminada**; sigue **2b** y luego 2c |
-| Entrega 8: Quatreros AI                                          | Configurada, sin integración funcional                          |
+| Etapa                                                            | Estado                                                        |
+| ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| A–E: descubrimiento, requerimientos, arquitectura, IA y Telegram | Completas                                                     |
+| F: monorepo, CI/CD, Docker, respaldos                            | Completa                                                      |
+| **Entrega 1**: ingreso, usuarios, roles y sedes                  | ✅ Terminada                                                  |
+| **Entrega 2**: catálogo e inventario                             | ✅ Terminada: 2a catálogo, 2b existencias y 2c FEFO/traslados |
+| **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción   |
+| **Entrega 4**: producción                                        | ✅ Terminada: recetas, consumo por lote y lote PT             |
+| **Entrega 5**: pedidos y reparto                                 | ✅ Terminada: reservas, despacho, entregas y recaudo          |
+| Entrega 8: Quatreros AI                                          | Configurada, sin integración funcional                        |
 
 ## 2. Dónde estamos (2026-11-02)
 
@@ -25,7 +28,12 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
   - `80f58ed` — orígenes 5173/3000 aceptados en desarrollo.
   - `1ad7041` — rediseño visual v1.1 (DEC-093), App Shell y kit de componentes.
   - `2d95eab` — especificación de existencias, kardex y trazabilidad (2b).
-- Entorno local recreado, migraciones `0000`–`0005` aplicadas y semilla demo cargada; la 2b en curso agrega `0006`–`0007`.
+  - `077a6ca` — implementación 2b (lotes, existencias, kardex y trazabilidad).
+  - `3363038` — isotipo oficial en la marca y el ingreso.
+  - `38d7094` — FEFO y traslados con tránsito (entrega 2c).
+  - `6961043` — compras, proveedores y recepción con lote MP (entrega 3).
+  - `4d0dc93` — recetas, consumo y lote terminado (entrega 4).
+- Entorno local recreado, migraciones `0000`–`0021` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001` y `D-0001`).
 
 ### Entrega 2a (hecha)
 
@@ -43,12 +51,60 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Pantallas en **04. Producción → Existencias y traslados**, con pestañas Existencias/Lotes/Kardex y ficha de lote.
 - Verificación: 71 unitarias, 55 integración (PGlite y PostgreSQL 17 real) y 47 E2E con axe.
 
-### Siguiente: 2c (FEFO y traslados)
+### Entrega 2c (hecha)
 
-- RF-112 (asignación FEFO), RF-113 (excepción con aprobación) y RF-114 (traslado con tránsito y recepción).
-- Especificación pendiente: `docs/04-specifications/inv/fefo-traslados.md`.
-- Implementar `allocateFefo()` con bloqueo determinista, `transfer()`/`receive()` y la tarjeta "Alertas FEFO" del Command Center.
-- RF-117 (bloqueo de lotes) sigue PROPOSED/P-05: no implementar.
+- FEFO: orden por vencimiento, exclusión de vencidos/bloqueados, reparto entre lotes y `409 INSUFFICIENT_STOCK`.
+- Traslados con `inventory.transfers`/`transfer_lines`, consecutivo `T-0001`, ubicación "En tránsito", recepción completa o con novedad y auditoría.
+- Pantalla de traslados en **04. Producción → Existencias y traslados**, detalle con recepción y tarjeta "Alertas FEFO" en el Command Center.
+- Alcance por sede en saldos, disponibilidad, lotes, kardex, resumen y traslados.
+- Semilla `T-0001` recibido; migraciones `0008`–`0009`.
+- Verificación: 71 unitarias, 60 integración (PGlite y PostgreSQL 17 real) y 48 E2E con axe.
+- **RF-113 (excepción FEFO) queda pendiente del motor de aprobaciones (RF-007).**
+
+### Entrega 3 (hecha)
+
+- Proveedores con identificación única, contacto, edición con `If-Match` e inactivación.
+- Compras con consecutivo `C-0001`, líneas de materia prima, total sin impuestos y estados pendiente/parcial/recibida.
+- Recepción total o parcial con consecutivo `R-0001`: cada línea crea un lote `MP-AAAA-####` con proveedor, costo y vencimiento, y un movimiento `receipt` en la misma transacción.
+- Rechaza sobre-recepción, ubicación de otra sede y vencimiento faltante o pasado; la confirmación con motivo espera RF-007.
+- Pantallas **06. Compras → Compras y recepción** y **Proveedores**.
+- Semilla: dos proveedores y `C-0001` pendiente (40 kg de carne y 20 kg de tocino por $1.000.000 sin impuestos).
+- Migraciones `0010`–`0012`; **DEC-094** aprueba la recepción parcial y el lote MP por recepción como `PROVISIONAL`.
+- Verificación: 76 unitarias, 66 integración (PGlite y PostgreSQL 17 real) y 52 E2E con axe.
+
+### Entrega 4 (hecha)
+
+- Recetas de producción versionadas por producto fabricado; la orden congela la versión vigente (DEC-095).
+- Orden planificada con consumo teórico y disponibilidad; advierte si falta MP, pero no bloquea crearla.
+- Consumo real por lote con sugerencia FEFO; descuenta existencias y registra teórico/real.
+- Cierre por presentación: lote `PT-AAAA-####` con fabricación/vencimiento, movimientos `production_output`, rendimiento y motivo fuera de tolerancia (DEC-096).
+- Trazabilidad N:M en `inventory.lot_inputs` (DEC-097).
+- Pantallas **04. Producción → Órdenes de producción** y **Recetas**.
+- Semilla: dos recetas y `OP-0001` planificada para 100 unidades de chorizo.
+- Migraciones `0013`–`0016`.
+- Verificación: 80 unitarias, 71 integración (PGlite y PostgreSQL 17 real) y 56 E2E con axe.
+- **RF-080 (sugerencias) pendiente de Q-PRO-03; RF-084 (anulación) de P-09; costo del lote BLOCKED (P-03).**
+
+### Entrega 5 (hecha)
+
+- Clientes con datos de entrega y crédito (cupo/plazo) configurable solo por el Administrador.
+- Pedido confirmado con precio congelado y reserva FEFO por lote (DEC-098); si falta existencia queda el faltante.
+- Cupo usado = cartera abierta + pedidos a crédito no entregados; exceso o mora genera advertencia, no bloqueo (DEC-099).
+- Despacho con pedidos confirmados, distribuidor y salida a "En ruta"; reservas consumidas.
+- Portal móvil del distribuidor: entrega total/parcial, recaudo efectivo/transferencia y devolución.
+- Obligación a crédito al entregar con vencimiento entrega + plazo; abono opcional; recaudos pendientes de conciliación (DEC-100).
+- Devolución a "En inspección" y reincorporación; descarte pendiente AP-08.
+- Pantallas **03. Distribución → Clientes, pedidos y despachos** y portal **Ruta**.
+- Semilla: dos clientes, `P-0001` a crédito y `D-0001` preparado.
+- Migraciones `0017`–`0021`.
+- Verificación: 80 unitarias, 76 integración (PGlite y PostgreSQL 17 real) y 60 E2E con axe.
+- **RF-153 (cancelación/descuentos) P-09; RF-186 (liquidación) P-08.**
+
+### Siguiente: entrega 6 (caja POS)
+
+- RF-220 apertura de turno, RF-221 venta de mostrador, RF-222 pagos mixtos, RF-223 cierre/arqueo, RF-224 revisión de diferencias.
+- RF-225 platos con consumo teórico sin descuento automático de cocina (Q-B-09); RF-226 conteos P-07; RF-227 documento fiscal BLOCKED P-02.
+- La especificación `docs/04-specifications/pos/caja.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
 
@@ -138,7 +194,7 @@ docs/                  descubrimiento, requerimientos, arquitectura, specs, dise
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-El **rediseño v1.1 ya está commiteado** (`1ad7041`). Sobre esa base hay 2b en curso **sin commitear**: `modules/inventory`, migraciones `0006`–`0007`, `features/existencias`, cambios en `modules.ts`, `ErpShell` y `ProductionPage`. No mezcles ese trabajo con cambios de presentación ni lo deshagas.
+El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. Las entregas 3, 4 y 5 se commitean con este cierre; la siguiente tarea es la entrega 6.
 
 El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
@@ -154,4 +210,4 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada; sigue 2c. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`).
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Command Center y header reorganizados**: KPIs operativos reales, atención priorizada, accesos rápidos secundarios y menú de usuario con tema/cierre; fuera el panel de plan del dashboard.

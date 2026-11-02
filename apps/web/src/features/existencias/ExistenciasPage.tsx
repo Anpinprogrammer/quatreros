@@ -24,9 +24,10 @@ import { BalanceTable } from './BalanceTable';
 import { useAvailability, useInventorySummary, useLots, useMovements, useStockBalances } from './api';
 import { formatDate, formatQuantity } from './format';
 import { MovementTable } from './MovementTable';
+import { TransfersPanel } from './TransfersPanel';
 import { LotStatusBadge } from './StatusBadge';
 
-type Tab = 'balances' | 'lots' | 'kardex';
+type Tab = 'balances' | 'lots' | 'kardex' | 'transfers';
 
 const statusOptions = [
   { value: '', label: 'Todos los estados' },
@@ -59,6 +60,7 @@ export function ExistenciasPage({ me }: { me: MeResponse }) {
     { id: 'balances', label: 'Existencias' },
     { id: 'lots', label: 'Lotes' },
     { id: 'kardex', label: 'Kardex' },
+    { id: 'transfers', label: 'Traslados' },
   ];
 
   return (
@@ -167,6 +169,14 @@ export function ExistenciasPage({ me }: { me: MeResponse }) {
         hidden={tab !== 'kardex'}
       >
         {tab === 'kardex' ? <KardexPanel /> : null}
+      </div>
+      <div
+        id="existencias-panel-transfers"
+        role="tabpanel"
+        aria-labelledby="existencias-tab-transfers"
+        hidden={tab !== 'transfers'}
+      >
+        {tab === 'transfers' ? <TransfersPanel me={me} /> : null}
       </div>
     </section>
   );

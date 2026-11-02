@@ -7,7 +7,7 @@ export async function signIn(page: Page, email: string, password = DEMO_PASSWORD
   await page.goto('/ingresar');
   await page.getByLabel('Correo').fill(email);
   await page.getByLabel('Contraseña').fill(password);
-  await page.getByRole('button', { name: 'Ingresar' }).click();
+  await page.getByRole('button', { name: /^Ingresar/ }).click();
 }
 
 /**
@@ -23,7 +23,8 @@ export async function openSection(page: Page, name: RegExp | string) {
 }
 
 export async function signOut(page: Page) {
-  await page.getByRole('button', { name: 'Salir' }).click();
+  await page.getByRole('button', { name: /Abrir menú de usuario/ }).click();
+  await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click();
   await expect(page).toHaveURL(/\/ingresar/);
 }
 

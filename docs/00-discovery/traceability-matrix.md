@@ -93,43 +93,43 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 
 ## 4. Proceso → decisiones → bloqueos (vista por flujo de negocio)
 
-| Flujo de negocio                                         | Decisiones                         | Bloqueos de implementación                      | Disp. global                                 |
-| -------------------------------------------------------- | ---------------------------------- | ----------------------------------------------- | -------------------------------------------- |
-| Gestión de usuarios, roles, sedes, auditoría             | DEC-040..044                       | P-10 (solo matriz final; motor construible)     | 🟨                                           |
-| Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091 | P-06 (apertura), P-09 (descuentos)              | 🟨                                           |
-| Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080          | Impuestos en compras P-02                       | 🟨                                           |
-| Receta → orden de producción → lote                      | DEC-010..013, DEC-092              | P-03 (solo costeo)                              | 🟨 (entrega 4)                               |
-| Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089 | P-05 (vencidos)                                 | 🟨 (2b listo; 2c pendiente)                  |
-| Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                       | Q-COM-04                                        | 🟨                                           |
-| Recaudo y liquidación de distribuidor                    | DEC-027                            | **P-08**                                        | 🟨                                           |
-| Crédito, cartera, abonos                                 | DEC-021, DEC-022                   | Q-COM-04                                        | 🟨                                           |
-| POS: turno → venta → pagos mixtos → cierre               | DEC-031..033                       | **P-02** (documento fiscal), P-09 (anulaciones) | 🟨                                           |
-| Cocina: conteos y consumo teórico                        | DEC-034                            | **P-07**                                        | 🟨                                           |
-| Contabilidad — capa (a) motor genérico                   | DEC-050, DEC-081                   | P-04 (plan de cuentas para cargar datos)        | 🟨                                           |
-| Contabilidad — capa (b) reglas de contabilización        | DEC-050, DEC-P09, DEC-081          | **P-01..P-04**                                  | ⛔                                           |
-| Asistente IA (consultas)                                 | DEC-070, DEC-071, DEC-073          | Q-IA-01                                         | ✅                                           |
-| Asistente IA (escrituras)                                | DEC-072, DEC-074                   | **P-10**                                        | 🟨                                           |
-| Quatreros AI: configuración del agente (`quatreros-ai/`) | DEC-087                            | Q-IA-04 (quién aplica y espacio de producción)  | ✅ versionada · ⛔ sin integración funcional |
-| Telegram                                                 | DEC-076..078                       | **P-13**                                        | 🟨                                           |
-| Carga inicial y piloto                                   | DEC-064, DEC-P14                   | P-04, P-16                                      | 🟨                                           |
+| Flujo de negocio                                         | Decisiones                          | Bloqueos de implementación                      | Disp. global                                     |
+| -------------------------------------------------------- | ----------------------------------- | ----------------------------------------------- | ------------------------------------------------ |
+| Gestión de usuarios, roles, sedes, auditoría             | DEC-040..044                        | P-10 (solo matriz final; motor construible)     | 🟨                                               |
+| Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091  | P-06 (apertura), P-09 (descuentos)              | 🟨                                               |
+| Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080, DEC-094  | Impuestos en compras P-02, anulación P-09       | 🟨 (entrega 3 lista; RF-053 pendiente)           |
+| Receta → orden de producción → lote                      | DEC-010..013, DEC-092, DEC-095..097 | P-03 (solo costeo), Q-PRO-03 (sugerencias)      | 🟨 (entrega 4 lista; RF-080 y RF-084 pendientes) |
+| Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089  | P-05 (vencidos), RF-113 (aprobaciones)          | 🟨 (2b y 2c listos; RF-113 pendiente)            |
+| Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                        | Q-COM-04                                        | 🟨                                               |
+| Recaudo y liquidación de distribuidor                    | DEC-027                             | **P-08**                                        | 🟨                                               |
+| Crédito, cartera, abonos                                 | DEC-021, DEC-022                    | Q-COM-04                                        | 🟨                                               |
+| POS: turno → venta → pagos mixtos → cierre               | DEC-031..033                        | **P-02** (documento fiscal), P-09 (anulaciones) | 🟨                                               |
+| Cocina: conteos y consumo teórico                        | DEC-034                             | **P-07**                                        | 🟨                                               |
+| Contabilidad — capa (a) motor genérico                   | DEC-050, DEC-081                    | P-04 (plan de cuentas para cargar datos)        | 🟨                                               |
+| Contabilidad — capa (b) reglas de contabilización        | DEC-050, DEC-P09, DEC-081           | **P-01..P-04**                                  | ⛔                                               |
+| Asistente IA (consultas)                                 | DEC-070, DEC-071, DEC-073           | Q-IA-01                                         | ✅                                               |
+| Asistente IA (escrituras)                                | DEC-072, DEC-074                    | **P-10**                                        | 🟨                                               |
+| Quatreros AI: configuración del agente (`quatreros-ai/`) | DEC-087                             | Q-IA-04 (quién aplica y espacio de producción)  | ✅ versionada · ⛔ sin integración funcional     |
+| Telegram                                                 | DEC-076..078                        | **P-13**                                        | 🟨                                               |
+| Carga inicial y piloto                                   | DEC-064, DEC-P14                    | P-04, P-16                                      | 🟨                                               |
 
 ## 5. Artefactos generados en Etapa B (2026-10-29)
 
-| Módulo   | BR                     | RF                     | Bloqueados / pendientes                                                                             |
-| -------- | ---------------------- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| ADM      | BR-001–010             | RF-001–008             | Umbrales AP (P-10) · RF-001/003/004/005 implementados y probados (entrega 1, `adm/acceso-usuarios`) |
-| CAT      | BR-020–025             | RF-030–033             | RF-030–032 implementados (entrega 2a); RF-033 → entrega 4 (DEC-092); BR-024 (Q-COM-03)              |
-| COMP     | BR-040–044             | RF-050–053             | BR-044 (P-02)                                                                                       |
-| PROD     | BR-060–068             | RF-080–084             | BR-067 (Q-PRO-03), BR-068 (P-03)                                                                    |
-| INV      | BR-080–093             | RF-110–119             | RF-110/111/118 implementados (2b); RF-112–114 → 2c; RF-116/RF-119 bloqueados (P-06/P-05)            |
-| COM      | BR-110–114             | RF-150–153             | BR-113/114, RF-153 (P-09)                                                                           |
-| DIS      | BR-120–128             | RF-180–186             | BR-127/RF-186 (P-08), BR-128 (Q-DIS-02)                                                             |
-| POS      | BR-140–150             | RF-220–227             | BR-149/RF-227 (P-07), BR-150 (P-02)                                                                 |
-| FIN      | BR-170–178             | RF-260–266             | BR-173 (Q-COM-04); rentabilidad en RF-266 (P-03)                                                    |
-| CONT     | BR-200–207             | RF-300–305             | BR-203–206, RF-304 (P-01..P-04)                                                                     |
-| IA       | BR-230–237             | RF-340–345             | RF-343 habilitación (P-10)                                                                          |
-| TG / MIG | BR-250–253, BR-260–261 | RF-370–372, RF-375–376 | BR-253/RF-372 (P-13)                                                                                |
-| RNF      | —                      | RNF-001–134 (58)       | Valores numéricos PENDING                                                                           |
+| Módulo   | BR                     | RF                     | Bloqueados / pendientes                                                                                    |
+| -------- | ---------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| ADM      | BR-001–010             | RF-001–008             | Umbrales AP (P-10) · RF-001/003/004/005 implementados y probados (entrega 1, `adm/acceso-usuarios`)        |
+| CAT      | BR-020–025             | RF-030–033             | RF-030–032 implementados (entrega 2a); RF-033 → entrega 4 (DEC-092); BR-024 (Q-COM-03)                     |
+| COMP     | BR-040–044             | RF-050–053             | BR-044 (P-02)                                                                                              |
+| PROD     | BR-060–068             | RF-080–084             | BR-067 (Q-PRO-03), BR-068 (P-03)                                                                           |
+| INV      | BR-080–093             | RF-110–119             | RF-110/111/112/114/118 implementados (2b y 2c); RF-113 espera RF-007; RF-116/RF-119 bloqueados (P-06/P-05) |
+| COM      | BR-110–114             | RF-150–153             | BR-113/114, RF-153 (P-09)                                                                                  |
+| DIS      | BR-120–128             | RF-180–186             | BR-127/RF-186 (P-08), BR-128 (Q-DIS-02)                                                                    |
+| POS      | BR-140–150             | RF-220–227             | BR-149/RF-227 (P-07), BR-150 (P-02)                                                                        |
+| FIN      | BR-170–178             | RF-260–266             | BR-173 (Q-COM-04); rentabilidad en RF-266 (P-03)                                                           |
+| CONT     | BR-200–207             | RF-300–305             | BR-203–206, RF-304 (P-01..P-04)                                                                            |
+| IA       | BR-230–237             | RF-340–345             | RF-343 habilitación (P-10)                                                                                 |
+| TG / MIG | BR-250–253, BR-260–261 | RF-370–372, RF-375–376 | BR-253/RF-372 (P-13)                                                                                       |
+| RNF      | —                      | RNF-001–134 (58)       | Valores numéricos PENDING                                                                                  |
 
 Flujos: `business-workflows.md` WF-01..WF-11 · Datos: `data-requirements.md` DR-001..025 · Integraciones: `integrations.md` INT-01..09 · Permisos: `actors-permissions.md` (AP-01..AP-10).
 

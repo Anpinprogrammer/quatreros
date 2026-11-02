@@ -1,0 +1,1 @@
+ALTER TABLE "distribution"."dispatch_lines" ADD COLUMN "location_id" uuid NOT NULL;

@@ -81,6 +81,53 @@ La semilla crea 8 lotes y 12 saldos con movimientos `opening_balance`; las fecha
 5. **Kardex**: pestaña _Kardex_; verifica la carga inicial, el usuario y el documento de origen. Filtra por tipo o rango de fechas.
 6. **Trazabilidad**: entra como `produccion@` y abre el lote; verás las secciones "Hacia atrás" y "Hacia adelante" con los vacíos que activan las entregas 3, 4 y 5. Como `compras@` no se consulta trazabilidad, pero sí existencias y kardex.
 
+## 4.4 FEFO y traslados (entrega 2c, ~4 minutos)
+
+La semilla deja el traslado `T-0001` ya recibido (2 paquetes de PT-2026-0001 de Bodega principal a Productos del punto).
+
+1. **Manager o Administrador**: _04. Producción_ → _Existencias y traslados_ → pestaña _Traslados_. Abre `T-0001` para ver las líneas, el lote asignado, quién envió y quién recibió.
+2. **FEFO por vencimiento**: _Nuevo traslado_ → origen "Principal" y destino "Productos del punto" → "Chorizo Santarrosano · Paquete x10" → cantidad `30`. La asignación usa primero PT-2026-0001 (vence antes) y reparte el resto en PT-2026-0002.
+3. **Enviar**: el traslado queda _En tránsito_. En _Existencias_ el saldo sale de Principal y entra a la ubicación "En tránsito".
+4. **Recibir completo**: abre el traslado y confirma la cantidad. El saldo sale de tránsito y entra a Productos del punto; el traslado queda _Recibido_.
+5. **Novedad**: repite con otra cantidad y confirma menos de lo enviado. El traslado queda _Recibido con novedad_ y la diferencia permanece en tránsito.
+6. **Command Center**: la tarjeta _Alertas FEFO_ muestra hasta 3 lotes vendibles que vencen en 7 días. Si estás como `compras@`, solo ves las sedes de su alcance.
+
+## 4.5 Compras y recepción (entrega 3, ~4 minutos)
+
+La semilla deja dos proveedores y la compra `C-0001` pendiente: 40 kg de carne de cerdo magra a $18.000/kg y 20 kg de tocino a $14.000/kg, total $1.000.000 sin impuestos.
+
+1. **Comprador**: _06. Compras_ → _Compras y recepción_. Abre `C-0001`; verás las líneas, el total sin impuestos y el saldo pendiente.
+2. **Proveedores**: pestaña _Proveedores_ → _Nuevo proveedor_. Crea uno con NIT ficticio; una identificación repetida se rechaza.
+3. **Registrar compra**: _Nueva compra_ → proveedor, sede, materia prima, cantidad y costo. El total se calcula en vivo y la compra queda _Pendiente de recepción_. El inventario no cambia.
+4. **Recepción parcial**: en el detalle, elige la ubicación "Principal", recibe 25 kg de carne con vencimiento futuro. Se crea el lote `MP-2026-0005` y la compra queda _Recibida parcialmente_ con 15 kg pendientes.
+5. **Completar**: recibe el saldo. La compra queda _Recibida_ y el kardex muestra las entradas con su proveedor y recepción.
+6. **Trazabilidad**: abre el lote recibido en _04. Producción_ → _Existencias y traslados_ → _Lotes_; la ficha muestra el origen en la compra y el proveedor.
+7. **Bloqueado**: los impuestos y el desglose fiscal no se capturan (P-02). Una cantidad mayor a la pendiente se rechaza: la confirmación con motivo requiere el motor de aprobaciones (RF-007).
+
+## 4.6 Producción (entrega 4, ~5 minutos)
+
+La semilla deja las recetas de Chorizo Santarrosano y Rellena Mixta, y la orden `OP-0001` planificada para 100 unidades de chorizo. La orden no mueve inventario hasta el consumo.
+
+1. **Productor**: _04. Producción_ → _Órdenes de producción_. Abre `OP-0001`; verás la receta v1, el consumo teórico y la disponibilidad de cada materia prima.
+2. **Recetas**: pestaña _Recetas_ → abre la receta del chorizo. Revisa la versión vigente, sus ingredientes y el historial. Como manager o administrador puedes publicar una versión nueva; las órdenes existentes conservan la anterior.
+3. **Consumo**: en la orden, registra el consumo con los lotes sugeridos por vencimiento. Se descuentan las materias primas y la orden pasa a _En proceso_.
+4. **Cierre**: registra 50 unidades y 5 paquetes ×10. El sistema crea el lote `PT-2026-0005` con fabricación y vencimiento, calcula el rendimiento y lo vincula a los lotes de MP consumidos.
+5. **Rendimiento fuera de tolerancia**: repite con una orden nueva y cierra con 90 unidades. Como el rendimiento se aleja más de 3 puntos del esperado (98 %), el cierre exige un motivo.
+6. **Trazabilidad**: abre el lote PT en _Existencias y traslados_ → _Lotes_; la sección "Hacia atrás" muestra los lotes de materia prima usados.
+7. **Pendiente**: las sugerencias por punto de reorden (RF-080, Q-PRO-03) y la anulación de órdenes (RF-084, P-09) no se implementan. El costo oficial del lote sigue bloqueado (P-03).
+
+## 4.7 Pedidos, despacho y reparto (entrega 5, ~6 minutos)
+
+La semilla deja dos clientes, el pedido `P-0001` a crédito con reserva FEFO y el despacho `D-0001` preparado para `reparto@`.
+
+1. **Manager**: _03. Distribución_ → _Clientes y pedidos_. Revisa clientes y su crédito. En _Pedidos_ abre `P-0001`; verás precio congelado, reserva y total.
+2. **Nuevo pedido**: crea uno para "Restaurante La Brasa" con pago a crédito. Si el cupo se excede o hay mora, el pedido se confirma con **advertencia** (DEC-099), no se bloquea.
+3. **Despacho**: pestaña _Despachos_ → _Nuevo despacho_, selecciona pedidos confirmados y a Diego Reparto. Abre el despacho y pulsa _Confirmar carga y salir_; los lotes pasan a "En ruta" y las reservas se consumen.
+4. **Repartidor en celular**: entra como `reparto@` → _Rutas del día_. Abre el despacho, confirma una entrega total o parcial (con motivo), registra el recaudo si es contraentrega y el abono si es crédito.
+5. **Devolución**: registra una devolución con motivo; la mercancía entra a "En inspección".
+6. **Inspección**: como manager, abre el despacho y pulsa _Reincorporar_. La devolución vuelve a la bodega en su lote. El descarte requiere AP-08 y no está disponible.
+7. **Cartera**: la entrega a crédito crea una obligación con vencimiento entrega + plazo. La liquidación del distribuidor y la conciliación quedan para la entrega 7 / P-08.
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

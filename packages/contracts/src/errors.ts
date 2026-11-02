@@ -44,5 +44,6 @@ export const ProblemDetails = z.object({
     .object({ required: z.boolean(), policy: z.string(), requestId: z.string().nullable() })
     .optional(),
   blockedBy: z.string().optional(),
+  missing: z.string().optional(),
 });
 export type ProblemDetails = z.infer<typeof ProblemDetails>;

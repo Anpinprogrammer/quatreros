@@ -26,6 +26,16 @@ async function audit(page: Page, info: TestInfo, name: string) {
   expect(overflow, `Desplazamiento horizontal en ${name}`).toBe(false);
 }
 
+/** Espera a que el panel de Quatreros AI termine su transición antes de medir contraste. */
+async function openAssistant(page: Page) {
+  await page.getByRole('button', { name: 'Abrir Quatreros AI' }).click();
+  const panel = page.locator('#quatreros-ai-panel');
+  await expect(panel).toBeVisible();
+  await panel.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+}
+
 test('ingreso', async ({ page }, info) => {
   await page.goto('/ingresar');
   await audit(page, info, 'ingreso');
@@ -46,7 +56,16 @@ test('Distribución', async ({ page }, info) => {
 test('ERP: Command Center y secciones', async ({ page }, info) => {
   await signIn(page, 'compras@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);
+  const viewTabs = page.getByRole('tablist', { name: 'Vistas del Command Center' });
+  const modulesTab = viewTabs.getByRole('tab', { name: 'Módulos' });
+  const boardTab = viewTabs.getByRole('tab', { name: 'Tablero del día' });
+  await expect(modulesTab).toHaveAttribute('aria-selected', 'true');
   await audit(page, info, 'command-center');
+  await modulesTab.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(boardTab).toHaveAttribute('aria-selected', 'true');
+  await expect(boardTab).toBeFocused();
+  await audit(page, info, 'command-center-tablero');
   await page.goto('/erp/seccion/produccion');
   await audit(page, info, 'seccion-produccion');
 });
@@ -75,6 +94,8 @@ test('ERP: modo oscuro', async ({ page }, info) => {
   await audit(page, info, 'produccion-oscuro');
   await page.goto('/erp/catalogo');
   await audit(page, info, 'catalogo-oscuro');
+  await openAssistant(page);
+  await audit(page, info, 'asistente-ia-oscuro');
 });
 
 test('ERP: existencias, lotes y kardex', async ({ page }, info) => {
@@ -89,6 +110,42 @@ test('ERP: existencias, lotes y kardex', async ({ page }, info) => {
   await page.goto('/erp/existencias');
   await page.getByRole('tab', { name: 'Kardex' }).click();
   await audit(page, info, 'existencias-kardex');
+  await page.getByRole('tab', { name: 'Traslados' }).click();
+  await audit(page, info, 'existencias-traslados');
+  await page.getByRole('link', { name: 'T-0001' }).first().click();
+  await audit(page, info, 'traslado');
+});
+
+test('ERP: compras y recepción', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/compras');
+  await audit(page, info, 'compras');
+  await page.getByRole('tab', { name: 'Proveedores' }).click();
+  await audit(page, info, 'compras-proveedores');
+  await page.getByRole('tab', { name: 'Compras' }).click();
+  await page.getByRole('link', { name: 'C-0001' }).first().click();
+  await audit(page, info, 'compra-detalle');
+});
+
+test('ERP: producción y recetas', async ({ page }, info) => {
+  await signIn(page, 'produccion@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/produccion');
+  await audit(page, info, 'produccion-ordenes');
+  await page.getByRole('link', { name: 'OP-0001' }).click();
+  await audit(page, info, 'produccion-orden');
+  await page.goto('/erp/produccion');
+  await page.getByRole('tab', { name: 'Recetas' }).click();
+  await audit(page, info, 'produccion-recetas');
+  await page.getByRole('link', { name: 'Abrir receta' }).first().click();
+  await audit(page, info, 'produccion-receta');
+});
+
+test('Ruta: despachos del distribuidor', async ({ page }, info) => {
+  await signIn(page, 'reparto@quatreros.example');
+  await expect(page).toHaveURL(/\/ruta$/);
+  await audit(page, info, 'ruta-despachos');
 });
 
 test('ERP: trazabilidad de lote', async ({ page }, info) => {
@@ -98,4 +155,42 @@ test('ERP: trazabilidad de lote', async ({ page }, info) => {
   await page.getByRole('tab', { name: 'Lotes' }).click();
   await page.getByRole('link', { name: 'PT-2026-0001' }).first().click();
   await audit(page, info, 'lote-trazabilidad');
+});
+
+test('ERP: Quatreros AI (vista previa)', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await openAssistant(page);
+  await audit(page, info, 'asistente-ia');
+  await page.getByRole('button', { name: /Volver|Cerrar Quatreros AI/ }).click();
+  await expect(page.getByRole('button', { name: 'Abrir Quatreros AI' })).toBeVisible();
+});
+
+test('ERP: menú de usuario y sedes', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+
+  const userTrigger = page.getByRole('button', { name: /Abrir menú de usuario/ });
+  await userTrigger.click();
+  const userMenu = page.getByRole('menu', { name: 'Menú de usuario' });
+  await expect(userMenu).toBeVisible();
+  await userMenu.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  await expect(page.getByRole('menuitemcheckbox', { name: 'Modo oscuro' })).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menuitem', { name: 'Cerrar sesión' })).toBeFocused();
+  await audit(page, info, 'menu-usuario');
+
+  await page.keyboard.press('Escape');
+  await expect(userTrigger).toBeFocused();
+
+  const siteTrigger = page.getByRole('button', { name: /Sedes autorizadas/ });
+  await siteTrigger.click();
+  const siteDialog = page.getByRole('dialog', { name: 'Sedes autorizadas' });
+  await expect(siteDialog).toBeVisible();
+  await siteDialog.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  await audit(page, info, 'sedes-autorizadas');
 });

@@ -1,0 +1,1 @@
+ALTER TABLE "production"."consumptions" ADD COLUMN "location_id" uuid NOT NULL;

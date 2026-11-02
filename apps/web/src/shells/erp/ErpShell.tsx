@@ -3,14 +3,24 @@ import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { CatalogPage } from '../../features/catalogo/CatalogPage';
 import { ProductPage } from '../../features/catalogo/ProductPage';
+import { PurchasePage } from '../../features/compras/PurchasePage';
+import { DispatchPage } from '../../features/ventas/DispatchPage';
+import { SalesOrderPage } from '../../features/ventas/SalesOrderPage';
+import { VentasPage } from '../../features/ventas/VentasPage';
+import { OrderPage } from '../../features/produccion/OrderPage';
+import { ProductionPage } from '../../features/produccion/ProductionPage';
+import { RecipePage } from '../../features/produccion/RecipePage';
+import { PurchasesPage } from '../../features/compras/PurchasesPage';
 import { ExistenciasPage } from '../../features/existencias/ExistenciasPage';
 import { LotePage } from '../../features/existencias/LotePage';
+import { TransferPage } from '../../features/existencias/TransferPage';
 import { UsersPage } from '../../features/usuarios/UsersPage';
 import { hasPermission } from '../../shared/auth/session';
 import { EmptyState } from '../../shared/ui/EmptyState';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 import { AppHeader } from './AppHeader';
 import { AppSidebar, MobileSidebar } from './AppSidebar';
+import { AssistantWidget } from './AssistantWidget';
 import { CommandCenter } from './CommandCenter';
 import { SectionPage } from './SectionPage';
 
@@ -60,7 +70,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
         Saltar al contenido
       </a>
       <div className="flex">
-        <AppSidebar me={me} collapsed={collapsed} onToggleCollapse={toggleCollapse} />
+        <AppSidebar me={me} collapsed={collapsed} />
         <MobileSidebar
           me={me}
           open={mobileNavOpen}
@@ -71,6 +81,8 @@ export function ErpShell({ me }: { me: MeResponse }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <AppHeader
             me={me}
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapse}
             onOpenNav={() => {
               setMobileNavOpen(true);
             }}
@@ -78,7 +90,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
           <main
             id="contenido"
             tabIndex={-1}
-            className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 outline-none md:px-8 md:py-8"
+            className="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-6 pb-24 outline-none md:px-8 md:pt-8 lg:pb-8"
           >
             <Routes>
               <Route index element={<CommandCenter me={me} />} />
@@ -98,11 +110,39 @@ export function ErpShell({ me }: { me: MeResponse }) {
               {hasPermission(me, 'inv.stock.read') ? (
                 <Route path="existencias/lotes/:id" element={<LotePage me={me} />} />
               ) : null}
+              {hasPermission(me, 'inv.stock.read') ? (
+                <Route path="existencias/traslados/:id" element={<TransferPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'comp.purchase.read') ? (
+                <Route path="compras" element={<PurchasesPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'comp.purchase.read') ? (
+                <Route path="compras/:id" element={<PurchasePage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'prod.order.read') ? (
+                <Route path="produccion" element={<ProductionPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'prod.order.read') ? (
+                <Route path="produccion/:id" element={<OrderPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'prod.recipe.read') ? (
+                <Route path="produccion/recetas/:id" element={<RecipePage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'com.order.read') ? (
+                <Route path="ventas" element={<VentasPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'com.order.read') ? (
+                <Route path="ventas/pedidos/:id" element={<SalesOrderPage />} />
+              ) : null}
+              {hasPermission(me, 'dis.dispatch.read') ? (
+                <Route path="ventas/despachos/:id" element={<DispatchPage me={me} />} />
+              ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
         </div>
       </div>
+      <AssistantWidget />
     </div>
   );
 }

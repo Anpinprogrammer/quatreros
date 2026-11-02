@@ -233,7 +233,7 @@
 - Reglas relacionadas: BR-041, BR-042, BR-043, BR-008
 - Dependencias: RF-051
 - Prioridad sugerida: Alta
-- Estado: CONFIRMED (recepción) · PROPOSED (parcial, lote MP)
+- Estado: CONFIRMED (recepción) · PROVISIONAL (parcial y lote MP, DEC-094)
 - Fuente: DM §4.1, §7.1
 
 ### RF-053 — Anulación de compra o recepción
@@ -303,7 +303,7 @@
 - Flujo esperado: 1. Ingresa cantidades producidas (unidades o paquetes). 2. El sistema crea el lote con fecha de fabricación y vencimiento (vida útil). 3. Calcula rendimiento real/esperado. 4. Entrada al inventario de la ubicación de producción. 5. Emite hecho económico (sin costo oficial, BR-068).
 - Excepciones: rendimiento fuera de tolerancia → motivo obligatorio (BR-066).
 - Reglas relacionadas: BR-065, BR-066, BR-068, BR-200
-- Dependencias: Q-PRO-02, Q-PRO-04
+- Dependencias: DEC-096, DEC-090 (Q-PRO-02 y Q-PRO-04 resueltas)
 - Prioridad sugerida: Alta
 - Estado: CONFIRMED (registro) · BLOCKED (costo)
 - Fuente: DM §5, §7.1

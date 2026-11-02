@@ -278,7 +278,7 @@ La Parte 2 define **cómo se ven y se recorren** las pantallas. Las reglas de ne
 
 La revisión conserva la identidad Ember y el Anexo A, pero cambia la preferencia visual: **modo claro como experiencia principal** y modo oscuro refinado como alternativa. Sustituye únicamente la regla de "modo oscuro por defecto" de la Parte 1; todo lo demás sigue vigente.
 
-**Tokens.** La fuente de verdad es `apps/web/src/styles.css` (`@theme inline` + variables `--q-*`). Los nombres semánticos son `canvas`, `surface`, `surface-2`, `surface-3`, `ink`, `ink-2`, `ink-3`, `line`, `line-strong`, `control`, `brand`, `brand-hover`, `brand-soft`, `brand-ink`, `success`, `warning`, `danger`, `info`. Los nombres heredados (`char`, `smoke`, `grill`, `chalk`, `ash`, `ember`) quedan como alias para no romper pantallas. Sombras: `shadow-card`, `shadow-float`, `shadow-brand` y `shadow-brand-sm`. El panel de marca del ingreso usa `panel` y `brand-on-dark`, fijos en ambos temas.
+**Tokens.** La fuente de verdad es `apps/web/src/styles.css` (`@theme inline` + variables `--q-*`). Los nombres semánticos son `canvas`, `surface`, `surface-2`, `surface-3`, `ink`, `ink-2`, `ink-3`, `line`, `line-strong`, `control`, `brand`, `brand-hover`, `brand-soft`, `brand-ink`, `success`, `warning`, `danger`, `info`. Los nombres heredados (`char`, `smoke`, `grill`, `chalk`, `ash`, `ember`) quedan como alias para no romper pantallas. Sombras: `shadow-card`, `shadow-float`, `shadow-brand` y `shadow-brand-sm`. El ingreso fuerza una atmósfera clara con `.login-theme`, incluso si el sistema está en modo oscuro.
 
 - Marca: `#FD5300`; hover `#E84A00`; soft `#FFF0E6`; texto de marca sobre claro `#B84300`.
 - Claro: fondo `#FAFAF9`, superficie `#FFFFFF`, líneas `#E7E7E5`, texto `#171717` / `#5F5F5C`.
@@ -290,9 +290,15 @@ La revisión conserva la identidad Ember y el Anexo A, pero cambia la preferenci
 
 **App Shell.** Barra lateral de 248 px expandida y 72 px contraída, agrupada en General, Operaciones, Gestión y Sistema; solo muestra secciones autorizadas. Encabezado de 72 px con migas de pan, búsqueda de navegación (⌘K / Ctrl+K), sede autorizada, notificaciones, tema y sesión. Contenido máximo de 1600 px con padding de 24–32 px. En tableta y móvil la navegación pasa a un panel deslizante con foco atrapado y cierre con Escape.
 
+**Ingreso.** Dos columnas 52/48 a altura completa: panel de marca luminoso con degradado crema-melocotón, logo oficial, mensaje "Toda tu operación. Un solo lugar." y el personaje como protagonista; formulario sobre superficie clara, ancho máximo 420 px, campos de 52 px con iconos, mostrar/ocultar contraseña dentro del input y botón primario de 52 px. La autenticación, los mensajes y las redirecciones no cambian.
+
+**Command Center.** Primero los indicadores operativos de pedidos, producción e inventario; después la actividad reciente y la atención requerida; los accesos rápidos quedan como sección secundaria. El panel de seguimiento del plan no vive en el dashboard. Las cifras sin fuente muestran un estado vacío explícito.
+
 **Marca.** El isotipo oficial "Los 4 Treros" se usa completo y sin recolorear (aro naranja, personaje y tipografía propios). La versión de interfaz es un WebP de 256 px con transparencia, para que funcione sobre superficies claras y oscuras; el favicon y el icono de iOS se generan del mismo archivo.
 
 **Componentes.** `AppSidebar`, `AppHeader`, `PageHeader`, `ModuleCard`, `StatCard`, `StatusBadge`, `EmptyState`, `SearchInput`, `FilterBar`, `DataTable`, `ConfirmDialog`, `LoadingSkeleton`, `NotificationItem`, `ResponsiveDrawer`, `PermissionGate`, `AIActionConfirmation` y `ToastProvider` viven en `apps/web/src/shared/ui/` o en el shell ERP. Las pantallas no redefinen botones, campos ni tarjetas.
+
+**Asistente (vista previa).** Burbuja fija en el borde inferior derecho con el personaje oficial; al abrirla, panel lateral de `clamp(13rem, 15vw, 24rem)` en escritorio (~15 % del ancho, con mínimo legible) y pantalla completa con botón "Volver" en móvil. Como el agente se integra en la entrega 8, el compositor está deshabilitado y el panel declara "sin conexión": no simula respuestas, conversaciones ni escrituras.
 
 **Honestidad de datos.** Los indicadores sin fuente real muestran "—" y explican qué entrega los activa. La apertura de paquetes sigue marcada como "Espera decisión P-06". El selector de sede es informativo mientras el backend no defina una sede activa por sesión: no filtra datos en el cliente.
 

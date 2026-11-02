@@ -4,6 +4,10 @@ import { adminRouter } from './admin/http/router.js';
 import type { InventoryUsage } from './catalog/application/ports.js';
 import { catalogRouter } from './catalog/http/router.js';
 import { inventoryRouter } from './inventory/http/router.js';
+import { distributionRouter } from './distribution/http/router.js';
+import { productionRouter } from './production/http/router.js';
+import { purchasingRouter } from './purchasing/http/router.js';
+import { salesRouter } from './sales/http/router.js';
 import { SqlInventoryUsage } from './inventory/infrastructure/repository.js';
 
 /**
@@ -31,5 +35,9 @@ export function registerModules(api: Router, deps: AppDeps, overrides: ModuleOve
       inventoryUsage,
     }),
   );
-  api.use(inventoryRouter({ db: deps.db }));
+  api.use(inventoryRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(purchasingRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(productionRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(salesRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(distributionRouter({ db: deps.db, idempotency: deps.idempotency }));
 }

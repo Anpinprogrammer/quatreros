@@ -11,7 +11,9 @@
 | G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md` |
 | Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                 |
 | **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                   |
-| **Entrega 2**: catálogo e inventario                                          | **En curso.** 2a y 2b terminadas; sigue 2c (FEFO y traslados)             |
+| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                       |
+| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                            |
+| **Entrega 4**: producción                                                     | **Terminada.** Sigue la entrega 5 (pedidos y reparto)                     |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -69,56 +71,51 @@
 - **Verificación:** `pnpm check`, `pnpm build`, E2E de acceso y catálogo en escritorio/tableta/móvil, y axe AA en claro (tres tamaños) y oscuro (ERP). Capturas de revisión en el reporte de Playwright.
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
+- **Asistente:** burbuja y panel de Quatreros AI implementados como **vista previa** (15 % del ancho en escritorio, pantalla completa con "Volver" en móvil). El compositor está deshabilitado hasta la entrega 8; no hay respuestas simuladas.
+- **Ingreso:** rediseño luminoso 52/48, logo oficial, personaje de Los 4 Treros, formulario de 52 px con iconos y control de contraseña integrado. La atmósfera clara se conserva aunque el sistema esté en oscuro.
+- **Command Center y header:** KPIs reales de pedidos, producción y FEFO (ventas del día en estado vacío), operación con pedidos/producción y atención requerida, accesos rápidos compactos. El header agrupa colapso, migas, búsqueda, sedes, notificaciones y menú de usuario; tema y cierre de sesión viven en el menú. Se retiró el panel de plan del dashboard.
 
-## 2. Siguiente tarea: entrega 2c, FEFO y traslados
+## 2. Siguiente tarea: entrega 6, caja (POS)
 
-**Estado al 2026-11-02:** 2a y 2b terminadas y verificadas. Sigue la 2c, que cierra la entrega 2 y permite demostrar el recorrido completo del inventario.
+**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3, 4 y 5 terminadas y verificadas. Sigue la 6: turnos de caja, venta de mostrador, pagos mixtos y cierre.
 
-**Objetivo demostrable de 2c:**
+### Hecho en 5: pedidos y reparto
 
-- Asignación FEFO de lotes por vencimiento más próximo en toda salida.
-- Excepción FEFO con motivo y aprobación (AP-03, Q-INV-03).
-- Traslado bodega → punto de venta con salida, estado en tránsito y recepción en destino.
-- Novedad cuando lo recibido difiere de lo enviado (BR-089, PROVISIONAL).
-- Tarjeta "Alertas FEFO" del Command Center con datos reales.
+- Especificación `docs/04-specifications/com/pedidos-reparto.md`; DEC-098 reservas por lote, DEC-099 crédito con advertencia y DEC-100 recaudos.
+- Clientes con datos de entrega y crédito (cupo/plazo) configurable por el Administrador.
+- Pedido confirmado con precio vigente congelado y reserva FEFO por lote; si falta existencia queda el faltante señalado.
+- Cupo usado = cartera abierta + pedidos a crédito no entregados; exceso o mora generan advertencia, no bloqueo.
+- Despacho con pedidos confirmados, distribuidor y salida a "En ruta"; reservas consumidas.
+- Portal móvil del distribuidor con entrega total/parcial, recaudo efectivo/transferencia y devolución.
+- Obligación a crédito al entregar, con vencimiento entrega + plazo; abono opcional.
+- Devolución a "En inspección" y reincorporación a la bodega; descarte pendiente AP-08.
+- Pantallas **03. Distribución → Clientes, pedidos y despachos** y portal **Ruta**.
+- Semilla: dos clientes, `P-0001` a crédito y `D-0001` preparado para `reparto@`.
+- **RF-153 (cancelación/descuentos) P-09 y RF-186 (liquidación) P-08 siguen fuera.**
 
-Procedimiento: skill `.claude/skills/quatreros-entrega`.
+### Objetivo demostrable de la entrega 6
 
-### RF que quedan en la entrega 2
+- Abrir turno de caja con base de efectivo.
+- Vender producto fabricado y platos preparados con precio vigente y pago mixto.
+- Descontar inventario de producto terminado desde la ubicación del POS con FEFO.
+- Registrar el consumo teórico de platos sin descontar automáticamente cocina (BR-147, Q-B-09).
+- Cerrar turno con efectivo esperado, contado y diferencia justificada.
+- Dejar fuera la facturación fiscal (P-02), descuentos/anulaciones (P-09) y clasificación de mermas (P-07).
 
-| RF     | Tema                       | Estado                                    | Ojo con                                                       |
-| ------ | -------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
-| RF-112 | Asignación FEFO            | CONFIRMED                                 | Orden por vencimiento y bloqueo determinista                  |
-| RF-113 | Excepción FEFO             | CONFIRMED                                 | Q-INV-03; usa el motor de aprobaciones (RF-007)               |
-| RF-114 | Traslado entre ubicaciones | CONFIRMED · tránsito PROVISIONAL (Q-B-07) | Q-POS-01; recepción y novedad                                 |
-| RF-117 | Bloqueo de lotes           | PROPOSED                                  | Depende de P-05: **no implementar** más allá de lo conceptual |
+### RF de la entrega 6
 
-**Hecho en 2a:** RF-030, RF-031 y RF-032 (`cat/catalogo.md`).
-**Hecho en 2b:** RF-110, RF-111 (DEC-089) y RF-118 (`inv/existencias.md`).
-**Movido:** RF-033 (recetas) a la entrega 4 por DEC-092.
+| RF     | Tema                     | Estado             | Ojo con                                           |
+| ------ | ------------------------ | ------------------ | ------------------------------------------------- |
+| RF-220 | Apertura de turno        | CONFIRMED          | Un turno abierto por caja y por cajero            |
+| RF-221 | Venta de mostrador       | CONFIRMED          | Precio vigente; producto y plato; FEFO            |
+| RF-222 | Pagos mixtos y cambio    | CONFIRMED          | Suma de pagos = total; efectivo y transferencia   |
+| RF-223 | Cierre de turno y arqueo | CONFIRMED          | Esperado vs contado; diferencia con justificación |
+| RF-224 | Revisión de diferencias  | CONFIRMED          | Supervisor distinto del cajero                    |
+| RF-225 | Platos y consumo teórico | CONFIRMED · Q-B-09 | Sin descuento automático de cocina hasta decisión |
+| RF-226 | Conteos de cocina        | PENDING (P-07)     | **No implementar** clasificación ni ajustes       |
+| RF-227 | Documento al cliente     | BLOCKED (P-02)     | No se emite factura; solo comprobante interno     |
 
-**Fuera de la entrega 2 (bloqueado):**
-
-- RF-116, apertura de paquetes (P-06).
-- RF-119, vencidos y retiros (P-05).
-
-**Reglas provisionales aplicables (DEC-083):**
-
-- Q-B-07: estados "en tránsito" y "en ruta".
-- Q-B-08: no se permiten existencias negativas.
-
-Impleméntalas configurables y señalizadas.
-
-### Orden sugerido
-
-1. ✅ **2a. Catálogo:** RF-030 a RF-032. Spec `docs/04-specifications/cat/catalogo.md`.
-2. ✅ **2b. Lotes, existencias y kardex:** RF-110, RF-111 y RF-118. Spec `docs/04-specifications/inv/existencias.md`.
-3. **2c. FEFO y traslados:** RF-112 a RF-114.
-   - Especificación en `docs/04-specifications/inv/fefo-traslados.md`.
-   - Implementar `allocateFefo()` con `FOR UPDATE` en orden determinista, `transfer()` con ubicación en tránsito y `receive()` con recepción y novedad.
-   - La excepción FEFO usa el motor de aprobaciones; no inventar umbrales.
-   - Pantallas: traslado desde existencias, recepción en destino, existencias en Caja (solo lectura hasta la entrega 6) y tarjeta de alertas FEFO en el Command Center.
-   - Semilla: un traslado de ejemplo bodega → punto de venta.
+Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/pos/caja.md` y esperar aprobación.
 
 En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
 

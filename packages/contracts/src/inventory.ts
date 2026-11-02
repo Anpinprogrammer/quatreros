@@ -250,3 +250,101 @@ export const LotPage = pageOf(LotSummary);
 export type LotPage = z.infer<typeof LotPage>;
 export const MovementPage = pageOf(StockMovementView);
 export type MovementPage = z.infer<typeof MovementPage>;
+
+export const TransferStatus = z.enum(['in_transit', 'received', 'received_with_variance']);
+export type TransferStatus = z.infer<typeof TransferStatus>;
+
+export const TRANSFER_STATUS_LABELS: Record<TransferStatus, string> = {
+  in_transit: 'En tránsito',
+  received: 'Recibido',
+  received_with_variance: 'Recibido con novedad',
+};
+
+export const NonNegativeQuantity = z
+  .string()
+  .regex(/^\d{1,11}(\.\d{1,3})?$/, 'Cantidad inválida')
+  .describe('Cantidad no negativa como cadena decimal');
+
+export const FefoAllocationView = z.object({
+  lotId: Uuid,
+  code: z.string(),
+  expiresOn: BusinessDate.nullable(),
+  quantity: Quantity,
+  baseQuantity: Quantity,
+});
+export type FefoAllocationView = z.infer<typeof FefoAllocationView>;
+
+export const FefoAllocationRequest = z.object({
+  presentationId: Uuid,
+  locationId: Uuid,
+  quantity: Quantity,
+});
+export type FefoAllocationRequest = z.input<typeof FefoAllocationRequest>;
+
+export const FefoAllocationResponse = z.object({
+  data: z.object({
+    allocations: z.array(FefoAllocationView),
+    baseQuantity: Quantity,
+    baseUnit: BaseUnit,
+  }),
+});
+export type FefoAllocationResponse = z.infer<typeof FefoAllocationResponse>;
+
+export const TransferLineView = z.object({
+  id: Uuid,
+  lotId: Uuid,
+  lotCode: z.string(),
+  presentationId: Uuid,
+  presentationName: z.string(),
+  itemName: z.string(),
+  sentQuantity: Quantity,
+  receivedQuantity: NonNegativeQuantity.nullable(),
+  expiresOn: BusinessDate.nullable(),
+});
+export type TransferLineView = z.infer<typeof TransferLineView>;
+
+export const TransferSummary = z.object({
+  id: Uuid,
+  number: z.string(),
+  fromLocationId: Uuid,
+  fromLocationName: z.string(),
+  fromSiteName: z.string(),
+  toLocationId: Uuid,
+  toLocationName: z.string(),
+  toSiteName: z.string(),
+  status: TransferStatus,
+  sentByName: z.string().nullable(),
+  sentAt: z.iso.datetime({ offset: true }),
+  receivedByName: z.string().nullable(),
+  receivedAt: z.iso.datetime({ offset: true }).nullable(),
+  lineCount: z.number().int(),
+  totalSent: Quantity,
+});
+export type TransferSummary = z.infer<typeof TransferSummary>;
+
+export const TransferDetail = TransferSummary.extend({ lines: z.array(TransferLineView) });
+export type TransferDetail = z.infer<typeof TransferDetail>;
+
+export const CreateTransferRequest = z.object({
+  fromLocationId: Uuid,
+  toLocationId: Uuid,
+  lines: z.array(z.object({ presentationId: Uuid, quantity: Quantity })).min(1, 'Agrega al menos una línea'),
+});
+export type CreateTransferRequest = z.input<typeof CreateTransferRequest>;
+
+export const ReceiveTransferRequest = z.object({
+  lines: z
+    .array(z.object({ lineId: Uuid, receivedQuantity: NonNegativeQuantity }))
+    .min(1, 'Confirma al menos una línea'),
+});
+export type ReceiveTransferRequest = z.input<typeof ReceiveTransferRequest>;
+
+export const TransferListQuery = PageQuery.extend({
+  status: TransferStatus.optional(),
+  from: BusinessDate.optional(),
+  to: BusinessDate.optional(),
+});
+export type TransferListQuery = z.input<typeof TransferListQuery>;
+
+export const TransferPage = pageOf(TransferSummary);
+export type TransferPage = z.infer<typeof TransferPage>;
