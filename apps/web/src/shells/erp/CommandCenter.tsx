@@ -129,8 +129,9 @@ function ListSkeleton({ rows = 3, label }: { rows?: number; label: string }) {
 
 function InlineEmpty({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="p-4">
-      <EmptyState compact title={title} {...(description ? { description } : {})} />
+    <div className="px-4 py-4">
+      <p className="text-body font-semibold text-ink">{title}</p>
+      {description ? <p className="mt-0.5 text-caption text-ink-2">{description}</p> : null}
     </div>
   );
 }
@@ -227,9 +228,9 @@ function ModuleAccessCard({ module, path, usable }: { module: ModuleEntry; path:
           <StatusBadge status={module.status} />
         )}
       </div>
-      <h3 className="mt-3 font-display text-card font-semibold text-ink">{module.name}</h3>
-      <p className="mt-1 line-clamp-2 text-caption leading-5 text-ink-2">{module.description}</p>
-      <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-3">
+      <h3 className="mt-2.5 font-display text-[15px] leading-5 font-semibold text-ink">{module.name}</h3>
+      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-ink-2">{module.description}</p>
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-2.5">
         <span className="text-[11px] font-medium text-ink-3">
           {usable ? 'Abrir módulo' : 'No disponible'}
         </span>
@@ -248,14 +249,14 @@ function ModuleAccessCard({ module, path, usable }: { module: ModuleEntry; path:
   if (usable) {
     return (
       <Link to={path} className="group block h-full rounded-2xl focus-visible:outline-offset-4">
-        <Panel className="flex h-full flex-col p-4 transition-[border-color,box-shadow,transform] duration-200 group-hover:-translate-y-0.5 group-hover:border-brand/40 group-hover:shadow-float motion-reduce:transform-none">
+        <Panel className="flex h-full flex-col p-3.5 transition-[border-color,box-shadow,transform] duration-200 group-hover:-translate-y-0.5 group-hover:border-brand/40 group-hover:shadow-float motion-reduce:transform-none">
           {body}
         </Panel>
       </Link>
     );
   }
 
-  return <Panel className="flex h-full flex-col p-4">{body}</Panel>;
+  return <Panel className="flex h-full flex-col p-3.5">{body}</Panel>;
 }
 
 function ModulesTab({ me }: { me: MeResponse }) {
@@ -450,16 +451,13 @@ function ActiveProductionCard({
 
 function CapabilityTile({ icon: Icon, title, status }: { icon: LucideIcon; title: string; status: string }) {
   return (
-    <Panel className="flex items-center gap-2.5 p-3">
-      <span
-        aria-hidden
-        className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface-2 text-ink-3"
-      >
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1 truncate text-caption font-semibold text-ink">{title}</span>
-      <Badge tone="neutral">{status}</Badge>
-    </Panel>
+    <div className="rounded-lg border border-line bg-surface-2/50 px-2 py-1.5" title={`${title}: ${status}`}>
+      <p className="flex items-center gap-1.5 text-[11px] font-semibold text-ink">
+        <Icon aria-hidden className="size-3.5 shrink-0 text-ink-3" />
+        <span className="truncate">{title}</span>
+      </p>
+      <p className="mt-0.5 pl-5 text-[10px] text-ink-3">{status}</p>
+    </div>
   );
 }
 
@@ -744,22 +742,22 @@ function BoardTab({ me }: { me: MeResponse }) {
                 </ul>
               )}
             </section>
-          </Panel>
-        </div>
-      </section>
 
-      <section aria-labelledby="otras-areas">
-        <div className="mb-2.5 flex items-center justify-between">
-          <h2 id="otras-areas" className="font-display text-title font-bold text-ink">
-            Otras áreas
-          </h2>
-          <span className="text-caption text-ink-3">Estado de los módulos pendientes</span>
-        </div>
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          <CapabilityTile icon={Wallet} title="Caja POS" status="Sin datos" />
-          <CapabilityTile icon={CreditCard} title="Crédito y cartera" status="No disponible" />
-          <CapabilityTile icon={ShieldCheck} title="Aprobaciones" status="No disponible" />
-          <CapabilityTile icon={Sparkles} title="Sugerencia de IA" status="Sin conexión" />
+            <section aria-labelledby="otras-areas" className="border-t border-line p-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <h4 id="otras-areas" className="text-body font-semibold text-ink">
+                  Otras áreas
+                </h4>
+                <span className="text-[10px] text-ink-3">Módulos pendientes</span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                <CapabilityTile icon={Wallet} title="Caja POS" status="Sin datos" />
+                <CapabilityTile icon={CreditCard} title="Crédito y cartera" status="No disponible" />
+                <CapabilityTile icon={ShieldCheck} title="Aprobaciones" status="No disponible" />
+                <CapabilityTile icon={Sparkles} title="Sugerencia de IA" status="Sin conexión" />
+              </div>
+            </section>
+          </Panel>
         </div>
       </section>
     </div>
