@@ -28,6 +28,11 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const section = SECTIONS.find((s) => s.id === 'produccion');
 
+const primaryActionClass =
+  'inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-brand px-5 text-action font-bold text-white shadow-brand transition-colors duration-200 hover:bg-brand-hover';
+const secondaryActionClass =
+  'inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-line-strong bg-surface px-5 text-action font-semibold text-ink transition-colors duration-200 hover:border-ink-3 hover:bg-surface-2';
+
 /**
  * Pantalla de Producción (RF-030, DEC-091, DEC-093).
  * Muestra datos reales del catálogo y estados vacíos honestos para lo que aún no existe.
@@ -81,22 +86,24 @@ export function ProductionPage({ me }: { me: MeResponse }) {
         title="Producción"
         description="Gestiona tus productos, órdenes y existencias desde un solo lugar."
         actions={
-          canProduction ? (
-            <Link
-              to="/erp/produccion"
-              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-brand px-5 text-action font-bold text-white shadow-brand transition-colors duration-200 hover:bg-brand-hover"
-            >
-              Abrir órdenes
-              <ArrowUpRight aria-hidden className="size-5" />
-            </Link>
-          ) : canCatalog ? (
-            <Link
-              to="/erp/catalogo"
-              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-brand px-5 text-action font-bold text-white shadow-brand transition-colors duration-200 hover:bg-brand-hover"
-            >
-              Abrir catálogo
-              <ArrowUpRight aria-hidden className="size-5" />
-            </Link>
+          canProduction || canCatalog ? (
+            <div className="flex flex-wrap gap-2">
+              {canProduction ? (
+                <Link to="/erp/produccion" className={primaryActionClass}>
+                  Abrir órdenes
+                  <ArrowUpRight aria-hidden className="size-5" />
+                </Link>
+              ) : null}
+              {canCatalog ? (
+                <Link
+                  to="/erp/catalogo"
+                  className={canProduction ? secondaryActionClass : primaryActionClass}
+                >
+                  {canProduction ? 'Catálogo' : 'Abrir catálogo'}
+                  <ArrowUpRight aria-hidden className="size-5" />
+                </Link>
+              ) : null}
+            </div>
           ) : (
             <Badge tone="neutral">Tu rol no administra el catálogo</Badge>
           )
