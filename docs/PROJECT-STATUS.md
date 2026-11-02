@@ -1,6 +1,6 @@
 # Estado del proyecto Quatreros
 
-> Actualizado: 2026-10-29
+> Actualizado: 2026-11-02
 
 | Etapa                         | Entregable                                                                               | Estado                                                                                                                                                            |
 | ----------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -11,7 +11,7 @@
 | D — Diseño IA                 | `docs/02-architecture/ai-architecture.md`                                                | **Completado (diseño)** — benchmark de modelo pendiente antes de la demo                                                                                          |
 | E — Telegram                  | `docs/02-architecture/telegram-architecture.md`                                          | **Completado (diseño)** — alcance sin IA propuesto, espera Q-C-04                                                                                                 |
 | F — Preparación del proyecto  | Monorepo, API base, web base, CI/CD, Docker, respaldos (verificado)                      | **Completado** — base verificada                                                                                                                                  |
-| G — Roadmap                   | `docs/03-planning/roadmap-prototipo.md`                                                  | **En curso** — entrega 1 terminada (ingreso, usuarios, roles, sedes); sigue la 2 (ver `docs/HANDOFF.md`)                                                          |
+| G — Roadmap                   | `docs/03-planning/roadmap-prototipo.md`                                                  | **En curso** — entrega 1 terminada; entrega 2 en curso (2a catálogo terminada); sigue 2b (ver `docs/HANDOFF.md`)                                                  |
 | Sistema de diseño             | `docs/05-design/sistema-de-diseno.md` (original en `docs/05-design/original/`)           | **Adoptado (DEC-086)** — base visual única; entrega 1 rehecha con él; isotipo oficial pendiente                                                                   |
 | Asistente Quatreros AI        | `quatreros-ai/` (agente Managed Agents) · `docs/02-architecture/ai-architecture.md` v0.2 | **Configuración versionada y arquitectura integrada (DEC-087, ADR-023)**; sin integración funcional (entrega 8); primer `ant apply` espera autorización (Q-IA-04) |
 | Contabilidad (implementación) | —                                                                                        | **Bloqueado** por P-01..P-04                                                                                                                                      |
@@ -21,6 +21,7 @@
 | Entrega | Contenido                                                                                                                                                                                                                           | Verificación                                                                                                           |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | 1 ✅    | Ingreso con correo y contraseña, segundo factor (TOTP) obligatorio para ADM/MGR/CONT, cada rol a su pantalla (ERP, Caja, Ruta), gestión de usuarios con roles y sedes, desactivar/reactivar con protección del último administrador | 49 unitarias, 27 integración (PGlite y PostgreSQL 17), 22 E2E (flujos + accesibilidad axe) en escritorio/tableta/móvil |
+| 2a ✅   | Catálogo y precios: productos fabricados y preparados, presentaciones, materias primas, precio vigente con histórico y auditoría, pantalla en 04. Producción                                                                        | 59 unitarias, 41 integración (incluida concurrencia en PostgreSQL 17), 32 E2E con axe en tres tamaños                  |
 
 Cómo mostrarlo en local: `docs/operations/demo-local.md`.
 

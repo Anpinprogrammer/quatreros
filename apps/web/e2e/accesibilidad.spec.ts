@@ -50,3 +50,18 @@ test('ERP: Command Center y secciones', async ({ page }, info) => {
   await page.goto('/erp/seccion/produccion');
   await audit(page, info, 'seccion-produccion');
 });
+
+test('ERP: catálogo y ficha de producto', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/catalogo');
+  await audit(page, info, 'catalogo-productos');
+  await page.getByRole('tab', { name: 'Materias primas' }).click();
+  await audit(page, info, 'catalogo-materias-primas');
+  await page.getByRole('tab', { name: 'Productos' }).click();
+  await page
+    .getByRole('link', { name: /Abrir ficha y precios/ })
+    .first()
+    .click();
+  await audit(page, info, 'producto');
+});

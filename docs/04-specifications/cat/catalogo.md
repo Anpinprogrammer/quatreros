@@ -1,9 +1,9 @@
 # Especificación — Entrega 2a: catálogo, presentaciones y precios
 
-> Estado: **BORRADOR para revisión del responsable** · 2026-11-02
+> Estado: **APROBADA E IMPLEMENTADA** · 2026-11-02
 > Cubre RF-030, RF-031 y RF-032. Decisiones aplicables: DEC-015, DEC-020, DEC-090, DEC-091.
 > Reglas `PROVISIONAL` (DEC-083): composición de paquete inmutable (BR-021) y precio de paquete independiente del de unidad (BR-025).
-> La implementación no empieza hasta que esta especificación esté aprobada.
+> Aprobada por el responsable el 2026-11-02. RF-033 se movió a la entrega 4 (DEC-092).
 
 ## 1. Objetivo y alcance
 
@@ -245,18 +245,18 @@ Ficticios, cargados por `modules/catalog/infrastructure/seed.ts` desde `cli/seed
 | Rellena Mixta        | Fabricado | unidad      | 30 días   | Unidad 1.200,00 · Paquete x10 11.000,00 |
 | Picada Quatreros XL  | Preparado | unidad      | —         | Porción 45.000,00                       |
 
-| Materia prima        | Unidad | Controla vencimiento |
-| -------------------- | ------ | -------------------- |
-| Carne de cerdo magra | kg     | Sí                   |
-| Tocino y grasa       | kg     | Sí                   |
-| Mix de especias      | kg     | Sí                   |
-| Tripa natural        | metro  | Sí                   |
+| Materia prima        | Unidad    | Controla vencimiento |
+| -------------------- | --------- | -------------------- |
+| Carne de cerdo magra | kg        | Sí                   |
+| Tocino y grasa       | kg        | Sí                   |
+| Mix de especias      | kg        | Sí                   |
+| Tripa natural        | m (metro) | Sí                   |
 
 El histórico de "Chorizo Santarrosano · Unidad" conserva un precio anterior (1.200,00 vigente hasta el 2026-10-01) para mostrar la pantalla de histórico. Los empaques **no** se siembran: el glosario aún no confirma si son materia prima (`Insumo` PROPOSED).
 
 ## 10. Alcance pendiente de aprobación
 
-**RF-033 (recetas).** Se propone moverlo a la entrega 4 (producción): las recetas solo se usan al crear órdenes, y en 2a no hay materias primas con lote ni forma de probarlas de punta a punta. Si el responsable prefiere mantenerlo en 2a, se agregan `recipes`, `recipe_versions` y `recipe_lines` con versión vigente única y pruebas propias; no cambia el resto de esta especificación.
+**RF-033 (recetas).** Se movió a la entrega 4 (producción) por DEC-092: las recetas solo se usan al crear órdenes, y en 2a no hay materias primas con lote ni forma de probarlas de punta a punta. La entrega 4 agrega `recipes`, `recipe_versions` y `recipe_lines` con versión vigente única y pruebas propias.
 
 **Empaques como materia prima.** Queda fuera de la semilla hasta confirmar el término en el glosario (`Insumo` PROPOSED). El modelo lo admite sin cambios: sería una materia prima con `tracks_expiry = false`.
 
@@ -271,3 +271,5 @@ El histórico de "Chorizo Santarrosano · Unidad" conserva un precio anterior (1
 - Semilla demo y pantallas en `/erp/catalogo`; módulo `available` en `shared/modules.ts`.
 - `pnpm check`, integración con PGlite y PostgreSQL real, `pnpm build && pnpm db:reset:demo && pnpm test:e2e` en verde.
 - `PROJECT-STATUS.md`, roadmap, matriz de trazabilidad, `demo-local.md` y `HANDOFF.md` actualizados.
+
+**Verificación al cierre (2026-11-02):** `pnpm check` en verde (59 pruebas unitarias); 41 pruebas de integración, incluida concurrencia de precios en PostgreSQL 17 real; 32 E2E en escritorio, tableta y móvil, con axe sin hallazgos; migraciones `0004` y `0005` aplicadas desde una base vacía.

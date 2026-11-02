@@ -9,6 +9,9 @@ test.beforeAll(() => {
   if (!DEMO_PASSWORD) throw new Error('Define DEMO_PASSWORD (la misma usada en pnpm db:seed:demo)');
 });
 
+// Se comparte con el flujo de catálogo: el administrador ya tiene el segundo factor activo.
+let adminSecret = '';
+
 test('el cajero ingresa y queda en Caja', async ({ page }) => {
   await signIn(page, 'caja@quatreros.example');
   await expect(page).toHaveURL(/\/pos$/);
@@ -39,8 +42,8 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await page.getByLabel('Tu contraseña actual').fill(DEMO_PASSWORD);
   await page.getByRole('button', { name: 'Continuar' }).click();
   await expect(page.getByRole('img', { name: /Código QR/ })).toBeVisible();
-  const secret = (await page.getByTestId('clave-manual').getAttribute('data-key')) ?? '';
-  await page.getByLabel('Código de 6 dígitos que muestra la aplicación').fill(totp(secret));
+  adminSecret = (await page.getByTestId('clave-manual').getAttribute('data-key')) ?? '';
+  await page.getByLabel('Código de 6 dígitos que muestra la aplicación').fill(totp(adminSecret));
   await page.getByRole('button', { name: 'Activar' }).click();
   await expect(page.getByText('Verificación en dos pasos activada.')).toBeVisible();
   await page.getByRole('button', { name: 'Ya los guardé, continuar' }).click();
@@ -74,7 +77,7 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   // Un nuevo ingreso del administrador pide el código antes de entrar.
   await signOut(page);
   await signIn(page, 'admin@quatreros.example');
-  await page.getByLabel('Código de 6 dígitos').fill(totp(secret));
+  await page.getByLabel('Código de 6 dígitos').fill(totp(adminSecret));
   await page.getByRole('button', { name: 'Verificar' }).click();
   await expect(page).toHaveURL(/\/erp$/);
 
@@ -94,4 +97,64 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await signIn(page, email);
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page).toHaveURL(/\/ingresar/);
+});
+
+test('administrador: crea producto, presentaciones y precios', async ({ page }, info) => {
+  test.skip(info.project.name !== 'escritorio', 'El flujo de administración se valida en escritorio');
+  test.skip(!adminSecret, 'Requiere el flujo de configuración del segundo factor');
+
+  await signIn(page, 'admin@quatreros.example');
+  await page.getByLabel('Código de 6 dígitos').fill(totp(adminSecret));
+  await page.getByRole('button', { name: 'Verificar' }).click();
+  await expect(page).toHaveURL(/\/erp$/);
+
+  await page
+    .getByRole('navigation', { name: 'Secciones' })
+    .getByRole('link', { name: /Producción/ })
+    .click();
+  await page.getByRole('link', { name: /Catálogo y precios/ }).click();
+  await expect(page.getByRole('heading', { name: 'Catálogo y precios' })).toBeVisible();
+
+  const stamp = String(Date.now());
+  const productName = `Chorizo Prueba ${stamp}`;
+  await page.getByRole('button', { name: 'Crear producto' }).click();
+  const productForm = page.getByRole('form', { name: 'Crear producto' });
+  await productForm.getByLabel('Nombre').fill(productName);
+  await productForm.getByLabel('Vida útil (días)').fill('30');
+  await productForm.getByRole('button', { name: 'Crear producto' }).click();
+  await expect(page.getByText(`${productName} quedó en el catálogo.`)).toBeVisible();
+
+  await page.getByRole('link', { name: new RegExp(productName) }).click();
+  await expect(page.getByRole('heading', { name: productName })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Agregar presentación' }).click();
+  const unitForm = page.getByRole('form', { name: 'Agregar presentación' });
+  await unitForm.getByLabel('Nombre').fill('Unidad');
+  await unitForm.getByLabel('Unidades base por presentación').fill('1');
+  await unitForm.getByRole('button', { name: 'Agregar presentación' }).click();
+  await expect(page.getByText('Presentación Unidad agregada.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Agregar presentación' }).click();
+  const packageForm = page.getByRole('form', { name: 'Agregar presentación' });
+  await packageForm.getByLabel('Nombre').fill('Paquete x10');
+  await packageForm.getByLabel('Unidades base por presentación').fill('10');
+  await packageForm.getByRole('button', { name: 'Agregar presentación' }).click();
+  await expect(page.getByText('Presentación Paquete x10 agregada.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Cambiar precio de Unidad' }).click();
+  const priceForm = page.getByRole('form', { name: 'Cambiar precio de Unidad' });
+  await priceForm.getByLabel('Precio (COP)').fill('1300.00');
+  await priceForm.getByRole('button', { name: 'Guardar precio' }).click();
+  await expect(page.getByText('Precio de Unidad actualizado.')).toBeVisible();
+  await expect(page.getByText(/1\.300/).first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Ver histórico de precios de Unidad' }).click();
+  await expect(page.getByText('Vigente', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Cambiar precio de Unidad' }).click();
+  const newPriceForm = page.getByRole('form', { name: 'Cambiar precio de Unidad' });
+  await newPriceForm.getByLabel('Precio (COP)').fill('1400.00');
+  await newPriceForm.getByRole('button', { name: 'Guardar precio' }).click();
+  await expect(page.getByText('Precio de Unidad actualizado.')).toBeVisible();
+  await expect(page.getByText(/1\.400/).first()).toBeVisible();
 });

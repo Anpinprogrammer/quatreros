@@ -85,6 +85,14 @@ export const SECTIONS: Section[] = [
     path: '/erp/seccion/produccion',
     modules: [
       {
+        id: 'catalogo',
+        name: 'Catálogo y precios',
+        description: 'Productos, presentaciones, materias primas y precios con histórico',
+        status: { kind: 'available' },
+        path: '/erp/catalogo',
+        permission: 'cat.product.read',
+      },
+      {
         id: 'ordenes',
         name: 'Órdenes de producción',
         description: 'Recetas, consumo real por lote y rendimiento',

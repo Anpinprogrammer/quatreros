@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref } from 'react';
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref, SelectHTMLAttributes } from 'react';
 import { useId, useState } from 'react';
 
 /**
@@ -26,7 +26,10 @@ export function Button({
   variant = 'primary',
   className = '',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; ref?: Ref<HTMLButtonElement> }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant;
+  ref?: Ref<HTMLButtonElement>;
+}) {
   return (
     <button
       type="button"
@@ -69,6 +72,99 @@ export function TextField({ label, error, hint, className = '', addon, ...props 
           {hint}
         </p>
       ) : null}
+      {error ? (
+        <p id={`${id}-error`} className="text-caption font-semibold text-red-400">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  label: string;
+  error?: string | undefined;
+  hint?: string;
+  options: { value: string; label: string }[];
+  ref?: Ref<HTMLSelectElement>;
+};
+
+/** Selección simple con los mismos tokens, borde y altura que TextField (Anexo A). */
+export function SelectField({ label, error, hint, options, className = '', ...props }: SelectFieldProps) {
+  const id = useId();
+  const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(' ');
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-body font-semibold text-chalk">
+        {label}
+      </label>
+      <select
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy || undefined}
+        {...props}
+        className={`min-h-12 rounded-xl border bg-char px-3 text-base text-chalk sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {hint ? (
+        <p id={`${id}-hint`} className="text-caption text-ash">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={`${id}-error`} className="text-caption font-semibold text-red-400">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Casilla única (p. ej. "controla vencimiento") con el mismo foco Ember del kit. */
+export function CheckboxField({
+  label,
+  hint,
+  checked,
+  onChange,
+  error,
+  disabled,
+}: {
+  label: string;
+  hint?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  error?: string | undefined;
+  disabled?: boolean;
+}) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label
+        htmlFor={id}
+        className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-grill bg-char px-3 transition-colors duration-200 hover:border-control"
+      >
+        <input
+          id={id}
+          type="checkbox"
+          className="size-5 accent-ember"
+          checked={checked}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+          onChange={(e) => {
+            onChange(e.target.checked);
+          }}
+        />
+        <span>
+          {label}
+          {hint ? <span className="block text-caption text-ash">{hint}</span> : null}
+        </span>
+      </label>
       {error ? (
         <p id={`${id}-error`} className="text-caption font-semibold text-red-400">
           {error}

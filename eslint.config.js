@@ -13,6 +13,9 @@ export default tseslint.config(
       '**/drizzle/**',
       'docs/**',
       '**/playwright-report/**',
+      // Artefactos locales del harness de agentes, no forman parte del proyecto.
+      '.agents/**',
+      'skills-lock.json',
     ],
   },
   js.configs.recommended,

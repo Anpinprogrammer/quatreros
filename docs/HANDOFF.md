@@ -1,4 +1,4 @@
-# Traspaso — estado al 2026-10-29
+# Traspaso — estado al 2026-11-02
 
 > Para el siguiente agente o desarrollador. Léelo después de `AGENTS.md`. Actualízalo al terminar cada trabajo.
 
@@ -11,7 +11,7 @@
 | G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md` |
 | Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                 |
 | **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                   |
-| **Entrega 2**: catálogo e inventario                                          | **Siguiente.** No iniciada                                                |
+| **Entrega 2**: catálogo e inventario                                          | **En curso.** 2a (catálogo) terminada; sigue 2b (existencias y kardex)    |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -28,39 +28,56 @@
 - 22 E2E: flujos más accesibilidad axe en escritorio, tableta y celular.
 - CI en verde.
 
+**Entrega 2a en detalle** (spec: `docs/04-specifications/cat/catalogo.md`, DEC-090..092):
+
+- Productos fabricados y preparados, presentaciones y materias primas, con unidad base y vida útil.
+- Precio único vigente por presentación, con histórico, cierre de vigencia y auditoría.
+- Permisos por rol: el administrador gestiona productos y precios; manager y comprador gestionan materias primas; el resto lee.
+- Pantalla en **04. Producción → Catálogo y precios**, con pestañas de productos y materias primas, formularios, estados vacíos y ficha con histórico.
+- Semilla demo: chorizo, rellena, picada, cuatro materias primas y un precio anterior para mostrar el histórico.
+
+**Verificación al cierre de 2a:** 59 pruebas unitarias; 41 de integración (incluida concurrencia de precios en PostgreSQL 17 real); 32 E2E con axe en escritorio, tableta y móvil; `pnpm check`, `pnpm build` y `pnpm test:e2e` en verde.
+
+### Entrega 2a en detalle técnico
+
+- Módulo `modules/catalog`: `domain/catalog.ts` (reglas puras), `application/catalog.ts` (casos de uso), `infrastructure/{schema,repository,seed}.ts`, `http/router.ts` y `application/public.ts` para el ToolGateway.
+- Puerto `InventoryUsage` (en 2a devuelve `false`): en 2b se implementa contra `stock_balances` y `stock_movements` para bloquear cambios de unidad o composición.
+- Migraciones `0004` (esquema `catalog`) y `0005` (permisos y FK lógica `price_history.set_by → admin.users`). La FK se declara en SQL para no importar el esquema de otro módulo.
+- Contratos en `packages/contracts/src/catalog.ts`; montos y cantidades como cadenas decimales.
+
 ### Quatreros AI (asistente, 2026-10-30)
 
 - El agente ya existe en Anthropic Console y su configuración está versionada en `quatreros-ai/` (DEC-087, ADR-023). Diseño de la integración: `docs/02-architecture/ai-architecture.md` v0.2.
 - **No está integrado funcionalmente.** No hay módulo `assistant` en el backend ni `ToolGateway`, y el agente no tiene herramientas: hoy solo puede conversar. La lista de lo que falta está en ai-architecture §15. Se construye en la entrega 8.
 - Desde la entrega 2, cada módulo nuevo debe dejar su caso de uso de lectura listo para envolverlo como herramienta (ai-architecture §2.1). **No declares herramientas en el agente ni ejecutes `ant apply`** sin autorización.
 
-## 2. Siguiente tarea: entrega 2, catálogo e inventario
+## 2. Siguiente tarea: entrega 2b, existencias y kardex
 
-**Objetivo demostrable:**
+**Estado al 2026-11-02:** la 2a (catálogo, precios y materias primas) está terminada y verificada. Sigue la 2b. La 2c (FEFO y traslados) va después.
 
-- Productos en unidad y paquete, materias primas y precios.
-- Existencias por lote y vencimiento, con salida FEFO.
-- Traslado bodega → punto de venta y trazabilidad de un lote.
+**Objetivo demostrable de 2b:**
+
+- Lotes de materia prima y producto terminado con fabricación y vencimiento.
+- Existencias por lote, presentación y ubicación, con saldos derivados de movimientos inmutables.
+- Kardex consultable con filtros y enlace al documento de origen.
+- Trazabilidad de lote hacia atrás (materias primas y proveedores) y lo que exista hacia adelante.
 
 Procedimiento: skill `.claude/skills/quatreros-entrega`.
 
-**Estado al 2026-11-02:** entorno local recreado y línea base en verde (`pnpm check`, 26 pruebas de integración). Decisiones DEC-089 (pantalla de kardex), DEC-090 (vida útil fija por producto) y DEC-091 (catálogo dentro de 04. Producción) registradas. Especificación 2a en **borrador para revisión**: `docs/04-specifications/cat/catalogo.md`. Falta aprobarla y decidir si RF-033 va en 2a o se mueve a la entrega 4.
+### RF que quedan en la entrega 2
 
-### RF incluidos y su estado
+| RF     | Tema                       | Estado                                    | Ojo con                                                       |
+| ------ | -------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
+| RF-110 | Consulta de existencias    | CONFIRMED                                 | —                                                             |
+| RF-111 | Kardex                     | CONFIRMED (DEC-089)                       | La pantalla ya está aprobada                                  |
+| RF-112 | Asignación FEFO            | CONFIRMED                                 | —                                                             |
+| RF-113 | Excepción FEFO             | CONFIRMED                                 | Q-INV-03; usa aprobaciones (RF-007)                           |
+| RF-114 | Traslado entre ubicaciones | CONFIRMED · tránsito PROVISIONAL (Q-B-07) | Q-POS-01                                                      |
+| RF-117 | Bloqueo de lotes           | PROPOSED                                  | Depende de P-05: **no implementar** más allá de lo conceptual |
+| RF-118 | Trazabilidad de lote       | CONFIRMED                                 | Hacia adelante no hay datos hasta las entregas 5 y 6          |
 
-| RF     | Tema                       | Estado                                    | Ojo con                                                               |
-| ------ | -------------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
-| RF-030 | Productos y presentaciones | CONFIRMED                                 | DEC-090: vida útil fija por producto, editable con permiso            |
-| RF-031 | Materias primas            | CONFIRMED                                 | Empaques como insumo no alimentario: confirmar término en el glosario |
-| RF-032 | Precios con histórico      | CONFIRMED                                 | Q-COM-03 (efecto en pedidos abiertos)                                 |
-| RF-033 | Recetas con versiones      | CONFIRMED                                 | Q-PRO-01 (subproductos). Puede pasar a la entrega 4 si alarga la 2    |
-| RF-110 | Consulta de existencias    | CONFIRMED                                 | —                                                                     |
-| RF-111 | Kardex                     | CONFIRMED (DEC-089)                       | —                                                                     |
-| RF-112 | Asignación FEFO            | CONFIRMED                                 | —                                                                     |
-| RF-113 | Excepción FEFO             | CONFIRMED                                 | Q-INV-03; usa aprobaciones (RF-007)                                   |
-| RF-114 | Traslado entre ubicaciones | CONFIRMED · tránsito PROVISIONAL (Q-B-07) | Q-POS-01                                                              |
-| RF-117 | Bloqueo de lotes           | PROPOSED                                  | Depende de P-05: **no implementar** más allá de lo conceptual         |
-| RF-118 | Trazabilidad de lote       | CONFIRMED                                 | —                                                                     |
+**Ya hecho en 2a:** RF-030, RF-031 y RF-032 (spec `cat/catalogo.md`).
+**Movido:** RF-033 (recetas) a la entrega 4 por DEC-092.
 
 **Fuera de la entrega 2 (bloqueado):**
 
@@ -74,15 +91,15 @@ Procedimiento: skill `.claude/skills/quatreros-entrega`.
 
 Impleméntalas configurables y señalizadas.
 
-### Orden sugerido (tres PRs)
+### Orden sugerido
 
-1. **2a. Catálogo:** RF-030 a RF-032 (y RF-033 si cabe).
-   - Especificación en `docs/04-specifications/cat/catalogo.md`.
-   - Módulo `modules/catalog`, contratos y semilla demo con productos reales de la empresa según el Documento Maestro: chorizo, rellena, paquete x10…
-   - Pantallas bajo la pestaña "04. Producción" (DEC-091).
+1. ✅ **2a. Catálogo:** RF-030 a RF-032. Terminada. Spec `docs/04-specifications/cat/catalogo.md`.
 2. **2b. Lotes, existencias y kardex:** RF-110, RF-111 y RF-118.
    - Especificación en `docs/04-specifications/inv/existencias.md`.
-   - Movimientos inmutables y saldos derivados (ADR-009); las cantidades en unidad base (DEC-P22).
+   - Movimientos inmutables y saldos derivados (ADR-009); cantidades en unidad base (DEC-P22).
+   - Implementar `InventoryUsage` contra `stock_balances` y `stock_movements`; el catálogo ya lo consulta.
+   - Sembrar existencias demo con movimientos `opening_balance`, nunca insertando saldos.
+   - Pantalla "Existencias" en 04. Producción y kardex desde la ficha del lote.
 3. **2c. FEFO y traslados:** RF-112 a RF-114.
    - Activa la tarjeta "Alertas FEFO" del Command Center con datos reales.
    - Muestra las existencias en Caja (solo lectura hasta la entrega 6).

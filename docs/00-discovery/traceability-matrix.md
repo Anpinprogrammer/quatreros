@@ -98,7 +98,7 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | Gestión de usuarios, roles, sedes, auditoría             | DEC-040..044                       | P-10 (solo matriz final; motor construible)     | 🟨                                           |
 | Catálogo, presentaciones y precios                       | DEC-015, DEC-020, DEC-090, DEC-091 | P-06 (apertura), P-09 (descuentos)              | 🟨                                           |
 | Compra → recepción de MP                                 | DEC-013, DEC-016, DEC-080          | Impuestos en compras P-02                       | 🟨                                           |
-| Receta → orden de producción → lote                      | DEC-010..013                       | P-03 (solo costeo)                              | 🟨                                           |
+| Receta → orden de producción → lote                      | DEC-010..013, DEC-092              | P-03 (solo costeo)                              | 🟨 (entrega 4)                               |
 | Movimientos, traslados, ajustes, FEFO                    | DEC-014, DEC-016, DEC-P21, DEC-089 | P-05 (vencidos)                                 | ✅                                           |
 | Pedido → despacho → entrega (parcial) → devolución       | DEC-023..026                       | Q-COM-04                                        | 🟨                                           |
 | Recaudo y liquidación de distribuidor                    | DEC-027                            | **P-08**                                        | 🟨                                           |
@@ -118,7 +118,7 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | Módulo   | BR                     | RF                     | Bloqueados / pendientes                                                                             |
 | -------- | ---------------------- | ---------------------- | --------------------------------------------------------------------------------------------------- |
 | ADM      | BR-001–010             | RF-001–008             | Umbrales AP (P-10) · RF-001/003/004/005 implementados y probados (entrega 1, `adm/acceso-usuarios`) |
-| CAT      | BR-020–025             | RF-030–033             | BR-024 (Q-COM-03)                                                                                   |
+| CAT      | BR-020–025             | RF-030–033             | RF-030–032 implementados (entrega 2a); RF-033 → entrega 4 (DEC-092); BR-024 (Q-COM-03)              |
 | COMP     | BR-040–044             | RF-050–053             | BR-044 (P-02)                                                                                       |
 | PROD     | BR-060–068             | RF-080–084             | BR-067 (Q-PRO-03), BR-068 (P-03)                                                                    |
 | INV      | BR-080–093             | RF-110–119             | BR-087/RF-119 (P-05), BR-090/RF-116 (P-06)                                                          |

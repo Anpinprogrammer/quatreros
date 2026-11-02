@@ -1,5 +1,7 @@
 import type { MeResponse } from '@quatreros/contracts';
 import { Link, NavLink, Route, Routes, useLocation, useParams } from 'react-router';
+import { CatalogPage } from '../../features/catalogo/CatalogPage';
+import { ProductPage } from '../../features/catalogo/ProductPage';
 import { UsersPage } from '../../features/usuarios/UsersPage';
 import { hasPermission } from '../../shared/auth/session';
 import {
@@ -142,6 +144,12 @@ export function ErpShell({ me }: { me: MeResponse }) {
           <Route path="seccion/:id" element={<SectionPage me={me} />} />
           {hasPermission(me, 'adm.user.read') ? (
             <Route path="usuarios" element={<UsersPage me={me} />} />
+          ) : null}
+          {hasPermission(me, 'cat.product.read') ? (
+            <Route path="catalogo" element={<CatalogPage me={me} />} />
+          ) : null}
+          {hasPermission(me, 'cat.product.read') ? (
+            <Route path="catalogo/productos/:id" element={<ProductPage me={me} />} />
           ) : null}
           <Route path="*" element={<NotFound />} />
         </Routes>
