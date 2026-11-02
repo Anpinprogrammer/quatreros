@@ -15,6 +15,7 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 | **Entrega 2**: catálogo e inventario                             | ✅ Terminada: 2a catálogo, 2b existencias y 2c FEFO/traslados |
 | **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción   |
 | **Entrega 4**: producción                                        | ✅ Terminada: recetas, consumo por lote y lote PT             |
+| **Entrega 5**: pedidos y reparto                                 | ✅ Terminada: reservas, despacho, entregas y recaudo          |
 | Entrega 8: Quatreros AI                                          | Configurada, sin integración funcional                        |
 
 ## 2. Dónde estamos (2026-11-02)
@@ -31,7 +32,8 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
   - `3363038` — isotipo oficial en la marca y el ingreso.
   - `38d7094` — FEFO y traslados con tránsito (entrega 2c).
   - `6961043` — compras, proveedores y recepción con lote MP (entrega 3).
-- Entorno local recreado, migraciones `0000`–`0016` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001` y `OP-0001`).
+  - `4d0dc93` — recetas, consumo y lote terminado (entrega 4).
+- Entorno local recreado, migraciones `0000`–`0021` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001` y `D-0001`).
 
 ### Entrega 2a (hecha)
 
@@ -83,13 +85,26 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Verificación: 80 unitarias, 71 integración (PGlite y PostgreSQL 17 real) y 56 E2E con axe.
 - **RF-080 (sugerencias) pendiente de Q-PRO-03; RF-084 (anulación) de P-09; costo del lote BLOCKED (P-03).**
 
-### Siguiente: entrega 5 (pedidos y reparto)
+### Entrega 5 (hecha)
 
-- RF-150 clientes, RF-151 pedido con precio/reserva, RF-152 seguimiento.
-- RF-180/181 despacho con FEFO y "en ruta", RF-182 portal móvil, RF-183 entrega parcial, RF-184 recaudo, RF-185 devolución a inspección.
-- RF-260/261 crédito y cupo; resolver reglas PROPOSED de crédito/reserva/entrega parcial.
-- RF-153 (cancelación/descuentos) queda PENDING P-09; RF-186 (liquidación) PENDING P-08.
-- La especificación `docs/04-specifications/com/pedidos-reparto.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
+- Clientes con datos de entrega y crédito (cupo/plazo) configurable solo por el Administrador.
+- Pedido confirmado con precio congelado y reserva FEFO por lote (DEC-098); si falta existencia queda el faltante.
+- Cupo usado = cartera abierta + pedidos a crédito no entregados; exceso o mora genera advertencia, no bloqueo (DEC-099).
+- Despacho con pedidos confirmados, distribuidor y salida a "En ruta"; reservas consumidas.
+- Portal móvil del distribuidor: entrega total/parcial, recaudo efectivo/transferencia y devolución.
+- Obligación a crédito al entregar con vencimiento entrega + plazo; abono opcional; recaudos pendientes de conciliación (DEC-100).
+- Devolución a "En inspección" y reincorporación; descarte pendiente AP-08.
+- Pantallas **03. Distribución → Clientes, pedidos y despachos** y portal **Ruta**.
+- Semilla: dos clientes, `P-0001` a crédito y `D-0001` preparado.
+- Migraciones `0017`–`0021`.
+- Verificación: 80 unitarias, 76 integración (PGlite y PostgreSQL 17 real) y 60 E2E con axe.
+- **RF-153 (cancelación/descuentos) P-09; RF-186 (liquidación) P-08.**
+
+### Siguiente: entrega 6 (caja POS)
+
+- RF-220 apertura de turno, RF-221 venta de mostrador, RF-222 pagos mixtos, RF-223 cierre/arqueo, RF-224 revisión de diferencias.
+- RF-225 platos con consumo teórico sin descuento automático de cocina (Q-B-09); RF-226 conteos P-07; RF-227 documento fiscal BLOCKED P-02.
+- La especificación `docs/04-specifications/pos/caja.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
 
@@ -179,7 +194,7 @@ docs/                  descubrimiento, requerimientos, arquitectura, specs, dise
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. Las entregas 3 y 4 se commitean con este cierre; la siguiente tarea es la entrega 5.
+El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. Las entregas 3, 4 y 5 se commitean con este cierre; la siguiente tarea es la entrega 6.
 
 El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
@@ -195,4 +210,4 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada; sigue la entrega 5 (pedidos y reparto).
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS).

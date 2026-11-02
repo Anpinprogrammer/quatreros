@@ -148,6 +148,16 @@ beforeAll(async () => {
     'prod.order.read',
     'prod.order.create',
     'prod.order.execute',
+    'com.customer.read',
+    'com.customer.manage',
+    'com.order.read',
+    'com.order.create',
+    'dis.dispatch.read',
+    'dis.dispatch.create',
+    'dis.delivery.register',
+    'dis.return.register',
+    'dis.return.inspect',
+    'fin.credit.configure',
   ]);
   const readerRole = await ensureRole('INV_TEST_READ', ['inv.stock.read']);
 
@@ -839,8 +849,7 @@ describe('producción: recetas, consumo y cierre (RF-033, RF-081..083)', () => {
         (select id from catalog.raw_materials where name = 'Carne de cerdo magra') as "carneId",
         (select id from catalog.raw_materials where name = 'Tocino y grasa') as "tocinoId",
         (select id from admin.sites where name = 'Bodega principal') as "warehouseSiteId",
-        (select id from admin.sites where name = 'Punto de asados') as "posSiteId",
-        null::uuid as "unused"
+        (select id from admin.sites where name = 'Punto de asados') as "posSiteId"
     `);
     const ref = refs.rows[0] as {
       productId: string;
@@ -1134,5 +1143,239 @@ describe('producción: recetas, consumo y cierre (RF-033, RF-081..083)', () => {
     expect(ids).toContain(orderId);
     expect(ids).not.toContain(posOrderId);
     expect((await agent.get(`/api/v1/production/orders/${posOrderId}`)).status).toBe(404);
+  });
+});
+
+describe('pedidos, despacho y reparto (RF-150..152, 180..185, 260..261)', () => {
+  let customerId = '';
+  let cashCustomerId = '';
+  let siteId = '';
+  let packagePresentationId = '';
+  let unitPresentationId = '';
+  let driverId = '';
+  let driverAgent: Agent;
+  let creditOrderId = '';
+  let creditDispatchId = '';
+  let creditLineId = '';
+  let creditOrderLineId = '';
+  let cashOrderId = '';
+
+  beforeAll(async () => {
+    const refs = await db.execute(sql`
+      select
+        (select id from admin.sites where name = 'Bodega principal') as "siteId",
+        (select pr.id from catalog.presentations pr join catalog.products p on p.id = pr.product_id
+          where p.name = 'Chorizo Santarrosano' and pr.name = 'Paquete x10') as "packageId",
+        (select pr.id from catalog.presentations pr join catalog.products p on p.id = pr.product_id
+          where p.name = 'Chorizo Santarrosano' and pr.name = 'Unidad') as "unitId",
+        (select id from catalog.products where name = 'Chorizo Santarrosano') as "productId",
+        (select id from admin.roles where code = 'DIST') as "distRoleId"
+    `);
+    const ref = refs.rows[0] as {
+      siteId: string;
+      packageId: string;
+      unitId: string;
+      distRoleId: string;
+    };
+    siteId = ref.siteId;
+    packagePresentationId = ref.packageId;
+    unitPresentationId = ref.unitId;
+
+    const creditCustomer = await admin
+      .post('/api/v1/sales/customers')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        kind: 'restaurant',
+        name: 'Restaurante crédito',
+        taxId: `NIT-${randomUUID().slice(0, 8)}`,
+        phone: '310 555 0000',
+        deliveryAddress: 'Calle 1 # 2-3',
+      });
+    expect(creditCustomer.status).toBe(201);
+    customerId = (creditCustomer.body as { data: { id: string } }).data.id;
+    const credit = await admin
+      .put(`/api/v1/sales/customers/${customerId}/credit`)
+      .send({ enabled: true, creditLimit: '50000.00', termDays: 15 });
+    expect(credit.status).toBe(200);
+
+    const cashCustomer = await admin
+      .post('/api/v1/sales/customers')
+      .set('Idempotency-Key', randomUUID())
+      .send({ kind: 'business', name: 'Tienda contraentrega' });
+    cashCustomerId = (cashCustomer.body as { data: { id: string } }).data.id;
+
+    const driverRole = (
+      await db.execute(sql`
+      select id from admin.roles where code = 'DIST' limit 1
+    `)
+    ).rows[0] as { id: string };
+    const suffix = randomUUID().slice(0, 8);
+    driverId = await createUser(`driver-${suffix}@test.example`, driverRole.id);
+    await db.insert(userSites).values({ userId: driverId, siteId });
+    driverAgent = await signIn(`driver-${suffix}@test.example`);
+  });
+
+  it('confirma un pedido a crédito con reserva y advertencia de cupo', async () => {
+    const created = await admin
+      .post('/api/v1/sales/orders')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        customerId,
+        siteId,
+        channel: 'phone',
+        paymentMode: 'credit',
+        lines: [{ presentationId: packagePresentationId, quantity: '10.000' }],
+      });
+    expect(created.status).toBe(201);
+    const order = (
+      created.body as {
+        data: {
+          id: string;
+          status: string;
+          total: string;
+          creditWarning: string | null;
+          lines: { id: string; reservedQty: string }[];
+        };
+      }
+    ).data;
+    creditOrderId = order.id;
+    creditOrderLineId = order.lines[0]?.id ?? '';
+    expect(order.status).toBe('confirmed');
+    expect(order.total).toBe('120000.00');
+    expect(order.creditWarning).toContain('Cupo excedido');
+    expect(order.lines[0]?.reservedQty).toBe('10.000');
+
+    const reservations = await db.execute(sql`
+      select count(*)::int as total from inventory.reservations
+      where sales_order_line_id = ${creditOrderLineId} and status = 'active'
+    `);
+    expect((reservations.rows[0] as { total: number }).total).toBe(1);
+  });
+
+  it('crea el despacho, carga a ruta y entrega parcial con obligación', async () => {
+    const dispatch = await admin
+      .post('/api/v1/distribution/dispatches')
+      .set('Idempotency-Key', randomUUID())
+      .send({ siteId, driverId, dispatchDate: '2026-11-02', orderIds: [creditOrderId] });
+    expect(dispatch.status).toBe(201);
+    const detail = (
+      dispatch.body as {
+        data: { id: string; status: string; orders: { lines: { dispatchLineId: string }[] }[] };
+      }
+    ).data;
+    creditDispatchId = detail.id;
+    creditLineId = detail.orders[0]?.lines[0]?.dispatchLineId ?? '';
+    expect(detail.status).toBe('prepared');
+
+    const loaded = await admin.post(`/api/v1/distribution/dispatches/${creditDispatchId}/load`).send({});
+    expect(loaded.status).toBe(200);
+    expect((loaded.body as { data: { status: string } }).data.status).toBe('in_route');
+
+    const delivered = await driverAgent
+      .post(`/api/v1/distribution/dispatches/${creditDispatchId}/deliveries`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        orderId: creditOrderId,
+        lines: [{ dispatchLineId: creditLineId, quantity: '6.000' }],
+        partialReason: 'El cliente solo recibió parte',
+      });
+    expect(delivered.status).toBe(201);
+    expect(
+      (delivered.body as { data: { orders: { lines: { deliveredQty: string }[] }[] } }).data.orders[0]
+        ?.lines[0]?.deliveredQty,
+    ).toBe('6.000');
+
+    const receivable = await db.execute(sql`
+      select amount, balance, due_on as "dueOn", status from finance.receivables
+      where source_type = 'distribution.delivery'
+    `);
+    expect(receivable.rows[0]).toMatchObject({ amount: '72000.00', balance: '72000.00', status: 'open' });
+
+    const route = await db.execute(sql`
+      select b.quantity from inventory.stock_balances b
+      join inventory.lots l on l.id = b.lot_id
+      join admin.locations loc on loc.id = b.location_id
+      where l.code = 'PT-2026-0001' and loc.kind = 'in_route'
+    `);
+    expect((route.rows[0] as { quantity: string }).quantity).toBe('4.000');
+  });
+
+  it('registra devolución e inspección con reincorporación', async () => {
+    const returned = await driverAgent
+      .post(`/api/v1/distribution/dispatches/${creditDispatchId}/returns`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ dispatchLineId: creditLineId, quantity: '1.000', reason: 'Empaque roto' });
+    expect(returned.status).toBe(201);
+    const returnRow = (returned.body as { data: { returns: { id: string; status: string }[] } }).data
+      .returns[0];
+    expect(returnRow?.status).toBe('in_inspection');
+
+    const inspected = await admin
+      .post(`/api/v1/distribution/returns/${returnRow?.id ?? ''}/inspect`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ decision: 'reinstate' });
+    expect(inspected.status).toBe(204);
+
+    const reinstated = await db.execute(sql`
+      select status from distribution.returns where id = ${returnRow?.id ?? ''}
+    `);
+    expect((reinstated.rows[0] as { status: string }).status).toBe('reinstated');
+
+    const discard = await admin
+      .post(`/api/v1/distribution/returns/${returnRow?.id ?? ''}/inspect`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ decision: 'discard' });
+    expect(discard.status).toBe(423);
+  });
+
+  it('cobra contraentrega completa al entregar', async () => {
+    const created = await admin
+      .post('/api/v1/sales/orders')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        customerId: cashCustomerId,
+        siteId,
+        channel: 'in_person',
+        paymentMode: 'cash_on_delivery',
+        lines: [{ presentationId: unitPresentationId, quantity: '5.000' }],
+      });
+    expect(created.status).toBe(201);
+    const order = (created.body as { data: { id: string; total: string } }).data;
+    cashOrderId = order.id;
+
+    const dispatch = await admin
+      .post('/api/v1/distribution/dispatches')
+      .set('Idempotency-Key', randomUUID())
+      .send({ siteId, driverId, dispatchDate: '2026-11-02', orderIds: [cashOrderId] });
+    const dispatchId = (dispatch.body as { data: { id: string } }).data.id;
+    const detail = (dispatch.body as { data: { orders: { lines: { dispatchLineId: string }[] }[] } }).data;
+    const lineId = detail.orders[0]?.lines[0]?.dispatchLineId ?? '';
+    expect((await admin.post(`/api/v1/distribution/dispatches/${dispatchId}/load`).send({})).status).toBe(
+      200,
+    );
+
+    const delivered = await driverAgent
+      .post(`/api/v1/distribution/dispatches/${dispatchId}/deliveries`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        orderId: cashOrderId,
+        lines: [{ dispatchLineId: lineId, quantity: '5.000' }],
+        paymentMethod: 'cash',
+        collectedAmount: order.total,
+      });
+    expect(delivered.status).toBe(201);
+
+    const collection = await db.execute(sql`
+      select amount, status from finance.collections order by created_at desc limit 1
+    `);
+    expect(collection.rows[0]).toMatchObject({ amount: '6500.00', status: 'registered' });
+  });
+
+  it('un distribuidor solo ve sus despachos', async () => {
+    const list = await driverAgent.get('/api/v1/distribution/dispatches?limit=100');
+    expect(list.status).toBe(200);
+    expect((list.body as { data: { id: string }[] }).data.length).toBeGreaterThan(0);
+    const ids = (list.body as { data: { id: string }[] }).data.map((row) => row.id);
+    expect(ids).toContain(creditDispatchId);
   });
 });

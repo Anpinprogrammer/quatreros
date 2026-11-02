@@ -116,6 +116,18 @@ La semilla deja las recetas de Chorizo Santarrosano y Rellena Mixta, y la orden 
 6. **Trazabilidad**: abre el lote PT en _Existencias y traslados_ → _Lotes_; la sección "Hacia atrás" muestra los lotes de materia prima usados.
 7. **Pendiente**: las sugerencias por punto de reorden (RF-080, Q-PRO-03) y la anulación de órdenes (RF-084, P-09) no se implementan. El costo oficial del lote sigue bloqueado (P-03).
 
+## 4.7 Pedidos, despacho y reparto (entrega 5, ~6 minutos)
+
+La semilla deja dos clientes, el pedido `P-0001` a crédito con reserva FEFO y el despacho `D-0001` preparado para `reparto@`.
+
+1. **Manager**: _03. Distribución_ → _Clientes y pedidos_. Revisa clientes y su crédito. En _Pedidos_ abre `P-0001`; verás precio congelado, reserva y total.
+2. **Nuevo pedido**: crea uno para "Restaurante La Brasa" con pago a crédito. Si el cupo se excede o hay mora, el pedido se confirma con **advertencia** (DEC-099), no se bloquea.
+3. **Despacho**: pestaña _Despachos_ → _Nuevo despacho_, selecciona pedidos confirmados y a Diego Reparto. Abre el despacho y pulsa _Confirmar carga y salir_; los lotes pasan a "En ruta" y las reservas se consumen.
+4. **Repartidor en celular**: entra como `reparto@` → _Rutas del día_. Abre el despacho, confirma una entrega total o parcial (con motivo), registra el recaudo si es contraentrega y el abono si es crédito.
+5. **Devolución**: registra una devolución con motivo; la mercancía entra a "En inspección".
+6. **Inspección**: como manager, abre el despacho y pulsa _Reincorporar_. La devolución vuelve a la bodega en su lote. El descarte requiere AP-08 y no está disponible.
+7. **Cartera**: la entrega a crédito crea una obligación con vencimiento entrega + plazo. La liquidación del distribuidor y la conciliación quedan para la entrega 7 / P-08.
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

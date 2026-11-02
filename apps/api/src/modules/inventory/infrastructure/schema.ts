@@ -199,3 +199,30 @@ export const transferLines = inventorySchema.table(
     index('transfer_lines_transfer_idx').on(t.transferId),
   ],
 );
+
+export const reservations = inventorySchema.table(
+  'reservations',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    salesOrderLineId: uuid().notNull(),
+    lotId: uuid()
+      .notNull()
+      .references(() => lots.id),
+    productId: uuid().notNull(),
+    presentationId: uuid().notNull(),
+    locationId: uuid().notNull(),
+    quantity: numeric({ precision: 14, scale: 3 }).notNull(),
+    status: text({ enum: ['active', 'consumed', 'released'] })
+      .notNull()
+      .default('active'),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('reservations_order_line_lot_uq').on(t.salesOrderLineId, t.lotId),
+    check('reservations_quantity_chk', sql`${t.quantity} > 0`),
+    check('reservations_status_chk', sql`${t.status} IN ('active','consumed','released')`),
+    index('reservations_active_idx')
+      .on(t.presentationId, t.locationId)
+      .where(sql`${t.status} = 'active'`),
+  ],
+);

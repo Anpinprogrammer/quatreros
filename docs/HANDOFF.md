@@ -72,51 +72,47 @@
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
 
-## 2. Siguiente tarea: entrega 5, pedidos y reparto
+## 2. Siguiente tarea: entrega 6, caja (POS)
 
-**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3 y 4 terminadas y verificadas. Sigue la 5: clientes, pedidos, despachos, entregas, recaudos y devoluciones.
+**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3, 4 y 5 terminadas y verificadas. Sigue la 6: turnos de caja, venta de mostrador, pagos mixtos y cierre.
 
-### Hecho en 4: producción
+### Hecho en 5: pedidos y reparto
 
-- Especificación en `docs/04-specifications/prod/produccion.md`; DEC-095/096/097 resuelven recetas versionadas, rendimiento con tolerancia y trazabilidad N:M.
-- Recetas de producción por producto fabricado, versionadas e inmutables; la orden congela la versión vigente al crearse.
-- Orden planificada con consumo teórico y disponibilidad; si falta MP advierte, pero no bloquea crearla.
-- Consumo real por lote, con lotes sugeridos por FEFO; descuenta existencias y registra teórico/real.
-- Cierre por presentación: lote PT `PT-AAAA-####` con fabricación, vencimiento (DEC-090) y movimientos `production_output`.
-- Rendimiento real/esperado y motivo obligatorio fuera de la tolerancia configurable (BR-066, DEC-096).
-- Trazabilidad `inventory.lot_inputs`: lote PT vinculado a todos los lotes de MP (DEC-097).
-- Pantallas **04. Producción → Órdenes de producción** y **Recetas**.
-- Semilla: dos recetas y `OP-0001` planificada para 100 unidades de chorizo.
-- **RF-080 (sugerencias) queda fuera por Q-PRO-03; RF-084 (anulación) por P-09. Costo oficial del lote BLOCKED (P-03).**
+- Especificación `docs/04-specifications/com/pedidos-reparto.md`; DEC-098 reservas por lote, DEC-099 crédito con advertencia y DEC-100 recaudos.
+- Clientes con datos de entrega y crédito (cupo/plazo) configurable por el Administrador.
+- Pedido confirmado con precio vigente congelado y reserva FEFO por lote; si falta existencia queda el faltante señalado.
+- Cupo usado = cartera abierta + pedidos a crédito no entregados; exceso o mora generan advertencia, no bloqueo.
+- Despacho con pedidos confirmados, distribuidor y salida a "En ruta"; reservas consumidas.
+- Portal móvil del distribuidor con entrega total/parcial, recaudo efectivo/transferencia y devolución.
+- Obligación a crédito al entregar, con vencimiento entrega + plazo; abono opcional.
+- Devolución a "En inspección" y reincorporación a la bodega; descarte pendiente AP-08.
+- Pantallas **03. Distribución → Clientes, pedidos y despachos** y portal **Ruta**.
+- Semilla: dos clientes, `P-0001` a crédito y `D-0001` preparado para `reparto@`.
+- **RF-153 (cancelación/descuentos) P-09 y RF-186 (liquidación) P-08 siguen fuera.**
 
-### Objetivo demostrable de la entrega 5
+### Objetivo demostrable de la entrega 6
 
-- Clientes con datos de entrega y crédito (cupo/plazo) cuando aplique.
-- Pedido con líneas, precio vigente, canal y modalidad de pago; reserva de cantidades al confirmar.
-- Despacho que agrupa pedidos, asigna distribuidor y sales FEFO a la ubicación "En ruta".
-- Portal móvil del distribuidor: despachos, direcciones, entrega total/parcial, recaudo y devolución.
-- Devolución a "En inspección" y su reincorporación/descarte (AP-08 si aplica).
-- Dejar fuera la liquidación del distribuidor (RF-186) y la anulación/descuentos (RF-153) hasta resolver P-08/P-09.
+- Abrir turno de caja con base de efectivo.
+- Vender producto fabricado y platos preparados con precio vigente y pago mixto.
+- Descontar inventario de producto terminado desde la ubicación del POS con FEFO.
+- Registrar el consumo teórico de platos sin descontar automáticamente cocina (BR-147, Q-B-09).
+- Cerrar turno con efectivo esperado, contado y diferencia justificada.
+- Dejar fuera la facturación fiscal (P-02), descuentos/anulaciones (P-09) y clasificación de mermas (P-07).
 
-### RF de la entrega 5
+### RF de la entrega 6
 
-| RF     | Tema                              | Estado                          | Ojo con                                               |
-| ------ | --------------------------------- | ------------------------------- | ----------------------------------------------------- |
-| RF-150 | Gestión de clientes               | CONFIRMED                       | Datos de entrega; inactivar, no borrar                |
-| RF-151 | Registro de pedido                | CONFIRMED                       | Precio vigente; reserva; crédito según BR-171         |
-| RF-152 | Seguimiento de pedidos            | CONFIRMED                       | Estados y pendientes por línea                        |
-| RF-153 | Cancelación y descuentos          | PENDING (P-09)                  | **No implementar** sin decisión                       |
-| RF-180 | Despacho y asignación             | CONFIRMED                       | Agrupa pedidos confirmados con pendiente              |
-| RF-181 | Salida del despacho               | CONFIRMED · en ruta PROVISIONAL | FEFO y ubicación "En ruta" (Q-B-07)                   |
-| RF-182 | Portal móvil del distribuidor     | CONFIRMED                       | Solo sus despachos; una columna en celular            |
-| RF-183 | Entrega total o parcial           | CONFIRMED                       | Parcial deja saldo y motivo; obligación si es crédito |
-| RF-184 | Recaudo en ruta                   | CONFIRMED                       | Métodos y pendiente de conciliación                   |
-| RF-185 | Devolución e inspección           | CONFIRMED                       | En inspección; reincorporar/descartar con AP-08       |
-| RF-186 | Liquidación del distribuidor      | PENDING (P-08)                  | **No implementar** sin decisión                       |
-| RF-260 | Crédito por cliente               | CONFIRMED                       | Cupo y plazo; auditoría                               |
-| RF-261 | Control de cupo y cartera vencida | CONFIRMED                       | Aprobación si excede; no inventar umbrales            |
+| RF     | Tema                     | Estado             | Ojo con                                           |
+| ------ | ------------------------ | ------------------ | ------------------------------------------------- |
+| RF-220 | Apertura de turno        | CONFIRMED          | Un turno abierto por caja y por cajero            |
+| RF-221 | Venta de mostrador       | CONFIRMED          | Precio vigente; producto y plato; FEFO            |
+| RF-222 | Pagos mixtos y cambio    | CONFIRMED          | Suma de pagos = total; efectivo y transferencia   |
+| RF-223 | Cierre de turno y arqueo | CONFIRMED          | Esperado vs contado; diferencia con justificación |
+| RF-224 | Revisión de diferencias  | CONFIRMED          | Supervisor distinto del cajero                    |
+| RF-225 | Platos y consumo teórico | CONFIRMED · Q-B-09 | Sin descuento automático de cocina hasta decisión |
+| RF-226 | Conteos de cocina        | PENDING (P-07)     | **No implementar** clasificación ni ajustes       |
+| RF-227 | Documento al cliente     | BLOCKED (P-02)     | No se emite factura; solo comprobante interno     |
 
-Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/com/pedidos-reparto.md` y esperar aprobación. Resolver en ella las reglas PROPOSED/PENDING de crédito, reservas, entrega parcial y devolución.
+Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/pos/caja.md` y esperar aprobación.
 
 En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
 

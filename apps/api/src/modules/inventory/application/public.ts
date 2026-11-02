@@ -24,3 +24,10 @@ export type {
   FinishedGoodLotResult,
   FinishedGoodOutput,
 } from './receipts.js';
+export {
+  activeReservationsForOrders,
+  consumeReservations,
+  consumeReservationsForOrders,
+  reserveOrderLine,
+} from './reservations.js';
+export type { ActiveReservation, ReservationInput, ReservationResult } from './reservations.js';

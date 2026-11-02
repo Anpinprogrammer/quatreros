@@ -4,6 +4,9 @@ import { Route, Routes } from 'react-router';
 import { CatalogPage } from '../../features/catalogo/CatalogPage';
 import { ProductPage } from '../../features/catalogo/ProductPage';
 import { PurchasePage } from '../../features/compras/PurchasePage';
+import { DispatchPage } from '../../features/ventas/DispatchPage';
+import { SalesOrderPage } from '../../features/ventas/SalesOrderPage';
+import { VentasPage } from '../../features/ventas/VentasPage';
 import { OrderPage } from '../../features/produccion/OrderPage';
 import { ProductionPage } from '../../features/produccion/ProductionPage';
 import { RecipePage } from '../../features/produccion/RecipePage';
@@ -121,6 +124,15 @@ export function ErpShell({ me }: { me: MeResponse }) {
               ) : null}
               {hasPermission(me, 'prod.recipe.read') ? (
                 <Route path="produccion/recetas/:id" element={<RecipePage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'com.order.read') ? (
+                <Route path="ventas" element={<VentasPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'com.order.read') ? (
+                <Route path="ventas/pedidos/:id" element={<SalesOrderPage />} />
+              ) : null}
+              {hasPermission(me, 'dis.dispatch.read') ? (
+                <Route path="ventas/despachos/:id" element={<DispatchPage me={me} />} />
               ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -121,6 +121,12 @@ test('ERP: producción y recetas', async ({ page }, info) => {
   await audit(page, info, 'produccion-receta');
 });
 
+test('Ruta: despachos del distribuidor', async ({ page }, info) => {
+  await signIn(page, 'reparto@quatreros.example');
+  await expect(page).toHaveURL(/\/ruta$/);
+  await audit(page, info, 'ruta-despachos');
+});
+
 test('ERP: trazabilidad de lote', async ({ page }, info) => {
   await signIn(page, 'produccion@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);

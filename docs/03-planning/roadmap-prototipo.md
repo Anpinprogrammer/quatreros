@@ -18,7 +18,7 @@
 | 8   | Asistente de IA (demo)               | Preguntas en lenguaje natural y un registro con resumen y confirmación                                                                            | RF-340–345                             | 2–7 + agente Quatreros AI ya creado (DEC-087; ai-architecture §15) | Pendiente                      |
 | —   | Publicación en línea                 | Enlace para compartir la demo                                                                                                                     | —                                      | Hosting (Q-C-01, DEC-084)                                          | Pendiente                      |
 
-> **2026-11-02:** 2a (catálogo, precios y materias primas), 2b (lotes, existencias y kardex), 2c (FEFO y traslados), 3 (compras y recepción) y 4 (producción) están terminadas. RF-033 (recetas) se construyó en la entrega 4; RF-080 (sugerencias) queda pendiente de Q-PRO-03 y RF-084 (anulación) de P-09. RF-113 (excepción FEFO) espera el motor de aprobaciones (RF-007). Sigue la entrega 5: pedidos y reparto; el plan está en `docs/HANDOFF.md`.
+> **2026-11-02:** 2a (catálogo, precios y materias primas), 2b (lotes, existencias y kardex), 2c (FEFO y traslados), 3 (compras y recepción), 4 (producción) y 5 (pedidos y reparto) están terminadas. RF-033 (recetas) se construyó en la entrega 4; RF-080 (sugerencias) queda pendiente de Q-PRO-03, RF-084 (anulación) de P-09, RF-153 (cancelación/descuentos) de P-09 y RF-186 (liquidación) de P-08. RF-113 (excepción FEFO) espera el motor de aprobaciones (RF-007). Sigue la entrega 6: caja (POS); el plan está en `docs/HANDOFF.md`.
 
 ## Fuera del prototipo
 
