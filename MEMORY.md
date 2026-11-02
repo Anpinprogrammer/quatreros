@@ -35,7 +35,7 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 
 ### Siguiente: 2b (lotes, existencias y kardex)
 
-- Especificación pendiente: `docs/04-specifications/inv/existencias.md`.
+- Especificación escrita y pendiente de aprobación: `docs/04-specifications/inv/existencias.md`.
 - RF-110 (existencias), RF-111 (kardex, aprobado por DEC-089) y RF-118 (trazabilidad).
 - Implementar `InventoryUsage` (hoy devuelve `false`) contra `stock_balances` y `stock_movements`.
 - Sembrar existencias con movimientos `opening_balance`, nunca insertando saldos.
@@ -145,4 +145,4 @@ El commit `33428b4` usa versiones mínimas de `modules.ts` y `form.tsx` sobre la
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Siguiente: 2b.
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado. Especificación 2b escrita, pendiente de aprobación.

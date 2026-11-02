@@ -64,6 +64,8 @@
 
 **Estado al 2026-11-02:** la 2a (catálogo, precios y materias primas) está terminada y verificada. Sigue la 2b. La 2c (FEFO y traslados) va después.
 
+La especificación de 2b está en **`docs/04-specifications/inv/existencias.md`** (borrador para revisión): lotes, kardex inmutable, saldos, disponibilidad, trazabilidad y semilla con `opening_balance`. Al aprobarse, seguir con el esquema `inventory`, `InventoryUsage` y las pantallas de existencias.
+
 **Objetivo demostrable de 2b:**
 
 - Lotes de materia prima y producto terminado con fabricación y vencimiento.
