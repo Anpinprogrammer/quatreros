@@ -1,30 +1,22 @@
 import { Link } from 'react-router';
 
+const markSize = { md: 44, lg: 56 } as const;
+
 /**
- * Marca provisional (el isotipo oficial sigue pendiente, Anexo B del sistema de diseño).
- * El anillo evoca el aro del isotipo y los cuatro puntos, a Los 4 Treros.
+ * Marca oficial "Los 4 Treros" (logo entregado por el responsable, Anexo B del sistema de diseño).
+ * El archivo optimizado conserva el aro naranja y el personaje; el nombre accesible lo da el texto.
  */
-export function BrandMark({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-  const box =
-    size === 'lg'
-      ? 'size-12 rounded-[16px]'
-      : size === 'sm'
-        ? 'size-8 rounded-[10px]'
-        : 'size-10 rounded-[12px]';
+export function BrandMark({ size = 'md' }: { size?: 'md' | 'lg' }) {
+  const pixels = markSize[size];
   return (
-    <span
-      aria-hidden
-      className={`grid shrink-0 place-items-center bg-brand text-white shadow-brand-sm ${box}`}
-    >
-      <svg viewBox="0 0 32 32" className={size === 'lg' ? 'size-8' : 'size-6'} fill="none">
-        <circle cx="16" cy="16" r="10.25" stroke="currentColor" strokeWidth="2.5" />
-        <circle cx="16" cy="16" r="3.4" fill="currentColor" />
-        <circle cx="16" cy="3.4" r="1.7" fill="currentColor" />
-        <circle cx="28.6" cy="16" r="1.7" fill="currentColor" />
-        <circle cx="16" cy="28.6" r="1.7" fill="currentColor" />
-        <circle cx="3.4" cy="16" r="1.7" fill="currentColor" />
-      </svg>
-    </span>
+    <img
+      src="/logo-mark.webp"
+      alt=""
+      width={pixels}
+      height={pixels}
+      decoding="async"
+      className="shrink-0 object-contain"
+    />
   );
 }
 
@@ -33,11 +25,13 @@ export function Brand({
   area,
   compact = false,
   inverse = false,
+  markSize = 'md',
 }: {
   to?: string;
   area?: string;
   compact?: boolean;
   inverse?: boolean;
+  markSize?: 'md' | 'lg';
 }) {
   return (
     <Link
@@ -45,7 +39,7 @@ export function Brand({
       className="inline-flex min-h-11 items-center gap-2.5 rounded-xl font-bold whitespace-nowrap"
       aria-label={compact ? 'Quatreros' : undefined}
     >
-      <BrandMark size={compact ? 'sm' : 'md'} />
+      <BrandMark size={markSize} />
       {!compact ? (
         <span className="flex flex-col leading-none">
           <span

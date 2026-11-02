@@ -91,7 +91,7 @@ export function LoginPage() {
           className="absolute -bottom-48 -left-32 size-[26rem] rounded-full bg-terracotta/10 blur-3xl"
         />
         <div className="relative">
-          <Brand to="/ingresar" inverse area="Plataforma" />
+          <Brand to="/ingresar" inverse area="Plataforma" markSize="lg" />
         </div>
 
         <div className="relative max-w-md">
