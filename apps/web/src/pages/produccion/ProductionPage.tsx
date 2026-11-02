@@ -8,7 +8,7 @@ import { ClipboardList, Factory, Plus, Trash2 } from 'lucide-react';
 import { useRef, useState, type SubmitEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { newIdempotencyKey, type ApiError } from '../../services/client';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { DataTable } from '../../components/ui/DataTable';
 import { EmptyState } from '../../components/ui/EmptyState';

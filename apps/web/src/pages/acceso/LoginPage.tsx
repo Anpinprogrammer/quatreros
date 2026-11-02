@@ -14,7 +14,7 @@ import {
 import { useRef, useState, type ReactNode, type SubmitEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router';
 import { authClient } from '../../services/auth-client';
-import { ME_KEY, useSession } from '../../hooks/session';
+import { ME_KEY, useSession } from '../../hooks/useSession';
 import { Brand } from '../../components/ui/Brand';
 import { Alert, Button, PasswordField, TextField } from '../../components/ui/form';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';

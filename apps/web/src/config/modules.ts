@@ -1,5 +1,5 @@
 import type { MeResponse } from '@quatreros/contracts';
-import { hasPermission } from '../hooks/session';
+import { hasPermission } from '../lib/session';
 
 /**
  * Secciones del ERP y estado real de construcción de cada módulo. Se actualiza al terminar

@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { useInventorySummary, useLots } from '../../services/existencias';
 import {
   formatDate as formatInventoryDate,

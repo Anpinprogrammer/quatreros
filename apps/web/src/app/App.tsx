@@ -4,7 +4,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { LoginPage } from '../pages/acceso/LoginPage';
 import { MfaSetupPage } from '../pages/acceso/MfaSetupPage';
 import { ApiError } from '../services/client';
-import { FullPageMessage, ME_KEY, RequireSession } from '../hooks/session';
+import { FullPageMessage, RequireSession } from '../components/auth/RequireSession';
+import { ME_KEY } from '../hooks/useSession';
 import { ToastProvider } from '../components/ui/Toast';
 
 // Cada shell se carga por separado (división de código, ADR-014).

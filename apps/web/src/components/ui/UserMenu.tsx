@@ -1,8 +1,8 @@
 import type { MeResponse } from '@quatreros/contracts';
 import { ChevronDown, LogOut, MapPin, Moon, UserRound } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { useSignOut } from '../../hooks/session';
-import { useTheme } from '../../hooks/theme';
+import { useSignOut } from '../../hooks/useSignOut';
+import { useTheme } from '../../hooks/useTheme';
 
 function initials(fullName: string) {
   return fullName

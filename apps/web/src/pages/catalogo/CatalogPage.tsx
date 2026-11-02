@@ -10,7 +10,7 @@ import {
 import { Package, Wheat } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';

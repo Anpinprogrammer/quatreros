@@ -15,7 +15,7 @@ import { Building2, ClipboardList, Plus, Trash2, Truck } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { newIdempotencyKey, type ApiError } from '../../services/client';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { DataTable } from '../../components/ui/DataTable';
 import { EmptyState } from '../../components/ui/EmptyState';

@@ -15,7 +15,7 @@ import { ExistenciasPage } from '../existencias/ExistenciasPage';
 import { LotePage } from '../existencias/LotePage';
 import { TransferPage } from '../existencias/TransferPage';
 import { UsersPage } from '../usuarios/UsersPage';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { AppHeader } from '../../components/layout/AppHeader';

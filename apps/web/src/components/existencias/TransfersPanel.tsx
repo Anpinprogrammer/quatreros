@@ -3,7 +3,7 @@ import { Truck } from 'lucide-react';
 import { useMemo, useState, type SubmitEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { newIdempotencyKey, type ApiError } from '../../services/client';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge, type BadgeTone } from '../ui/Badge';
 import { DataTable } from '../ui/DataTable';
 import { EmptyState } from '../ui/EmptyState';

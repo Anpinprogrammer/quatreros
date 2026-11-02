@@ -15,7 +15,7 @@ import { Link } from 'react-router';
 import { useProducts } from '../../services/catalogo';
 import { useInventorySummary } from '../../services/existencias';
 import { formatMoney } from '../../lib/format/catalogo';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { SECTIONS } from '../../config/modules';
 import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';

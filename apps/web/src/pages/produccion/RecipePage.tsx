@@ -3,7 +3,7 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { Link, useParams } from 'react-router';
 import { newIdempotencyKey, type ApiError } from '../../services/client';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge } from '../../components/ui/Badge';
 import { Card, CardLabel } from '../../components/ui/Card';
 import { DataTable } from '../../components/ui/DataTable';

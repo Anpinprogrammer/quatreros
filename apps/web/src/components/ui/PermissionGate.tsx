@@ -1,6 +1,6 @@
 import type { MeResponse } from '@quatreros/contracts';
 import type { ReactNode } from 'react';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 
 /**
  * Oculta acciones para las que no hay permiso. No sustituye la autorización del servidor:

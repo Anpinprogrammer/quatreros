@@ -7,7 +7,7 @@ import {
 import { ArrowLeft, CheckCircle2, PackageCheck, Truck } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Card, CardLabel } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';

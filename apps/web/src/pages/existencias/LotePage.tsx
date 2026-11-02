@@ -1,7 +1,7 @@
 import { ITEM_KIND_LABELS, type MeResponse } from '@quatreros/contracts';
 import { CalendarClock, MapPin, Package, Warehouse } from 'lucide-react';
 import { Link, useParams } from 'react-router';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge } from '../../components/ui/Badge';
 import { Card, CardLabel } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';

@@ -2,7 +2,7 @@ import type { MeResponse, SupplierView } from '@quatreros/contracts';
 import { Building2 } from 'lucide-react';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { newIdempotencyKey, type ApiError } from '../../services/client';
-import { hasPermission } from '../../hooks/session';
+import { hasPermission } from '../../lib/session';
 import { Badge } from '../ui/Badge';
 import { DataTable } from '../ui/DataTable';
 import { EmptyState } from '../ui/EmptyState';
