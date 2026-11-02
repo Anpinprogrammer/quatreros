@@ -1,29 +1,64 @@
 import { Link } from 'react-router';
 
 /**
- * Logotipo provisional de texto (Anexo B del sistema de diseño: el isotipo oficial está pendiente).
- * El anillo Ember evoca el anillo exterior del isotipo.
+ * Marca provisional (el isotipo oficial sigue pendiente, Anexo B del sistema de diseño).
+ * El anillo evoca el aro del isotipo y los cuatro puntos, a Los 4 Treros.
  */
-export function BrandMark({ size = 'md' }: { size?: 'md' | 'lg' }) {
-  const box = size === 'lg' ? 'size-12 border-4' : 'size-8 border-[3px]';
-  const dot = size === 'lg' ? 'size-4' : 'size-2.5';
+export function BrandMark({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+  const box =
+    size === 'lg'
+      ? 'size-12 rounded-[16px]'
+      : size === 'sm'
+        ? 'size-8 rounded-[10px]'
+        : 'size-10 rounded-[12px]';
   return (
-    <span aria-hidden className={`grid shrink-0 place-items-center rounded-full border-ember ${box}`}>
-      <span className={`rounded-full bg-terracotta ${dot}`} />
+    <span
+      aria-hidden
+      className={`grid shrink-0 place-items-center bg-brand text-white shadow-brand-sm ${box}`}
+    >
+      <svg viewBox="0 0 32 32" className={size === 'lg' ? 'size-8' : 'size-6'} fill="none">
+        <circle cx="16" cy="16" r="10.25" stroke="currentColor" strokeWidth="2.5" />
+        <circle cx="16" cy="16" r="3.4" fill="currentColor" />
+        <circle cx="16" cy="3.4" r="1.7" fill="currentColor" />
+        <circle cx="28.6" cy="16" r="1.7" fill="currentColor" />
+        <circle cx="16" cy="28.6" r="1.7" fill="currentColor" />
+        <circle cx="3.4" cy="16" r="1.7" fill="currentColor" />
+      </svg>
     </span>
   );
 }
 
-export function Brand({ to = '/', area }: { to?: string; area?: string }) {
+export function Brand({
+  to = '/',
+  area,
+  compact = false,
+  inverse = false,
+}: {
+  to?: string;
+  area?: string;
+  compact?: boolean;
+  inverse?: boolean;
+}) {
   return (
     <Link
       to={to}
       className="inline-flex min-h-11 items-center gap-2.5 rounded-xl font-bold whitespace-nowrap"
+      aria-label={compact ? 'Quatreros' : undefined}
     >
-      <BrandMark />
-      <span className="text-title tracking-tight text-chalk">Quatreros</span>
-      {area ? (
-        <span className="text-caption font-semibold tracking-wider text-ash uppercase">{area}</span>
+      <BrandMark size={compact ? 'sm' : 'md'} />
+      {!compact ? (
+        <span className="flex flex-col leading-none">
+          <span
+            className={`font-display text-card font-extrabold tracking-[-0.03em] ${inverse ? 'text-white' : 'text-ink'}`}
+          >
+            Quatreros
+          </span>
+          <span
+            className={`mt-1 text-[10px] font-semibold tracking-[0.18em] uppercase ${inverse ? 'text-white/60' : 'text-ink-3'}`}
+          >
+            {area ?? 'Los 4 Treros'}
+          </span>
+        </span>
       ) : null}
     </Link>
   );

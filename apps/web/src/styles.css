@@ -1,73 +1,268 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/plus-jakarta-sans';
 @import '@fontsource-variable/jetbrains-mono';
 
 /*
- * Sistema de Diseño "Los Quatreros" (docs/05-design/sistema-de-diseno.md, DEC-086).
- * Modo oscuro nativo. Ajustes AA en el Anexo A del documento.
+ * Sistema de Diseño "Los Quatreros" v1.1 (docs/05-design/sistema-de-diseno.md, DEC-093).
+ * Modo claro como experiencia principal, modo oscuro refinado como alternativa.
+ * Los nombres heredados (char, smoke, grill, chalk, ash, ember) se conservan como alias
+ * semánticos para no romper las pantallas existentes.
  */
-@theme {
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Paleta oficial */
-  --color-ember: #ea580c; /* Primary / Ember Orange */
-  --color-ember-hover: #c2410c; /* Primary Hover / Flame Red-Orange */
-  --color-terracotta: #f97316; /* Accent / Terracotta Gold */
-  --color-char: #09090b; /* Background / Char Black */
-  --color-smoke: #18181b; /* Surface Dark / Smoked Charcoal */
-  --color-grill: #27272a; /* Surface Border / Grill Gray */
-  --color-grill-strong: #3f3f46; /* Borde del botón secundario (UI Kit A) */
-  --color-chalk: #ffffff; /* Text Primary / Pure Chalk */
-  --color-ash: #a1a1aa; /* Text Muted / Ash Gray */
-  --color-success: #22c55e;
-  --color-warning: #eab308;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
-  /* Anexo A: borde de campos con contraste ≥ 3:1 (WCAG 1.4.11) */
-  --color-control: #71717a;
+:root {
+  --q-canvas: #fafaf9;
+  --q-surface: #ffffff;
+  --q-surface-2: #f5f5f4;
+  --q-surface-3: #eeeeec;
 
-  /* Escala tipográfica oficial */
-  --text-display: 1.75rem;
-  --text-display--line-height: 2rem;
-  --text-title: 1.25rem;
-  --text-title--line-height: 1.5rem;
+  --q-ink: #171717;
+  --q-ink-2: #5f5f5c; /* Texto secundario con contraste AA incluso a 12 px */
+  --q-ink-3: #6f6f6b; /* Placeholders y metadatos, con contraste AA */
+  --q-inverse: #ffffff;
+
+  --q-line: #e7e7e5;
+  --q-line-strong: #d4d4d4;
+  --q-control: #71717a; /* Borde de campos con contraste ≥ 3:1 (Anexo A) */
+
+  --q-brand: #fd5300;
+  --q-brand-hover: #e84a00;
+  --q-brand-soft: #fff0e6;
+  --q-brand-ink: #b84300; /* Naranja legible como texto sobre superficies claras */
+
+  --q-success: #0e6f4d;
+  --q-warning: #8f5200;
+  --q-danger: #c22b2b;
+  --q-info: #1f5cab;
+
+  --q-shadow: 0 1px 2px rgb(23 23 23 / 0.04), 0 10px 30px -18px rgb(23 23 23 / 0.18);
+  --q-shadow-float: 0 24px 70px -24px rgb(23 23 23 / 0.28);
+  --q-shadow-brand: 0 10px 24px -14px rgb(253 83 0 / 0.9);
+  --q-shadow-brand-sm: 0 6px 18px -8px rgb(253 83 0 / 0.7);
+  --q-header: rgb(255 255 255 / 0.82);
+  --q-overlay: rgb(23 23 23 / 0.42);
+  /* Panel de marca del ingreso: siempre oscuro, en ambos temas. */
+  --q-panel: #141619;
+  --q-brand-on-dark: #ff9a63;
+}
+
+.dark {
+  --q-canvas: #0d0e10;
+  --q-surface: #17191d;
+  --q-surface-2: #1e2025;
+  --q-surface-3: #282b31;
+
+  --q-ink: #f8fafc;
+  --q-ink-2: #a1a1aa;
+  --q-ink-3: #8b8b93;
+  --q-inverse: #0d0e10;
+
+  --q-line: #2a2d33;
+  --q-line-strong: #3a3d44;
+  --q-control: #71717a;
+
+  --q-brand: #fd5300;
+  --q-brand-hover: #ff6a1f;
+  --q-brand-soft: #2b1a10;
+  --q-brand-ink: #ff9a63;
+
+  --q-success: #3ddc97;
+  --q-warning: #f5b83d;
+  --q-danger: #ff7b7b;
+  --q-info: #7cb3ff;
+
+  --q-shadow: 0 0 0 1px rgb(255 255 255 / 0.02);
+  --q-shadow-float: 0 28px 80px -20px rgb(0 0 0 / 0.65);
+  --q-header: rgb(23 25 29 / 0.82);
+  --q-overlay: rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  /* Superficies y texto */
+  --color-canvas: var(--q-canvas);
+  --color-surface: var(--q-surface);
+  --color-surface-2: var(--q-surface-2);
+  --color-surface-3: var(--q-surface-3);
+  --color-ink: var(--q-ink);
+  --color-ink-2: var(--q-ink-2);
+  --color-ink-3: var(--q-ink-3);
+  --color-inverse: var(--q-inverse);
+
+  /* Líneas y controles */
+  --color-line: var(--q-line);
+  --color-line-strong: var(--q-line-strong);
+  --color-control: var(--q-control);
+
+  /* Marca */
+  --color-brand: var(--q-brand);
+  --color-brand-hover: var(--q-brand-hover);
+  --color-brand-soft: var(--q-brand-soft);
+  --color-brand-ink: var(--q-brand-ink);
+  --color-panel: var(--q-panel);
+  --color-brand-on-dark: var(--q-brand-on-dark);
+
+  /* Semántica */
+  --color-success: var(--q-success);
+  --color-warning: var(--q-warning);
+  --color-danger: var(--q-danger);
+  --color-info: var(--q-info);
+
+  /* Alias heredados del sistema anterior */
+  --color-char: var(--q-canvas);
+  --color-smoke: var(--q-surface);
+  --color-grill: var(--q-line);
+  --color-grill-strong: var(--q-line-strong);
+  --color-chalk: var(--q-ink);
+  --color-ash: var(--q-ink-2);
+  --color-ember: var(--q-brand);
+  --color-ember-hover: var(--q-brand-hover);
+  --color-terracotta: #f97316;
+
+  --shadow-card: var(--q-shadow);
+  --shadow-float: var(--q-shadow-float);
+  --shadow-brand: var(--q-shadow-brand);
+  --shadow-brand-sm: var(--q-shadow-brand-sm);
+  --color-overlay: var(--q-overlay);
+  --color-header: var(--q-header);
+
+  /* Escala tipográfica */
+  --text-display: 1.875rem;
+  --text-display--line-height: 2.25rem;
+  --text-display--letter-spacing: -0.025em;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.75rem;
+  --text-title--letter-spacing: -0.015em;
+  --text-card: 1.0625rem;
+  --text-card--line-height: 1.5rem;
   --text-body: 0.875rem;
-  --text-body--line-height: 1.25rem;
+  --text-body--line-height: 1.375rem;
   --text-caption: 0.75rem;
   --text-caption--line-height: 1rem;
-  /* Anexo A: etiqueta del botón primario como texto grande (≥ 18,66 px en negrita) */
+  /* Anexo A: etiqueta del botón primario como texto grande en negrita */
   --text-action: 1.1875rem;
   --text-action--line-height: 1.5rem;
+
+  --radius-panel: 1.25rem;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
   html {
-    color-scheme: dark;
-    color: var(--color-chalk);
-    background: var(--color-char);
+    color-scheme: light;
+    background: var(--q-canvas);
+    color: var(--q-ink);
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
+    scrollbar-color: var(--q-line-strong) transparent;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
     margin: 0;
+    min-width: 320px;
+    background: var(--q-canvas);
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
-    font-weight: 500; /* Body Medium */
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+  }
+  ::selection {
+    background: var(--q-brand-soft);
+    color: var(--q-brand-ink);
   }
   :focus-visible {
-    outline: 2px solid var(--color-ember);
+    outline: 2px solid var(--q-brand);
     outline-offset: 2px;
   }
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+  .dark ::placeholder {
+    color: var(--q-ink-3);
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
-      transition: none !important;
-      animation: none !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: q-fade-in 180ms var(--ease-out-soft) both;
+  }
+  .animate-rise {
+    animation: q-rise 220ms var(--ease-out-soft) both;
+  }
+  .animate-slide-in {
+    animation: q-slide-in 240ms var(--ease-out-soft) both;
+  }
+  .animate-toast-in {
+    animation: q-toast-in 220ms var(--ease-out-soft) both;
+  }
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--q-line-strong) transparent;
+  }
+}
+
+@keyframes q-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes q-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes q-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes q-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

@@ -25,14 +25,18 @@ function query(params: Record<string, string | undefined>): string {
   return text ? `?${text}` : '';
 }
 
-export function useProducts(params: {
-  q?: string | undefined;
-  kind?: ProductKind | undefined;
-  status: 'active' | 'inactive' | 'all';
-}) {
+export function useProducts(
+  params: {
+    q?: string | undefined;
+    kind?: ProductKind | undefined;
+    status: 'active' | 'inactive' | 'all';
+  },
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: [...CATALOG_KEY, 'products', params],
     queryFn: () => apiRequest<ProductPage>(`/api/v1/catalog/products${query(params)}`),
+    enabled: options?.enabled ?? true,
   });
 }
 

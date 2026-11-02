@@ -65,14 +65,18 @@ export function RawMaterialForm({
   return (
     <form
       ref={formRef}
-      className="mt-6 flex max-w-2xl flex-col gap-5 rounded-2xl border border-grill bg-smoke p-5 shadow-xl md:p-6"
+      className="mt-6 flex max-w-2xl flex-col gap-5 rounded-2xl border border-line bg-surface p-5 shadow-card md:p-6"
       onSubmit={submit}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onCancel();
       }}
       aria-label={material ? `Editar ${material.name}` : 'Crear materia prima'}
     >
-      <h2 ref={titleRef} tabIndex={-1} className="scroll-mt-4 text-title font-semibold outline-none">
+      <h2
+        ref={titleRef}
+        tabIndex={-1}
+        className="scroll-mt-4 font-display text-title font-bold text-ink outline-none"
+      >
         {material ? `Editar ${material.name}` : 'Nueva materia prima'}
       </h2>
 
@@ -116,7 +120,7 @@ export function RawMaterialForm({
         />
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-t border-line pt-4">
         <Button type="submit" disabled={busy}>
           {busy ? 'Guardando…' : material ? 'Guardar cambios' : 'Crear materia prima'}
         </Button>

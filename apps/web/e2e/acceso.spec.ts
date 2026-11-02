@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { DEMO_PASSWORD, signIn, signOut, totp } from './helpers';
+import { DEMO_PASSWORD, openSection, signIn, signOut, totp } from './helpers';
 
 /**
  * Entrega 1 — criterios de aceptación de adm/acceso-usuarios §7 en el navegador.
@@ -51,10 +51,8 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   await expect(page).toHaveURL(/\/erp$/);
   await expect(page.getByRole('heading', { name: 'Command Center' })).toBeVisible();
   // Navegación por pestañas del encabezado → sección Administración → módulo Usuarios.
-  await page
-    .getByRole('navigation', { name: 'Secciones' })
-    .getByRole('link', { name: /Administración/ })
-    .click();
+  await openSection(page, /Administración/);
+  await expect(page.getByRole('heading', { name: 'Administración', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: /Usuarios y permisos/ }).click();
   await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
 
@@ -108,10 +106,8 @@ test('administrador: crea producto, presentaciones y precios', async ({ page }, 
   await page.getByRole('button', { name: 'Verificar' }).click();
   await expect(page).toHaveURL(/\/erp$/);
 
-  await page
-    .getByRole('navigation', { name: 'Secciones' })
-    .getByRole('link', { name: /Producción/ })
-    .click();
+  await openSection(page, /Producción/);
+  await expect(page.getByRole('heading', { name: 'Producción', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: /Catálogo y precios/ }).click();
   await expect(page.getByRole('heading', { name: 'Catálogo y precios' })).toBeVisible();
 

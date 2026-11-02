@@ -5,6 +5,7 @@ import { LoginPage } from '../features/acceso/LoginPage';
 import { MfaSetupPage } from '../features/acceso/MfaSetupPage';
 import { ApiError } from '../shared/api/client';
 import { FullPageMessage, ME_KEY, RequireSession } from '../shared/auth/session';
+import { ToastProvider } from '../shared/ui/Toast';
 
 // Cada shell se carga por separado (división de código, ADR-014).
 const ErpShell = lazy(() => import('../shells/erp/ErpShell').then((m) => ({ default: m.ErpShell })));
@@ -13,11 +14,18 @@ const RutaShell = lazy(() => import('../shells/ruta/RutaShell').then((m) => ({ d
 
 function NotFound() {
   return (
-    <main className="p-10">
-      <h1 className="text-display font-bold">Esta página no existe</h1>
-      <a className="mt-3 inline-block text-ember underline underline-offset-4" href="/">
-        Volver al inicio
-      </a>
+    <main className="grid min-h-dvh place-items-center bg-canvas p-6">
+      <div className="max-w-md text-center">
+        <p className="font-mono text-caption tracking-[0.2em] text-ink-3 uppercase">404</p>
+        <h1 className="mt-2 font-display text-display font-bold text-ink">Esta página no existe</h1>
+        <p className="mt-2 text-body text-ink-2">Revisa el enlace o vuelve al inicio para continuar.</p>
+        <a
+          className="mt-5 inline-flex min-h-[52px] items-center rounded-xl bg-brand px-5 text-action font-bold text-white hover:bg-brand-hover"
+          href="/"
+        >
+          Volver al inicio
+        </a>
+      </div>
     </main>
   );
 }
@@ -41,33 +49,35 @@ export function App() {
   const [queryClient] = useState(makeQueryClient);
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Suspense fallback={<FullPageMessage>Cargando…</FullPageMessage>}>
-          <Routes>
-            <Route path="/ingresar" element={<LoginPage />} />
-            <Route path="/seguridad/segundo-factor" element={<MfaSetupPage />} />
-            <Route
-              path="/"
-              element={
-                <RequireSession>{(me) => <Navigate to={`/${me.homeShell}`} replace />}</RequireSession>
-              }
-            />
-            <Route
-              path="/erp/*"
-              element={<RequireSession shell="erp">{(me) => <ErpShell me={me} />}</RequireSession>}
-            />
-            <Route
-              path="/pos/*"
-              element={<RequireSession shell="pos">{(me) => <PosShell me={me} />}</RequireSession>}
-            />
-            <Route
-              path="/ruta/*"
-              element={<RequireSession shell="ruta">{(me) => <RutaShell me={me} />}</RequireSession>}
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <Suspense fallback={<FullPageMessage>Cargando…</FullPageMessage>}>
+            <Routes>
+              <Route path="/ingresar" element={<LoginPage />} />
+              <Route path="/seguridad/segundo-factor" element={<MfaSetupPage />} />
+              <Route
+                path="/"
+                element={
+                  <RequireSession>{(me) => <Navigate to={`/${me.homeShell}`} replace />}</RequireSession>
+                }
+              />
+              <Route
+                path="/erp/*"
+                element={<RequireSession shell="erp">{(me) => <ErpShell me={me} />}</RequireSession>}
+              />
+              <Route
+                path="/pos/*"
+                element={<RequireSession shell="pos">{(me) => <PosShell me={me} />}</RequireSession>}
+              />
+              <Route
+                path="/ruta/*"
+                element={<RequireSession shell="ruta">{(me) => <RutaShell me={me} />}</RequireSession>}
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

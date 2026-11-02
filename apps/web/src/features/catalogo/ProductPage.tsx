@@ -4,32 +4,35 @@ import {
   type MeResponse,
   type PresentationView,
 } from '@quatreros/contracts';
+import { Package, Pencil } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { hasPermission } from '../../shared/auth/session';
 import { Badge } from '../../shared/ui/Badge';
 import { Card } from '../../shared/ui/Card';
+import { EmptyState } from '../../shared/ui/EmptyState';
 import { Alert, Button } from '../../shared/ui/form';
+import { LoadingSkeleton } from '../../shared/ui/LoadingSkeleton';
+import { PageHeader } from '../../shared/ui/PageHeader';
+import { useToast } from '../../shared/ui/Toast';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 import { useProduct } from './api';
-import { formatMoney, formatQuantity } from './format';
+import { formatMoney, formatUnits } from './format';
 import { PriceForm } from './PriceForm';
 import { PriceHistory } from './PriceHistory';
 import { PresentationForm } from './PresentationForm';
 import { ProductForm } from './ProductForm';
 
-type Notice = { tone: 'success' | 'error'; text: string } | null;
-
 /** Ficha de producto: presentaciones, precio vigente e histórico (RF-030, RF-032). */
 export function ProductPage({ me }: { me: MeResponse }) {
   const { id = '' } = useParams();
   const product = useProduct(id);
+  const toast = useToast();
   const [editingProduct, setEditingProduct] = useState(false);
   const [addingPresentation, setAddingPresentation] = useState(false);
   const [editingPresentation, setEditingPresentation] = useState<PresentationView | null>(null);
   const [priceEditing, setPriceEditing] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState<string | null>(null);
-  const [notice, setNotice] = useState<Notice>(null);
   const presentationsRef = useRef<HTMLHeadingElement>(null);
   const canManage = hasPermission(me, 'cat.product.manage');
   const canPrice = hasPermission(me, 'cat.price.update');
@@ -38,73 +41,82 @@ export function ProductPage({ me }: { me: MeResponse }) {
   const closePresentations = (message?: string) => {
     setAddingPresentation(false);
     setEditingPresentation(null);
-    if (message) setNotice({ tone: 'success', text: message });
+    if (message) toast.show(message);
     requestAnimationFrame(() => presentationsRef.current?.focus());
   };
 
   return (
-    <section aria-labelledby="producto-titulo">
+    <section aria-labelledby="producto-titulo" className="space-y-7">
       <Link
         to="/erp/catalogo"
-        className="inline-flex min-h-6 items-center gap-1 text-caption font-semibold tracking-wider text-ash uppercase hover:text-chalk"
+        className="inline-flex min-h-6 items-center gap-1 text-caption font-semibold tracking-[0.12em] text-ink-2 uppercase hover:text-ink"
       >
         <span aria-hidden>‹</span> Catálogo y precios
       </Link>
 
-      {product.isPending ? <p className="mt-4 text-ash">Cargando producto…</p> : null}
-      {product.error ? (
-        <div className="mt-4">
-          <Alert>{product.error.message}</Alert>
-        </div>
-      ) : null}
+      {product.isPending ? <LoadingSkeleton label="Cargando producto…" rows={2} /> : null}
+      {product.error ? <Alert>{product.error.message}</Alert> : null}
 
       {product.data ? (
         <>
-          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 id="producto-titulo" className="text-display font-bold">
-                {product.data.name}
-              </h1>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+          <PageHeader
+            titleId="producto-titulo"
+            eyebrow="Ficha de producto"
+            title={product.data.name}
+            meta={
+              <>
                 <Badge tone={product.data.kind === 'manufactured' ? 'ember' : 'info'}>
                   {PRODUCT_KIND_LABELS[product.data.kind]}
                 </Badge>
                 <Badge tone={product.data.isActive ? 'success' : 'neutral'}>
                   {product.data.isActive ? 'Activo' : 'Inactivo'}
                 </Badge>
-              </div>
-              <p className="mt-3 text-ash">
-                Unidad base: <span className="text-chalk">{BASE_UNIT_LABELS[product.data.baseUnit]}</span>
-                {product.data.shelfLifeDays != null
-                  ? ` · Vida útil: ${String(product.data.shelfLifeDays)} días`
-                  : ' · Sin vencimiento'}
-              </p>
-            </div>
-            {canManage && !editingProduct ? (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setNotice(null);
-                  setEditingProduct(true);
-                }}
-              >
-                Editar producto
-              </Button>
-            ) : null}
-          </div>
+              </>
+            }
+            actions={
+              canManage && !editingProduct ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setEditingProduct(true);
+                  }}
+                >
+                  <Pencil aria-hidden className="size-4" />
+                  Editar producto
+                </Button>
+              ) : null
+            }
+          />
 
-          {notice ? (
-            <div className="mt-4">
-              <Alert tone={notice.tone}>{notice.text}</Alert>
+          <dl className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
+              <dt className="text-caption text-ink-2">Unidad base</dt>
+              <dd className="mt-1 text-body font-semibold text-ink">
+                {BASE_UNIT_LABELS[product.data.baseUnit]}
+              </dd>
             </div>
-          ) : null}
+            <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
+              <dt className="text-caption text-ink-2">Vida útil</dt>
+              <dd className="mt-1 text-body font-semibold text-ink">
+                {product.data.shelfLifeDays != null
+                  ? `${String(product.data.shelfLifeDays)} días`
+                  : 'Sin vencimiento'}
+              </dd>
+            </div>
+            <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
+              <dt className="text-caption text-ink-2">Presentaciones</dt>
+              <dd className="tabular mt-1 font-mono text-body font-semibold text-ink">
+                {product.data.presentations.length}
+              </dd>
+            </div>
+          </dl>
 
           {editingProduct ? (
             <ProductForm
               product={product.data}
               onDone={(message) => {
                 setEditingProduct(false);
-                setNotice({ tone: 'success', text: message });
+                toast.show(message);
               }}
               onCancel={() => {
                 setEditingProduct(false);
@@ -112,20 +124,24 @@ export function ProductPage({ me }: { me: MeResponse }) {
             />
           ) : null}
 
-          <section aria-labelledby="presentaciones-titulo" className="mt-8">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <h2
-                id="presentaciones-titulo"
-                ref={presentationsRef}
-                tabIndex={-1}
-                className="text-title font-semibold outline-none"
-              >
-                Presentaciones
-              </h2>
+          <section aria-labelledby="presentaciones-titulo">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
+              <div>
+                <h2
+                  id="presentaciones-titulo"
+                  ref={presentationsRef}
+                  tabIndex={-1}
+                  className="font-display text-title font-bold text-ink outline-none"
+                >
+                  Presentaciones
+                </h2>
+                <p className="mt-1 text-body text-ink-2">
+                  Cada presentación tiene su precio vigente y su histórico auditado.
+                </p>
+              </div>
               {canManage && !addingPresentation ? (
                 <Button
                   onClick={() => {
-                    setNotice(null);
                     setAddingPresentation(true);
                   }}
                 >
@@ -145,21 +161,23 @@ export function ProductPage({ me }: { me: MeResponse }) {
             ) : null}
 
             {product.data.presentations.length === 0 && !addingPresentation ? (
-              <p className="mt-6 text-ash">
-                Este producto no tiene presentaciones. Agrega al menos la unidad y, si aplica, el paquete.
-              </p>
+              <div className="mt-5">
+                <EmptyState
+                  icon={<Package className="size-5" />}
+                  title="Este producto no tiene presentaciones"
+                  description="Agrega al menos la unidad y, si aplica, el paquete con su cantidad fija."
+                />
+              </div>
             ) : null}
 
-            <ul className="mt-6 grid gap-4 md:grid-cols-2">
+            <ul className="mt-5 grid gap-4 md:grid-cols-2">
               {product.data.presentations.map((presentation) => (
                 <li key={presentation.id}>
-                  <Card className="h-full">
+                  <Card className="flex h-full flex-col">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-title font-semibold">{presentation.name}</h3>
-                        <p className="mt-1 text-caption text-ash">
-                          {formatQuantity(presentation.unitsPer)} unidad(es) base
-                        </p>
+                      <div className="min-w-0">
+                        <h3 className="font-display text-card font-semibold text-ink">{presentation.name}</h3>
+                        <p className="mt-1 text-caption text-ink-2">{formatUnits(presentation.unitsPer)}</p>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           <Badge tone={presentation.isActive ? 'success' : 'neutral'}>
                             {presentation.isActive ? 'Activa' : 'Inactiva'}
@@ -167,22 +185,21 @@ export function ProductPage({ me }: { me: MeResponse }) {
                           {presentation.currentPrice ? null : <Badge tone="warning">Sin precio</Badge>}
                         </div>
                       </div>
-                      <p className="text-right">
-                        <span className="block text-caption tracking-wider text-ash uppercase">
+                      <p className="shrink-0 text-right">
+                        <span className="block text-caption tracking-[0.08em] text-ink-2 uppercase">
                           Precio vigente
                         </span>
-                        <span className="font-mono text-title text-chalk">
+                        <span className="tabular mt-1 block font-mono text-title font-semibold text-ink">
                           {presentation.currentPrice ? formatMoney(presentation.currentPrice) : '—'}
                         </span>
                       </p>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-auto flex flex-wrap gap-2 border-t border-line pt-4">
                       {canPrice ? (
                         <Button
                           aria-label={`Cambiar precio de ${presentation.name}`}
                           onClick={() => {
-                            setNotice(null);
                             setPriceEditing(priceEditing === presentation.id ? null : presentation.id);
                           }}
                         >
@@ -194,7 +211,6 @@ export function ProductPage({ me }: { me: MeResponse }) {
                           variant="secondary"
                           aria-label={`Editar ${presentation.name}`}
                           onClick={() => {
-                            setNotice(null);
                             setEditingPresentation(
                               editingPresentation?.id === presentation.id ? null : presentation,
                             );
@@ -220,7 +236,7 @@ export function ProductPage({ me }: { me: MeResponse }) {
                         presentation={presentation}
                         onDone={(message) => {
                           setPriceEditing(null);
-                          setNotice({ tone: 'success', text: message });
+                          toast.show(message);
                         }}
                         onCancel={() => {
                           setPriceEditing(null);

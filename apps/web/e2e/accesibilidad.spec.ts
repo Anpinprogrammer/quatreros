@@ -65,3 +65,14 @@ test('ERP: catálogo y ficha de producto', async ({ page }, info) => {
     .click();
   await audit(page, info, 'producto');
 });
+
+test('ERP: modo oscuro', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.getByRole('button', { name: 'Usar modo oscuro' }).click();
+  await audit(page, info, 'command-center-oscuro');
+  await page.goto('/erp/seccion/produccion');
+  await audit(page, info, 'produccion-oscuro');
+  await page.goto('/erp/catalogo');
+  await audit(page, info, 'catalogo-oscuro');
+});

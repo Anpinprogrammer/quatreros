@@ -54,14 +54,14 @@ export function PriceForm({
   return (
     <form
       ref={formRef}
-      className="mt-3 flex flex-col gap-4 rounded-xl border border-grill bg-char p-4"
+      className="mt-3 flex flex-col gap-4 rounded-xl border border-line bg-surface-2 p-4"
       onSubmit={submit}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onCancel();
       }}
       aria-label={`Cambiar precio de ${presentation.name}`}
     >
-      <h3 ref={titleRef} tabIndex={-1} className="text-body font-semibold outline-none">
+      <h3 ref={titleRef} tabIndex={-1} className="text-body font-semibold text-ink outline-none">
         {presentation.currentPrice ? 'Cambiar precio' : 'Fijar precio'} · {presentation.name}
       </h3>
       {localError ? <Alert>{localError}</Alert> : null}
@@ -84,7 +84,7 @@ export function PriceForm({
           setPrice(e.target.value);
         }}
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-t border-line pt-3">
         <Button type="submit" disabled={savePrice.isPending}>
           {savePrice.isPending ? 'Guardando…' : 'Guardar precio'}
         </Button>

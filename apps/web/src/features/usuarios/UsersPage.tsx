@@ -1,9 +1,17 @@
 import { ROLE_NAMES, RoleCode, type MeResponse, type UserSummary } from '@quatreros/contracts';
+import { Users } from 'lucide-react';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
-import { newIdempotencyKey, type ApiError } from '../../shared/api/client';
 import { Link } from 'react-router';
+import { newIdempotencyKey, type ApiError } from '../../shared/api/client';
 import { Badge } from '../../shared/ui/Badge';
+import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
+import { DataTable } from '../../shared/ui/DataTable';
+import { EmptyState } from '../../shared/ui/EmptyState';
 import { Alert, Button, CheckboxGroup, TextField } from '../../shared/ui/form';
+import { LoadingSkeleton } from '../../shared/ui/LoadingSkeleton';
+import { PageHeader } from '../../shared/ui/PageHeader';
+import { SearchInput } from '../../shared/ui/SearchInput';
+import { useToast } from '../../shared/ui/Toast';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 import { useCreateUser, useSetActive, useSites, useUpdateUser, useUsers } from './api';
 import { generateTemporaryPassword } from './password';
@@ -18,8 +26,9 @@ export function UsersPage({ me }: { me: MeResponse }) {
   const [q, setQ] = useState('');
   const [editing, setEditing] = useState<Editing>(null);
   const [notice, setNotice] = useState<{ tone: 'info' | 'error'; text: string } | null>(null);
-  const [confirming, setConfirming] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<UserSummary | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const toast = useToast();
   const users = useUsers(q);
   const setActive = useSetActive();
   const canCreate = 'adm.user.create' in me.permissions;
@@ -28,49 +37,47 @@ export function UsersPage({ me }: { me: MeResponse }) {
   // Al cerrar el formulario, el foco vuelve al título para no perderse en el documento.
   const closeForm = (message?: string) => {
     setEditing(null);
-    if (message) setNotice({ tone: 'info', text: message });
+    if (message) toast.show(message);
     requestAnimationFrame(() => headingRef.current?.focus());
   };
 
-  return (
-    <section aria-labelledby="usuarios-titulo">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Link
-            to="/erp/seccion/administracion"
-            className="inline-flex min-h-6 items-center gap-1 text-caption font-semibold tracking-wider text-ash uppercase hover:text-chalk"
-          >
-            <span aria-hidden className="font-mono">
-              08.
-            </span>
-            Administración
-          </Link>
-          <h1
-            id="usuarios-titulo"
-            ref={headingRef}
-            tabIndex={-1}
-            className="text-display font-bold outline-none"
-          >
-            Usuarios
-          </h1>
-        </div>
-        {canCreate && !editing ? (
-          <Button
-            onClick={() => {
-              setNotice(null);
-              setEditing({ mode: 'create' });
-            }}
-          >
-            Crear usuario
-          </Button>
-        ) : null}
-      </div>
+  const deactivating = confirming?.isActive ?? true;
+  const confirmAction = deactivating ? 'desactivación' : 'reactivación';
 
-      {notice ? (
-        <div className="mt-4">
-          <Alert tone={notice.tone === 'info' ? 'success' : 'error'}>{notice.text}</Alert>
-        </div>
-      ) : null}
+  return (
+    <section aria-labelledby="usuarios-titulo" className="space-y-6">
+      <PageHeader
+        titleId="usuarios-titulo"
+        titleRef={headingRef}
+        eyebrow={
+          <Link to="/erp/seccion/administracion" className="hover:text-ink">
+            Administración · Usuarios
+          </Link>
+        }
+        title="Usuarios"
+        description="Personas con acceso a la plataforma, su rol, sus sedes y el estado de su cuenta. Los cambios quedan auditados."
+        actions={
+          canCreate && !editing ? (
+            <Button
+              onClick={() => {
+                setNotice(null);
+                setEditing({ mode: 'create' });
+              }}
+            >
+              Crear usuario
+            </Button>
+          ) : null
+        }
+        meta={
+          users.data ? (
+            <Badge tone="neutral">
+              {users.data.length} {users.data.length === 1 ? 'persona' : 'personas'}
+            </Badge>
+          ) : null
+        }
+      />
+
+      {notice ? <Alert tone={notice.tone === 'info' ? 'success' : 'error'}>{notice.text}</Alert> : null}
 
       {editing ? (
         <UserForm
@@ -83,10 +90,10 @@ export function UsersPage({ me }: { me: MeResponse }) {
         />
       ) : null}
 
-      <div className="mt-6 max-w-sm">
-        <TextField
+      <div className="max-w-md">
+        <SearchInput
           label="Buscar por nombre o correo"
-          type="search"
+          placeholder="Nombre o correo"
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
@@ -94,162 +101,130 @@ export function UsersPage({ me }: { me: MeResponse }) {
         />
       </div>
 
-      {users.isPending ? <p className="mt-6 text-ash">Cargando usuarios…</p> : null}
-      {users.error ? (
-        <div className="mt-6">
-          <Alert>{users.error.message}</Alert>
-        </div>
-      ) : null}
+      {users.isPending ? <LoadingSkeleton label="Cargando usuarios…" rows={1} /> : null}
+      {users.error ? <Alert>{users.error.message}</Alert> : null}
       {users.data?.length === 0 ? (
-        <p className="mt-6 text-ash">{q ? 'Nadie coincide con la búsqueda.' : 'Todavía no hay usuarios.'}</p>
+        <EmptyState
+          icon={<Users className="size-5" />}
+          title={q ? 'Nadie coincide con la búsqueda' : 'Todavía no hay usuarios'}
+          description={
+            q ? 'Prueba con otro nombre o correo.' : 'Crea la primera cuenta para que alguien pueda ingresar.'
+          }
+        />
       ) : null}
 
       {users.data && users.data.length > 0 ? (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-grill bg-smoke shadow-xl">
-          <table className="w-full min-w-[44rem] text-left">
-            <caption className="sr-only">Usuarios del sistema, con su rol, sedes y estado</caption>
-            <thead className="border-b border-grill text-caption tracking-wider text-ash uppercase">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Persona
+        <DataTable>
+          <caption className="sr-only">Usuarios del sistema, con su rol, sedes y estado</caption>
+          <thead className="border-b border-line bg-surface-2/70 text-caption tracking-[0.08em] text-ink-2 uppercase">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-semibold">
+                Persona
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold">
+                Rol
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold">
+                Sedes
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold">
+                Estado
+              </th>
+              <th scope="col" className="px-4 py-3">
+                <span className="sr-only">Acciones</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {users.data.map((u) => (
+              <tr key={u.id} className="transition-colors hover:bg-surface-2/50">
+                <th scope="row" className="px-4 py-3 font-normal">
+                  <span className="block font-semibold text-ink">{u.fullName}</span>
+                  <span className="text-caption text-ink-2">{u.email}</span>
                 </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Rol
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Sedes
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Estado
-                </th>
-                <th scope="col" className="px-4 py-3">
-                  <span className="sr-only">Acciones</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.data.map((u) => (
-                <tr key={u.id} className="border-b border-grill last:border-0">
-                  <th scope="row" className="px-4 py-3 font-normal">
-                    <span className="block font-semibold">{u.fullName}</span>
-                    <span className="text-caption text-ash">{u.email}</span>
-                  </th>
-                  <td className="px-4 py-3">{u.roles.map((r) => ROLE_NAMES[r]).join(', ')}</td>
-                  <td className="px-4 py-3">{u.sites.map((s) => s.name).join(', ') || '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className="flex flex-wrap gap-1.5">
-                      <Badge tone={u.isActive ? 'success' : 'neutral'}>
-                        {u.isActive ? 'Activo' : 'Desactivado'}
-                      </Badge>
-                      {u.mfaEnabled ? <Badge tone="info">Dos pasos</Badge> : null}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    {canUpdate && confirming === u.id ? (
-                      <ConfirmToggle
-                        user={u}
-                        busy={setActive.isPending}
-                        onCancel={() => {
-                          setConfirming(null);
+                <td className="px-4 py-3 text-ink">{u.roles.map((r) => ROLE_NAMES[r]).join(', ')}</td>
+                <td className="px-4 py-3 text-ink-2">{u.sites.map((s) => s.name).join(', ') || '—'}</td>
+                <td className="px-4 py-3">
+                  <span className="flex flex-wrap gap-1.5">
+                    <Badge tone={u.isActive ? 'success' : 'neutral'}>
+                      {u.isActive ? 'Activo' : 'Desactivado'}
+                    </Badge>
+                    {u.mfaEnabled ? <Badge tone="info">Dos pasos</Badge> : null}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  {canUpdate ? (
+                    <div className="flex flex-wrap justify-end gap-1">
+                      <Button
+                        variant="secondary"
+                        aria-label={`Editar a ${u.fullName}`}
+                        onClick={() => {
+                          setNotice(null);
+                          setEditing({ mode: 'edit', user: u });
                         }}
-                        onConfirm={() => {
-                          setActive.mutate(
-                            { user: u, active: !u.isActive },
-                            {
-                              onSuccess: () => {
-                                setNotice({
-                                  tone: 'info',
-                                  text: `${u.fullName} quedó ${u.isActive ? 'desactivado' : 'activo'}.`,
-                                });
-                              },
-                              onError: (err) => {
-                                setNotice({ tone: 'error', text: err.message });
-                              },
-                              onSettled: () => {
-                                setConfirming(null);
-                              },
-                            },
-                          );
-                        }}
-                      />
-                    ) : canUpdate ? (
-                      <>
+                      >
+                        Editar
+                      </Button>
+                      {u.id !== me.user.id ? (
                         <Button
-                          variant="secondary"
-                          aria-label={`Editar a ${u.fullName}`}
+                          variant="ghost"
+                          aria-label={`${u.isActive ? 'Desactivar' : 'Reactivar'} a ${u.fullName}`}
                           onClick={() => {
                             setNotice(null);
-                            setEditing({ mode: 'edit', user: u });
+                            setConfirming(u);
                           }}
                         >
-                          Editar
+                          {u.isActive ? 'Desactivar' : 'Reactivar'}
                         </Button>
-                        {u.id !== me.user.id ? (
-                          <Button
-                            variant="ghost"
-                            className="ml-1"
-                            aria-label={`${u.isActive ? 'Desactivar' : 'Reactivar'} a ${u.fullName}`}
-                            onClick={() => {
-                              setNotice(null);
-                              setConfirming(u.id);
-                            }}
-                          >
-                            {u.isActive ? 'Desactivar' : 'Reactivar'}
-                          </Button>
-                        ) : null}
-                      </>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       ) : null}
-    </section>
-  );
-}
 
-/** Confirmación dentro de la fila (sin diálogos del navegador): dice qué pasará y enfoca "No". */
-function ConfirmToggle({
-  user,
-  busy,
-  onConfirm,
-  onCancel,
-}: {
-  user: UserSummary;
-  busy: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    cancelRef.current?.focus();
-  }, []);
-  const deactivating = user.isActive;
-  return (
-    <div
-      role="group"
-      aria-label={`Confirmar ${deactivating ? 'desactivación' : 'reactivación'}`}
-      className="inline-flex flex-col items-end gap-2 text-left whitespace-normal"
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onCancel();
-      }}
-    >
-      <p className="max-w-64 text-body">
-        {deactivating
-          ? `¿Desactivar a ${user.fullName}? Se cerrarán sus sesiones y no podrá ingresar.`
-          : `¿Reactivar a ${user.fullName}? Podrá volver a ingresar.`}
-      </p>
-      <div className="flex gap-2">
-        <Button ref={cancelRef} variant="secondary" onClick={onCancel}>
-          No
-        </Button>
-        <Button variant={deactivating ? 'danger' : 'primary'} disabled={busy} onClick={onConfirm}>
-          {busy ? 'Guardando…' : deactivating ? 'Sí, desactivar' : 'Sí, reactivar'}
-        </Button>
-      </div>
-    </div>
+      <ConfirmDialog
+        open={Boolean(confirming)}
+        title={deactivating ? 'Desactivar cuenta' : 'Reactivar cuenta'}
+        description={
+          confirming ? (
+            <>
+              {deactivating
+                ? `${confirming.fullName} dejará de poder ingresar y se cerrarán sus sesiones.`
+                : `${confirming.fullName} podrá volver a ingresar con sus credenciales actuales.`}
+            </>
+          ) : null
+        }
+        confirmLabel={deactivating ? 'Sí, desactivar' : 'Sí, reactivar'}
+        groupLabel={`Confirmar ${confirmAction}`}
+        tone={deactivating ? 'danger' : 'primary'}
+        busy={setActive.isPending}
+        onCancel={() => {
+          setConfirming(null);
+        }}
+        onConfirm={() => {
+          if (!confirming) return;
+          const user = confirming;
+          setActive.mutate(
+            { user, active: !user.isActive },
+            {
+              onSuccess: () => {
+                toast.show(`${user.fullName} quedó ${user.isActive ? 'desactivado' : 'activo'}.`);
+              },
+              onError: (err) => {
+                setNotice({ tone: 'error', text: err.message });
+              },
+              onSettled: () => {
+                setConfirming(null);
+              },
+            },
+          );
+        }}
+      />
+    </section>
   );
 }
 
@@ -320,16 +295,25 @@ function UserForm({
   return (
     <form
       ref={formRef}
-      className="mt-6 flex max-w-2xl flex-col gap-5 rounded-2xl border border-grill bg-smoke p-5 shadow-xl md:p-6"
+      className="flex max-w-2xl flex-col gap-5 rounded-2xl border border-line bg-surface p-5 shadow-card md:p-6"
       onSubmit={submit}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onCancel();
       }}
       aria-label={existing ? `Editar a ${existing.fullName}` : 'Crear usuario'}
     >
-      <h2 ref={titleRef} tabIndex={-1} className="scroll-mt-4 text-title font-semibold outline-none">
-        {existing ? `Editar a ${existing.fullName}` : 'Nuevo usuario'}
-      </h2>
+      <div>
+        <p className="text-caption font-semibold tracking-[0.1em] text-ink-3 uppercase">
+          {existing ? 'Editar cuenta' : 'Nueva cuenta'}
+        </p>
+        <h2
+          ref={titleRef}
+          tabIndex={-1}
+          className="mt-1 scroll-mt-4 font-display text-title font-bold text-ink outline-none"
+        >
+          {existing ? `Editar a ${existing.fullName}` : 'Nuevo usuario'}
+        </h2>
+      </div>
       {error && !error.problem.errors && !emailTaken ? <Alert>{error.message}</Alert> : null}
       <TextField
         label="Nombre completo"
@@ -401,9 +385,9 @@ function UserForm({
           error={error?.fieldError('siteIds')}
         />
       ) : (
-        <p className="text-ash">Cargando sedes…</p>
+        <p className="text-ink-2">Cargando sedes…</p>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-t border-line pt-4">
         <Button type="submit" disabled={busy}>
           {busy ? 'Guardando…' : existing ? 'Guardar cambios' : 'Crear usuario'}
         </Button>

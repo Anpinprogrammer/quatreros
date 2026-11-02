@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { signIn } from './helpers';
+import { openSection, signIn } from './helpers';
 
 /**
  * Entrega 2a — catálogo desde los roles que no tienen segundo factor.
@@ -15,10 +15,8 @@ test('comprador consulta el catálogo y crea una materia prima', async ({ page }
   await signIn(page, 'compras@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);
 
-  await page
-    .getByRole('navigation', { name: 'Secciones' })
-    .getByRole('link', { name: /Producción/ })
-    .click();
+  await openSection(page, /Producción/);
+  await expect(page.getByRole('heading', { name: 'Producción', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: /Catálogo y precios/ }).click();
   await expect(page.getByRole('heading', { name: 'Catálogo y precios' })).toBeVisible();
 

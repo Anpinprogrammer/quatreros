@@ -20,6 +20,12 @@ export function formatQuantity(value: string): string {
   return quantity.format(Number(value));
 }
 
+/** "1 unidad base" / "10 unidades base" (sin el incómodo "unidad(es)"). */
+export function formatUnits(value: string): string {
+  const amount = Number(value);
+  return `${quantity.format(amount)} ${amount === 1 ? 'unidad base' : 'unidades base'}`;
+}
+
 export function formatDateTime(value: string): string {
   return dateTime.format(new Date(value));
 }

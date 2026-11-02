@@ -63,14 +63,14 @@ export function PresentationForm({
   return (
     <form
       ref={formRef}
-      className="mt-4 flex max-w-2xl flex-col gap-4 rounded-2xl border border-grill bg-char p-4"
+      className="mt-4 flex max-w-2xl flex-col gap-4 rounded-2xl border border-line bg-surface-2 p-4"
       onSubmit={submit}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onCancel();
       }}
       aria-label={presentation ? `Editar ${presentation.name}` : 'Agregar presentación'}
     >
-      <h3 ref={titleRef} tabIndex={-1} className="text-title font-semibold outline-none">
+      <h3 ref={titleRef} tabIndex={-1} className="font-display text-title font-bold text-ink outline-none">
         {presentation ? `Editar ${presentation.name}` : 'Nueva presentación'}
       </h3>
 
@@ -110,7 +110,7 @@ export function PresentationForm({
         />
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-t border-line pt-3">
         <Button type="submit" disabled={busy}>
           {busy ? 'Guardando…' : presentation ? 'Guardar cambios' : 'Agregar presentación'}
         </Button>
