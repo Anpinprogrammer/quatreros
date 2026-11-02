@@ -226,3 +226,16 @@ test('ERP: Command Center sin scroll vertical en escritorio', async ({ page }, i
     expect(await fits()).toBe(true);
   }).toPass();
 });
+
+test('ERP: navegación en drawer', async ({ page }, info) => {
+  test.skip(info.project.name === 'escritorio', 'El drawer se usa por debajo de 1024 px');
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.getByRole('button', { name: 'Abrir navegación' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Navegación' });
+  await expect(drawer).toBeVisible();
+  await drawer.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  await audit(page, info, 'navegacion-drawer');
+});

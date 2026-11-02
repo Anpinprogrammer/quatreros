@@ -213,21 +213,17 @@ export function LoginPage() {
         </div>
       </aside>
 
-      <section className="relative flex min-h-dvh items-start justify-center bg-surface px-5 py-8 sm:px-8 lg:h-dvh lg:min-h-0 lg:items-center lg:overflow-y-auto lg:border-l lg:border-line lg:px-10 lg:py-10">
+      <section className="relative flex min-h-dvh items-start justify-center bg-surface px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-8 md:items-center lg:h-dvh lg:min-h-0 lg:items-center lg:overflow-y-auto lg:border-l lg:border-line lg:px-10 lg:py-10">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden lg:hidden">
-          <div className="absolute -top-24 -right-24 size-72 rounded-full bg-[#FFE8D5]/65 blur-3xl" />
+          <div className="login-brand-panel absolute inset-0" />
+          <div className="login-brand-grid absolute inset-0 opacity-30" />
+          <div className="absolute -top-24 -right-24 size-72 rounded-full bg-brand/10 blur-3xl" />
+          <div className="absolute bottom-24 -left-20 size-64 rounded-full bg-white/35 blur-3xl" />
         </div>
 
         <div className="animate-rise relative z-10 w-full max-w-[420px]">
-          <div className="mb-8 flex items-center justify-between gap-4 lg:hidden">
+          <div className="mb-6 flex items-center lg:hidden">
             <Brand to="/ingresar" area="Plataforma" markSize="md" />
-            <img
-              src="/cuatreros-bot-full.webp"
-              alt=""
-              width={320}
-              height={320}
-              className="animate-float-soft size-20 shrink-0 object-contain"
-            />
           </div>
 
           {step === 'code' ? (
@@ -256,7 +252,7 @@ export function LoginPage() {
               : 'Escribe el código de 6 dígitos de tu aplicación de autenticación.'}
           </p>
 
-          <div className="mt-7 space-y-5">
+          <div className="mt-6 space-y-5 rounded-[20px] border border-[#171717]/10 bg-[#FFFDFC] p-5 shadow-[0_24px_60px_-38px_rgba(120,50,10,0.45)] sm:p-6 lg:mt-7 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
             {reason && REASONS[reason] && step === 'credentials' ? <Alert>{REASONS[reason]}</Alert> : null}
             {error ? (
               <Alert id="error-ingreso">
@@ -305,7 +301,12 @@ export function LoginPage() {
                     if (error) setError(null);
                   }}
                 />
-                <Button type="submit" disabled={busy} aria-busy={busy} className="mt-1 w-full">
+                <Button
+                  type="submit"
+                  disabled={busy}
+                  aria-busy={busy}
+                  className="mt-1 h-[56px] w-full rounded-[14px] lg:h-[52px]"
+                >
                   {busy ? (
                     <>
                       <Loader2 aria-hidden className="size-5 animate-spin" />
@@ -344,7 +345,7 @@ export function LoginPage() {
                   type="submit"
                   disabled={busy || code.length !== 6}
                   aria-busy={busy}
-                  className="mt-1 w-full"
+                  className="mt-1 h-[56px] w-full rounded-[14px] lg:h-[52px]"
                 >
                   {busy ? (
                     <>
@@ -359,11 +360,40 @@ export function LoginPage() {
             )}
           </div>
 
-          <p className="mt-7 flex items-center justify-center gap-1.5 text-caption text-ink-3 lg:hidden">
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-caption text-ink-2 lg:hidden">
             <ShieldCheck aria-hidden className="size-3.5" />
             Acceso restringido al personal autorizado.
           </p>
-          <p className="mt-7 text-center text-[11px] text-ink-3">Los 4 Treros · Plataforma de operación</p>
+
+          <div aria-hidden className="relative mx-auto mt-5 h-[212px] w-full max-w-xs lg:hidden">
+            <div className="absolute bottom-7 left-1/2 size-64 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(253,83,0,0.22),rgba(253,83,0,0)_66%)] blur-2xl" />
+            <div className="hidden min-[360px]:block">
+              <FloatingChip
+                icon={<Factory className="size-3.5" />}
+                label="Producción"
+                className="absolute top-4 left-0 z-20 scale-90"
+              />
+            </div>
+            <div className="hidden min-[360px]:block">
+              <FloatingChip
+                icon={<Boxes className="size-3.5" />}
+                label="Inventarios"
+                className="absolute top-24 right-0 z-20 scale-90"
+              />
+            </div>
+            <span className="absolute bottom-1 left-1/2 h-4 w-40 -translate-x-1/2 rounded-full bg-[#B84300]/20 blur-lg" />
+            <img
+              src="/cuatreros-bot-full.webp"
+              alt=""
+              width={360}
+              height={360}
+              className="animate-float-soft absolute bottom-0 left-1/2 z-10 h-[205px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_18px_24px_rgba(120,60,20,0.14)]"
+            />
+          </div>
+
+          <p className="mt-4 text-center text-[11px] text-ink-2 lg:mt-7">
+            Los 4 Treros · Plataforma de operación
+          </p>
         </div>
       </section>
     </main>

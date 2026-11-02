@@ -248,6 +248,60 @@
     background-size: 24px 24px;
     mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
   }
+  /*
+   * App Shell: tres capas con identidad propia. La sidebar es oscura en ambos temas;
+   * el header es cálido en claro y cálido profundo en oscuro. El contenido conserva
+   * los tokens globales.
+   */
+  .app-sidebar {
+    color-scheme: dark;
+    --shell-sidebar-bg: #191b20;
+    --shell-sidebar-hover: #292c32;
+    --shell-sidebar-active: #3b261f;
+    --shell-sidebar-text: #f8fafc;
+    --shell-sidebar-muted: #a6a8b0;
+    --shell-sidebar-border: #34373d;
+    --shell-sidebar-accent: #fd5300;
+    background: var(--shell-sidebar-bg);
+    color: var(--shell-sidebar-text);
+    border-color: var(--shell-sidebar-border);
+    scrollbar-color: var(--shell-sidebar-border) transparent;
+  }
+
+  .dark .app-sidebar {
+    --shell-sidebar-bg: #111318;
+    --shell-sidebar-hover: #23262c;
+    --shell-sidebar-active: #3b261f;
+    --shell-sidebar-text: #f8fafc;
+    --shell-sidebar-muted: #8e9199;
+    --shell-sidebar-border: #2a2d33;
+    --shell-sidebar-accent: #fd5300;
+  }
+
+  .app-sidebar .scroll-thin {
+    scrollbar-color: var(--shell-sidebar-border) transparent;
+  }
+
+  .app-header {
+    color-scheme: light;
+    --shell-header-bg: #fff1e7;
+    --shell-header-text: #38261c;
+    --shell-header-muted: #795b4a;
+    --shell-header-border: #f0dccb;
+    --shell-header-surface: #ffffff;
+    background: var(--shell-header-bg);
+    color: var(--shell-header-text);
+    border-color: var(--shell-header-border);
+  }
+
+  .dark .app-header {
+    color-scheme: dark;
+    --shell-header-bg: #1b1714;
+    --shell-header-text: #f8fafc;
+    --shell-header-muted: #b9a99d;
+    --shell-header-border: #332a24;
+    --shell-header-surface: #24201c;
+  }
 }
 
 @layer utilities {
