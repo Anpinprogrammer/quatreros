@@ -14,6 +14,7 @@ import {
 import { Link } from 'react-router';
 import { useProducts } from '../../services/catalogo';
 import { useInventorySummary } from '../../services/existencias';
+import { useOrders } from '../../services/produccion';
 import { formatMoney } from '../../lib/format/catalogo';
 import { hasPermission } from '../../lib/session';
 import { SECTIONS } from '../../config/modules';
@@ -36,8 +37,10 @@ export function ProductionPage({ me }: { me: MeResponse }) {
   useDocumentTitle('Producción');
   const canCatalog = hasPermission(me, 'cat.product.read');
   const canInventory = hasPermission(me, 'inv.stock.read');
+  const canProduction = hasPermission(me, 'prod.order.read');
   const products = useProducts({ status: 'active' }, { enabled: canCatalog });
   const inventory = useInventorySummary({ enabled: canInventory });
+  const orders = useOrders({ limit: 100 }, { enabled: canProduction });
   const list = products.data?.data ?? [];
   const activeCount = products.data
     ? `${String(list.length)}${products.data.page.nextCursor ? '+' : ''}`
@@ -49,6 +52,21 @@ export function ProductionPage({ me }: { me: MeResponse }) {
       : products.error
         ? 'No fue posible consultar el catálogo'
         : 'Productos activos en el catálogo';
+  const orderCount = orders.data
+    ? `${String(orders.data.data.length)}${orders.data.page.nextCursor ? '+' : ''}`
+    : '—';
+  const ordersHint = !canProduction
+    ? 'Requiere permiso de producción'
+    : orders.isPending
+      ? 'Consultando órdenes…'
+      : orders.error
+        ? 'No fue posible consultar las órdenes'
+        : 'Órdenes registradas';
+  const ordersCaption = !canProduction
+    ? 'Tu rol puede ver la sección, pero las órdenes requieren el permiso prod.order.read.'
+    : orders.isPending
+      ? 'Consultando órdenes registradas…'
+      : `Órdenes registradas: ${orderCount}. Abre la pantalla para planificar, consumir por FEFO y cerrar el lote.`;
 
   return (
     <section aria-labelledby="produccion-titulo" className="space-y-8">
@@ -63,7 +81,15 @@ export function ProductionPage({ me }: { me: MeResponse }) {
         title="Producción"
         description="Gestiona tus productos, órdenes y existencias desde un solo lugar."
         actions={
-          canCatalog ? (
+          canProduction ? (
+            <Link
+              to="/erp/produccion"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-brand px-5 text-action font-bold text-white shadow-brand transition-colors duration-200 hover:bg-brand-hover"
+            >
+              Abrir órdenes
+              <ArrowUpRight aria-hidden className="size-5" />
+            </Link>
+          ) : canCatalog ? (
             <Link
               to="/erp/catalogo"
               className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-brand px-5 text-action font-bold text-white shadow-brand transition-colors duration-200 hover:bg-brand-hover"
@@ -96,8 +122,9 @@ export function ProductionPage({ me }: { me: MeResponse }) {
           />
           <StatCard
             label="Órdenes de producción"
-            value="—"
-            hint="Se activa con la entrega 4"
+            value={orderCount}
+            hint={ordersHint}
+            tone={canProduction ? 'brand' : 'neutral'}
             icon={<Factory className="size-4" />}
           />
           <StatCard
@@ -139,9 +166,15 @@ export function ProductionPage({ me }: { me: MeResponse }) {
               >
                 <Package className="size-5" />
               </span>
-              <Badge tone="success">
-                <span aria-hidden className="size-1.5 rounded-full bg-success" />
-                Disponible
+              <Badge tone={canCatalog ? 'success' : 'neutral'}>
+                {canCatalog ? (
+                  <>
+                    <span aria-hidden className="size-1.5 rounded-full bg-success" />
+                    Disponible
+                  </>
+                ) : (
+                  'Requiere permiso'
+                )}
               </Badge>
             </div>
             <h3 className="mt-4 font-display text-title font-bold text-ink">
@@ -225,18 +258,35 @@ export function ProductionPage({ me }: { me: MeResponse }) {
             ) : null}
           </Card>
 
-          {/* Órdenes: pendiente, con explicación de lo que hará */}
+          {/* Órdenes: módulo real, con acceso directo */}
           <Card className="flex flex-col lg:col-span-5">
             <div className="flex items-start justify-between gap-3">
               <span
                 aria-hidden
-                className="grid size-11 place-items-center rounded-2xl bg-surface-2 text-ink-2"
+                className="grid size-11 place-items-center rounded-2xl bg-brand-soft text-brand-ink"
               >
                 <Factory className="size-5" />
               </span>
-              <Badge tone="neutral">En construcción · entrega 4</Badge>
+              <Badge tone={canProduction ? 'success' : 'neutral'}>
+                {canProduction ? (
+                  <>
+                    <span aria-hidden className="size-1.5 rounded-full bg-success" />
+                    Disponible
+                  </>
+                ) : (
+                  'Requiere permiso'
+                )}
+              </Badge>
             </div>
-            <h3 className="mt-4 font-display text-title font-bold text-ink">Órdenes de producción</h3>
+            <h3 className="mt-4 font-display text-title font-bold text-ink">
+              {canProduction ? (
+                <Link to="/erp/produccion" className="rounded transition-colors hover:text-brand-ink">
+                  Órdenes de producción
+                </Link>
+              ) : (
+                'Órdenes de producción'
+              )}
+            </h3>
             <p className="mt-1.5 text-body text-ink-2">
               Recetas, consumo real por lote y rendimiento de fabricación.
             </p>
@@ -260,23 +310,50 @@ export function ProductionPage({ me }: { me: MeResponse }) {
                 </li>
               ))}
             </ol>
-            <p className="mt-auto pt-5 text-caption text-ink-3">
-              Sin órdenes todavía. La primera se podrá registrar cuando la entrega 4 esté activa.
-            </p>
+            <div className="mt-auto flex flex-col gap-3 pt-5">
+              <p className="text-caption text-ink-3">{ordersCaption}</p>
+              {orders.error ? <p className="text-caption text-danger">{orders.error.message}</p> : null}
+              {canProduction ? (
+                <Link
+                  to="/erp/produccion"
+                  className="inline-flex min-h-11 items-center gap-1.5 text-body font-semibold text-brand-ink hover:text-ink"
+                >
+                  Abrir órdenes
+                  <ArrowUpRight aria-hidden className="size-4" />
+                </Link>
+              ) : null}
+            </div>
           </Card>
 
-          {/* Existencias: pendiente, con el vocabulario real del dominio */}
+          {/* Existencias: módulo real, con acceso directo */}
           <Card className="flex flex-col lg:col-span-5">
             <div className="flex items-start justify-between gap-3">
               <span
                 aria-hidden
-                className="grid size-11 place-items-center rounded-2xl bg-surface-2 text-ink-2"
+                className="grid size-11 place-items-center rounded-2xl bg-brand-soft text-brand-ink"
               >
                 <Boxes className="size-5" />
               </span>
-              <Badge tone="neutral">En construcción · entrega 2b</Badge>
+              <Badge tone={canInventory ? 'success' : 'neutral'}>
+                {canInventory ? (
+                  <>
+                    <span aria-hidden className="size-1.5 rounded-full bg-success" />
+                    Disponible
+                  </>
+                ) : (
+                  'Requiere permiso'
+                )}
+              </Badge>
             </div>
-            <h3 className="mt-4 font-display text-title font-bold text-ink">Existencias y traslados</h3>
+            <h3 className="mt-4 font-display text-title font-bold text-ink">
+              {canInventory ? (
+                <Link to="/erp/existencias" className="rounded transition-colors hover:text-brand-ink">
+                  Existencias y traslados
+                </Link>
+              ) : (
+                'Existencias y traslados'
+              )}
+            </h3>
             <p className="mt-1.5 text-body text-ink-2">
               Saldos por ubicación, lotes con vencimiento y salida preferente FEFO.
             </p>
@@ -296,11 +373,21 @@ export function ProductionPage({ me }: { me: MeResponse }) {
                 </span>
               ))}
             </div>
-            <div className="mt-auto pt-5">
+            <div className="mt-auto flex flex-col gap-3 pt-5">
               <p className="text-caption text-ink-3">
-                La consulta de existencias y el kardex llegan con la entrega 2b. Hasta entonces no se muestran
-                saldos.
+                {canInventory
+                  ? 'Saldos, lotes, vencimientos, kardex, traslados y trazabilidad con datos reales.'
+                  : 'Tu rol puede ver la sección, pero las existencias requieren el permiso inv.stock.read.'}
               </p>
+              {canInventory ? (
+                <Link
+                  to="/erp/existencias"
+                  className="inline-flex min-h-11 items-center gap-1.5 text-body font-semibold text-brand-ink hover:text-ink"
+                >
+                  Abrir existencias
+                  <ArrowUpRight aria-hidden className="size-4" />
+                </Link>
+              ) : null}
             </div>
           </Card>
 
