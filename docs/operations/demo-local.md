@@ -56,6 +56,16 @@ La semilla deja productos, presentaciones, precios y materias primas ficticios. 
 4. **Presentaciones y precios**: en la ficha, _Agregar presentación_ → "Unidad" con 1 unidad base; repetir con "Paquete x10" y 10. Luego _Fijar precio_ en la unidad (por ejemplo `1300.00`) → el precio queda vigente y auditado. Cambiarlo a `1400.00` → el anterior pasa al histórico.
 5. **Materias primas**: pestaña _Materias primas_. Como `compras@` se puede crear "Sal de pruebas" en kg; como `produccion@` el catálogo es solo lectura.
 
+## 4.2 Probar sin configurar el segundo factor (solo local)
+
+Para revisar funcionalidades internas sin pasar por la configuración de TOTP, agrega al `.env`:
+
+```
+AUTH_MFA_ENFORCEMENT_DISABLED=true
+```
+
+y reinicia `pnpm dev`. El servidor deja de exigir la configuración a Administrador, Manager y Contador (`/api/v1/me` devuelve `mfa.required: false`). No elimina un TOTP ya activado: si la cuenta ya lo tiene, el ingreso seguirá pidiendo el código. La variable se rechaza en staging y producción; los E2E fuerzan `false` para seguir probando el flujo real de MFA.
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

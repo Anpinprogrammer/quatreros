@@ -22,6 +22,21 @@ describe('loadEnv', () => {
     ).not.toThrow();
   });
 
+  it('nunca permite desactivar la exigencia de MFA en producción', () => {
+    expect(() =>
+      loadEnv({
+        DATABASE_URL: 'postgres://x',
+        NODE_ENV: 'production',
+        BETTER_AUTH_SECRET: 'a'.repeat(32),
+        AUTH_MFA_ENFORCEMENT_DISABLED: 'true',
+      }),
+    ).toThrow(/AUTH_MFA_ENFORCEMENT_DISABLED/);
+    expect(
+      loadEnv({ DATABASE_URL: 'postgres://x', AUTH_MFA_ENFORCEMENT_DISABLED: 'true' })
+        .AUTH_MFA_ENFORCEMENT_DISABLED,
+    ).toBe(true);
+  });
+
   it('nunca permite desactivar el límite de ingresos en producción', () => {
     expect(() =>
       loadEnv({

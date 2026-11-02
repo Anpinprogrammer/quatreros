@@ -22,6 +22,12 @@ const EnvSchema = z
     APP_VERSION: z.string().default('0.1.0'),
     /** Solo para pruebas E2E locales/CI: desactiva el límite de intentos de ingreso. Prohibido en staging/producción. */
     AUTH_RATE_LIMIT_DISABLED: booleanFromString,
+    /**
+     * Solo para desarrollo/pruebas locales: deja de exigir configurar el segundo factor a los roles sensibles.
+     * No elimina un TOTP ya activado; solo evita la pantalla de configuración obligatoria.
+     * Prohibido en staging/producción (DEC-043).
+     */
+    AUTH_MFA_ENFORCEMENT_DISABLED: booleanFromString,
   })
   .superRefine((env, ctx) => {
     if (env.AUTH_RATE_LIMIT_DISABLED && (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production')) {
@@ -29,6 +35,13 @@ const EnvSchema = z
         code: 'custom',
         path: ['AUTH_RATE_LIMIT_DISABLED'],
         message: 'AUTH_RATE_LIMIT_DISABLED no se permite en staging ni producción',
+      });
+    }
+    if (env.AUTH_MFA_ENFORCEMENT_DISABLED && (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AUTH_MFA_ENFORCEMENT_DISABLED'],
+        message: 'AUTH_MFA_ENFORCEMENT_DISABLED no se permite en staging ni producción',
       });
     }
     const needsSecret = env.NODE_ENV === 'staging' || env.NODE_ENV === 'production';
