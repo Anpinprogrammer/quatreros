@@ -19,6 +19,7 @@ import type { Database } from '../../../platform/db/client.js';
 import type { ExecutionContext } from '../../../platform/http/context.js';
 import { AppError } from '../../../platform/http/errors.js';
 import { authorize } from '../../admin/application/public.js';
+import { siteIdsFor } from './access.js';
 import {
   findLotRow,
   inventorySummary,
@@ -120,8 +121,9 @@ export async function listStockBalances(
   raw: unknown,
 ): Promise<StockBalancePage> {
   authorize(ctx, 'inv.stock.read');
+  const siteIds = siteIdsFor(ctx, 'inv.stock.read');
   const query = StockBalanceQuery.parse(raw);
-  const data = await listStockBalanceRows(deps.db, query);
+  const data = await listStockBalanceRows(deps.db, { ...query, siteIds });
   return {
     data: data.map(toBalance),
     page: { nextCursor: null, limit: query.limit },
@@ -135,16 +137,19 @@ export async function listAvailability(
   raw: unknown,
 ): Promise<AvailabilityList> {
   authorize(ctx, 'inv.stock.read');
+  const siteIds = siteIdsFor(ctx, 'inv.stock.read');
   const query = AvailabilityQuery.parse(raw);
-  const data = await listAvailabilityRows(deps.db, query);
+  const data = await listAvailabilityRows(deps.db, { ...query, siteIds });
   return { data: data.map(toAvailability) };
 }
 
 /** RF-110 y RF-118: lotes con su saldo total. */
 export async function listLots(deps: InventoryDeps, ctx: ExecutionContext, raw: unknown): Promise<LotPage> {
   authorize(ctx, 'inv.stock.read');
+  const siteIds = siteIdsFor(ctx, 'inv.stock.read');
   const query = LotListQuery.parse(raw);
   const data = await listLotRows(deps.db, {
+    siteIds,
     q: query.q,
     status: query.status,
     expiresBefore: query.expiresBefore,
@@ -165,11 +170,12 @@ export async function listLots(deps: InventoryDeps, ctx: ExecutionContext, raw: 
 /** Ficha del lote con saldos y últimos movimientos. */
 export async function getLot(deps: InventoryDeps, ctx: ExecutionContext, lotId: string): Promise<LotDetail> {
   authorize(ctx, 'inv.stock.read');
-  const lot = await findLotRow(deps.db, lotId);
+  const siteIds = siteIdsFor(ctx, 'inv.stock.read');
+  const lot = await findLotRow(deps.db, lotId, siteIds);
   if (!lot) throw AppError.notFound();
   const [balances, movements] = await Promise.all([
-    listStockBalanceRows(deps.db, { lotId, limit: 200 }),
-    listMovementRows(deps.db, { lotId, limit: 20 }),
+    listStockBalanceRows(deps.db, { lotId, siteIds, limit: 200 }),
+    listMovementRows(deps.db, { lotId, siteIds, limit: 20 }),
   ]);
   return {
     ...toLot(lot),
@@ -185,6 +191,7 @@ export async function listMovements(
   raw: unknown,
 ): Promise<MovementPage> {
   authorize(ctx, 'inv.stock.read');
+  const siteIds = siteIdsFor(ctx, 'inv.stock.read');
   const query = MovementListQuery.parse(raw);
   let cursorId: number | undefined;
   if (query.cursor) {
@@ -195,6 +202,7 @@ export async function listMovements(
     cursorId = parsed;
   }
   const data = await listMovementRows(deps.db, {
+    siteIds,
     q: query.q,
     lotId: query.lotId,
     locationId: query.locationId,
@@ -220,11 +228,12 @@ export async function traceLot(
   lotId: string,
 ): Promise<TraceabilityView> {
   authorize(ctx, 'inv.traceability.read');
-  const lot = await findLotRow(deps.db, lotId);
+  const siteIds = siteIdsFor(ctx, 'inv.traceability.read');
+  const lot = await findLotRow(deps.db, lotId, siteIds);
   if (!lot) throw AppError.notFound();
   const [inputs, forward] = await Promise.all([
     listLotInputRows(deps.db, lotId),
-    listForwardMovementRows(deps.db, lotId),
+    listForwardMovementRows(deps.db, lotId, siteIds),
   ]);
   return {
     lot: toLot(lot),
@@ -252,5 +261,5 @@ export async function getInventorySummary(
   ctx: ExecutionContext,
 ): Promise<InventorySummary> {
   authorize(ctx, 'inv.stock.read');
-  return inventorySummary(deps.db);
+  return inventorySummary(deps.db, siteIdsFor(ctx, 'inv.stock.read'));
 }

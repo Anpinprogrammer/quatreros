@@ -132,6 +132,8 @@ const lotJoins = sql`
   from inventory.lots l
   left join inventory.stock_balances b on b.lot_id = l.id
   left join catalog.presentations pr on pr.id = b.presentation_id
+  left join admin.locations loc on loc.id = b.location_id
+  left join admin.sites s on s.id = loc.site_id
   left join catalog.products p on p.id = l.product_id
   left join catalog.raw_materials rm on rm.id = l.raw_material_id
 `;
@@ -142,6 +144,15 @@ function where(conditions: SQL[]): SQL {
 
 function likeTerm(q: string): string {
   return `%${q}%`;
+}
+
+function siteCondition(siteIds: string[] | null | undefined, alias = 's'): SQL {
+  if (siteIds === null || siteIds === undefined) return sql`true`;
+  if (siteIds.length === 0) return sql`false`;
+  return sql`${sql.raw(alias)}.id in (${sql.join(
+    siteIds.map((id) => sql`${id}`),
+    sql`, `,
+  )})`;
 }
 
 async function rows<T>(db: Database, statement: SQL): Promise<T[]> {
@@ -158,6 +169,7 @@ export interface StockBalanceFilters {
   locationId?: string | undefined;
   status?: LotStatus | undefined;
   expiresBefore?: string | undefined;
+  siteIds?: string[] | null;
   limit: number;
 }
 
@@ -165,7 +177,7 @@ export async function listStockBalanceRows(
   db: Database,
   filters: StockBalanceFilters,
 ): Promise<StockBalanceRow[]> {
-  const conditions: SQL[] = [sql`b.quantity > 0`];
+  const conditions: SQL[] = [sql`b.quantity > 0`, siteCondition(filters.siteIds)];
   if (filters.q) {
     const term = likeTerm(filters.q);
     conditions.push(sql`(${itemName} ilike ${term} or l.code ilike ${term})`);
@@ -203,6 +215,7 @@ export interface AvailabilityFilters {
   rawMaterialId?: string | undefined;
   presentationId?: string | undefined;
   locationId?: string | undefined;
+  siteIds?: string[] | null;
   limit: number;
 }
 
@@ -214,6 +227,7 @@ export async function listAvailabilityRows(
     sql`b.quantity > 0`,
     sql`l.status = 'available'`,
     sql`(l.expires_on is null or l.expires_on >= current_date)`,
+    siteCondition(filters.siteIds),
   ];
   if (filters.q) {
     const term = likeTerm(filters.q);
@@ -250,11 +264,12 @@ export interface LotFilters {
   productId?: string | undefined;
   rawMaterialId?: string | undefined;
   cursor?: string | undefined;
+  siteIds?: string[] | null;
   limit: number;
 }
 
 export async function listLotRows(db: Database, filters: LotFilters): Promise<LotRow[]> {
-  const conditions: SQL[] = [];
+  const conditions: SQL[] = [siteCondition(filters.siteIds)];
   if (filters.q) {
     const term = likeTerm(filters.q);
     conditions.push(sql`(${itemName} ilike ${term} or l.code ilike ${term})`);
@@ -283,7 +298,11 @@ export async function listLotRows(db: Database, filters: LotFilters): Promise<Lo
   );
 }
 
-export async function findLotRow(db: Database, id: string): Promise<LotRow | undefined> {
+export async function findLotRow(
+  db: Database,
+  id: string,
+  siteIds?: string[] | null,
+): Promise<LotRow | undefined> {
   const result = await rows<LotRow>(
     db,
     sql`
@@ -294,7 +313,7 @@ export async function findLotRow(db: Database, id: string): Promise<LotRow | und
              round(coalesce(sum(b.quantity * coalesce(pr.units_per, 1)), 0), 3) as "totalQuantity",
              ${baseUnit} as "baseUnit", l.created_at as "createdAt"
       ${lotJoins}
-      where l.id = ${id}
+      where l.id = ${id} and ${siteCondition(siteIds)}
       group by l.id, p.id, p.name, p.base_unit, rm.id, rm.name, rm.unit
     `,
   );
@@ -309,11 +328,12 @@ export interface MovementFilters {
   from?: string | undefined;
   to?: string | undefined;
   cursorId?: number | undefined;
+  siteIds?: string[] | null;
   limit: number;
 }
 
 export async function listMovementRows(db: Database, filters: MovementFilters): Promise<MovementRow[]> {
-  const conditions: SQL[] = [];
+  const conditions: SQL[] = [siteCondition(filters.siteIds)];
   if (filters.q) {
     const term = likeTerm(filters.q);
     conditions.push(sql`(l.code ilike ${term} or ${itemName} ilike ${term})`);
@@ -361,7 +381,11 @@ export async function listLotInputRows(db: Database, outputLotId: string): Promi
   );
 }
 
-export async function listForwardMovementRows(db: Database, lotId: string): Promise<MovementRow[]> {
+export async function listForwardMovementRows(
+  db: Database,
+  lotId: string,
+  siteIds?: string[] | null,
+): Promise<MovementRow[]> {
   return rows<MovementRow>(
     db,
     sql`
@@ -377,6 +401,7 @@ export async function listForwardMovementRows(db: Database, lotId: string): Prom
              m.created_at as "createdAt"
       ${movementJoins}
       where m.lot_id = ${lotId}
+        and ${siteCondition(siteIds)}
         and m.movement_type in ('dispatch_out','sale','transfer_out')
       order by m.created_at desc, m.id desc
       limit 50
@@ -384,24 +409,44 @@ export async function listForwardMovementRows(db: Database, lotId: string): Prom
   );
 }
 
-export async function inventorySummary(db: Database): Promise<SummaryRow> {
+export async function inventorySummary(db: Database, siteIds?: string[] | null): Promise<SummaryRow> {
+  const site = siteCondition(siteIds);
   const result = await rows<SummaryRow>(
     db,
     sql`
       select
         (select count(distinct l.product_id)::int
-           from inventory.lots l join inventory.stock_balances b on b.lot_id = l.id
-          where b.quantity > 0 and l.product_id is not null) as "productsWithStock",
+           from inventory.lots l
+           join inventory.stock_balances b on b.lot_id = l.id
+           join admin.locations loc on loc.id = b.location_id
+           join admin.sites s on s.id = loc.site_id
+          where b.quantity > 0 and l.product_id is not null and ${site}) as "productsWithStock",
         (select count(distinct l.raw_material_id)::int
-           from inventory.lots l join inventory.stock_balances b on b.lot_id = l.id
-          where b.quantity > 0 and l.raw_material_id is not null) as "rawMaterialsWithStock",
-        (select count(*)::int from inventory.lots l
+           from inventory.lots l
+           join inventory.stock_balances b on b.lot_id = l.id
+           join admin.locations loc on loc.id = b.location_id
+           join admin.sites s on s.id = loc.site_id
+          where b.quantity > 0 and l.raw_material_id is not null and ${site}) as "rawMaterialsWithStock",
+        (select count(distinct l.id)::int
+           from inventory.lots l
+           join inventory.stock_balances b on b.lot_id = l.id
+           join admin.locations loc on loc.id = b.location_id
+           join admin.sites s on s.id = loc.site_id
           where l.status = 'available'
-            and l.expires_on between current_date and current_date + 7) as "lotsNearExpiry",
-        (select count(*)::int from inventory.lots l
-          where l.expires_on < current_date and l.status <> 'written_off') as "expiredLots",
-        (select count(distinct b.location_id)::int from inventory.stock_balances b
-          where b.quantity > 0) as "locationsWithStock"
+            and l.expires_on between current_date and current_date + 7
+            and ${site}) as "lotsNearExpiry",
+        (select count(distinct l.id)::int
+           from inventory.lots l
+           join inventory.stock_balances b on b.lot_id = l.id
+           join admin.locations loc on loc.id = b.location_id
+           join admin.sites s on s.id = loc.site_id
+          where l.expires_on < current_date and l.status <> 'written_off'
+            and ${site}) as "expiredLots",
+        (select count(distinct b.location_id)::int
+           from inventory.stock_balances b
+           join admin.locations loc on loc.id = b.location_id
+           join admin.sites s on s.id = loc.site_id
+          where b.quantity > 0 and ${site}) as "locationsWithStock"
     `,
   );
   const row = result[0];

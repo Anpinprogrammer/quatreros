@@ -31,5 +31,5 @@ export function registerModules(api: Router, deps: AppDeps, overrides: ModuleOve
       inventoryUsage,
     }),
   );
-  api.use(inventoryRouter({ db: deps.db }));
+  api.use(inventoryRouter({ db: deps.db, idempotency: deps.idempotency }));
 }

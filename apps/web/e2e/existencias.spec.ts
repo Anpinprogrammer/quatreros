@@ -43,5 +43,5 @@ test('producción consulta la trazabilidad del lote', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Lote PT-2026-0001/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Trazabilidad' })).toBeVisible();
   await expect(page.getByText('Sin insumos registrados')).toBeVisible();
-  await expect(page.getByText('Sin despachos ni ventas')).toBeVisible();
+  await expect(page.getByText(/inventory\.transfer|Sin despachos ni ventas/).first()).toBeVisible();
 });

@@ -81,6 +81,17 @@ La semilla crea 8 lotes y 12 saldos con movimientos `opening_balance`; las fecha
 5. **Kardex**: pestaña _Kardex_; verifica la carga inicial, el usuario y el documento de origen. Filtra por tipo o rango de fechas.
 6. **Trazabilidad**: entra como `produccion@` y abre el lote; verás las secciones "Hacia atrás" y "Hacia adelante" con los vacíos que activan las entregas 3, 4 y 5. Como `compras@` no se consulta trazabilidad, pero sí existencias y kardex.
 
+## 4.4 FEFO y traslados (entrega 2c, ~4 minutos)
+
+La semilla deja el traslado `T-0001` ya recibido (2 paquetes de PT-2026-0001 de Bodega principal a Productos del punto).
+
+1. **Manager o Administrador**: _04. Producción_ → _Existencias y traslados_ → pestaña _Traslados_. Abre `T-0001` para ver las líneas, el lote asignado, quién envió y quién recibió.
+2. **FEFO por vencimiento**: _Nuevo traslado_ → origen "Principal" y destino "Productos del punto" → "Chorizo Santarrosano · Paquete x10" → cantidad `30`. La asignación usa primero PT-2026-0001 (vence antes) y reparte el resto en PT-2026-0002.
+3. **Enviar**: el traslado queda _En tránsito_. En _Existencias_ el saldo sale de Principal y entra a la ubicación "En tránsito".
+4. **Recibir completo**: abre el traslado y confirma la cantidad. El saldo sale de tránsito y entra a Productos del punto; el traslado queda _Recibido_.
+5. **Novedad**: repite con otra cantidad y confirma menos de lo enviado. El traslado queda _Recibido con novedad_ y la diferencia permanece en tránsito.
+6. **Command Center**: la tarjeta _Alertas FEFO_ muestra hasta 3 lotes vendibles que vencen en 7 días. Si estás como `compras@`, solo ves las sedes de su alcance.
+
 ## 5. Volver a empezar
 
 Para repetir la demo desde cero (el administrador sin segundo factor), recrea la base: `docker compose down -v && docker compose up -d`, luego `pnpm db:migrate`, `pnpm db:seed` y `pnpm db:seed:demo`.

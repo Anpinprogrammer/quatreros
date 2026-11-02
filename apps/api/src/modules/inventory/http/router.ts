@@ -1,6 +1,8 @@
 import { Uuid } from '@quatreros/contracts';
 import { Router } from 'express';
 import { AppError } from '../../../platform/http/errors.js';
+import { requireIdempotency } from '../../../platform/idempotency/middleware.js';
+import type { IdempotencyStore } from '../../../platform/idempotency/store.js';
 import {
   getInventorySummary,
   getLot,
@@ -11,6 +13,13 @@ import {
   traceLot,
   type InventoryDeps,
 } from '../application/inventory.js';
+import {
+  createTransfer,
+  getTransfer,
+  listTransfers,
+  receiveTransfer,
+  simulateFefo,
+} from '../application/transfers.js';
 
 function id(raw: string | string[] | undefined): string {
   const parsed = Uuid.safeParse(Array.isArray(raw) ? raw[0] : raw);
@@ -18,7 +27,7 @@ function id(raw: string | string[] | undefined): string {
   return parsed.data;
 }
 
-export function inventoryRouter(deps: InventoryDeps): Router {
+export function inventoryRouter(deps: InventoryDeps & { idempotency: IdempotencyStore }): Router {
   const router = Router();
 
   router.get('/inventory/stock-balances', async (req, res) => {
@@ -47,6 +56,26 @@ export function inventoryRouter(deps: InventoryDeps): Router {
 
   router.get('/inventory/movements', async (req, res) => {
     res.json(await listMovements(deps, req.ctx, req.query));
+  });
+
+  router.post('/inventory/fefo-allocations', async (req, res) => {
+    res.json(await simulateFefo(deps, req.ctx, req.body));
+  });
+
+  router.post('/inventory/transfers', requireIdempotency(deps.idempotency), async (req, res) => {
+    res.status(201).json({ data: await createTransfer(deps, req.ctx, req.body) });
+  });
+
+  router.get('/inventory/transfers', async (req, res) => {
+    res.json(await listTransfers(deps, req.ctx, req.query));
+  });
+
+  router.get('/inventory/transfers/:id', async (req, res) => {
+    res.json({ data: await getTransfer(deps, req.ctx, id(req.params.id)) });
+  });
+
+  router.post('/inventory/transfers/:id/receive', requireIdempotency(deps.idempotency), async (req, res) => {
+    res.json({ data: await receiveTransfer(deps, req.ctx, id(req.params.id), req.body) });
   });
 
   return router;

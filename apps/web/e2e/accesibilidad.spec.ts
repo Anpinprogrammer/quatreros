@@ -89,6 +89,10 @@ test('ERP: existencias, lotes y kardex', async ({ page }, info) => {
   await page.goto('/erp/existencias');
   await page.getByRole('tab', { name: 'Kardex' }).click();
   await audit(page, info, 'existencias-kardex');
+  await page.getByRole('tab', { name: 'Traslados' }).click();
+  await audit(page, info, 'existencias-traslados');
+  await page.getByRole('link', { name: 'T-0001' }).first().click();
+  await audit(page, info, 'traslado');
 });
 
 test('ERP: trazabilidad de lote', async ({ page }, info) => {

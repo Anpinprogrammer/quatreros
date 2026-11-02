@@ -152,3 +152,50 @@ export const lotInputs = inventorySchema.table(
     check('lot_inputs_quantity_chk', sql`${t.quantity} > 0`),
   ],
 );
+
+export const transfers = inventorySchema.table(
+  'transfers',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    number: text().notNull().unique(),
+    fromLocationId: uuid().notNull(),
+    toLocationId: uuid().notNull(),
+    transitLocationId: uuid().notNull(),
+    status: text({ enum: ['in_transit', 'received', 'received_with_variance'] })
+      .notNull()
+      .default('in_transit'),
+    sentBy: uuid().notNull(),
+    sentAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    receivedBy: uuid(),
+    receivedAt: timestamp({ withTimezone: true }),
+  },
+  (t) => [
+    check('transfers_locations_chk', sql`${t.fromLocationId} <> ${t.toLocationId}`),
+    check('transfers_status_chk', sql`${t.status} IN ('in_transit','received','received_with_variance')`),
+    index('transfers_status_idx').on(t.status, t.sentAt),
+  ],
+);
+
+export const transferLines = inventorySchema.table(
+  'transfer_lines',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    transferId: uuid()
+      .notNull()
+      .references(() => transfers.id),
+    lotId: uuid()
+      .notNull()
+      .references(() => lots.id),
+    presentationId: uuid().notNull(),
+    sentQty: numeric({ precision: 14, scale: 3 }).notNull(),
+    receivedQty: numeric({ precision: 14, scale: 3 }),
+  },
+  (t) => [
+    check('transfer_lines_sent_qty_chk', sql`${t.sentQty} > 0`),
+    check(
+      'transfer_lines_received_qty_chk',
+      sql`${t.receivedQty} IS NULL OR (${t.receivedQty} >= 0 AND ${t.receivedQty} <= ${t.sentQty})`,
+    ),
+    index('transfer_lines_transfer_idx').on(t.transferId),
+  ],
+);

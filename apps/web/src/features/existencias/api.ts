@@ -65,10 +65,11 @@ export interface LotParams {
   limit?: number | undefined;
 }
 
-export function useLots(params: LotParams) {
+export function useLots(params: LotParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...INVENTORY_KEY, 'lots', params],
     queryFn: () => apiRequest<LotPage>(`/api/v1/inventory/lots${query(params)}`),
+    enabled: options?.enabled ?? true,
   });
 }
 

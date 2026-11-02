@@ -154,3 +154,31 @@ test('administrador: crea producto, presentaciones y precios', async ({ page }, 
   await expect(page.getByText('Precio de Unidad actualizado.')).toBeVisible();
   await expect(page.getByText(/1\.400/).first()).toBeVisible();
 });
+
+test('administrador: crea un traslado y lo recibe', async ({ page }, info) => {
+  test.skip(info.project.name !== 'escritorio', 'El flujo de administración se valida en escritorio');
+  test.skip(!adminSecret, 'Requiere el flujo de configuración del segundo factor');
+
+  await signIn(page, 'admin@quatreros.example');
+  await page.getByLabel('Código de 6 dígitos').fill(totp(adminSecret));
+  await page.getByRole('button', { name: 'Verificar' }).click();
+  await expect(page).toHaveURL(/\/erp$/);
+
+  await page.goto('/erp/existencias');
+  await page.getByRole('tab', { name: 'Traslados' }).click();
+  await page.getByRole('button', { name: 'Nuevo traslado' }).click();
+  const form = page.getByRole('form', { name: 'Nuevo traslado' });
+  await form.getByLabel('Origen').selectOption({ label: 'Principal · Bodega principal' });
+  await form.getByLabel('Destino').selectOption({ label: 'Productos del punto · Punto de asados' });
+  await form
+    .getByLabel('Producto y presentación')
+    .selectOption({ label: 'Chorizo Santarrosano · Paquete x10' });
+  await form.getByLabel('Cantidad').fill('1');
+  await form.getByRole('button', { name: 'Enviar traslado' }).click();
+
+  await expect(page).toHaveURL(/\/erp\/existencias\/traslados\//);
+  await expect(page.getByRole('heading', { name: /Traslado T-\d{4}/ })).toBeVisible();
+  await expect(page.getByText('En tránsito', { exact: true }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmar recepción' }).click();
+  await expect(page.getByText('Traslado recibido completo.').first()).toBeVisible();
+});

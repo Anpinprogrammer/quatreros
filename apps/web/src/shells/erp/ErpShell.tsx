@@ -5,6 +5,7 @@ import { CatalogPage } from '../../features/catalogo/CatalogPage';
 import { ProductPage } from '../../features/catalogo/ProductPage';
 import { ExistenciasPage } from '../../features/existencias/ExistenciasPage';
 import { LotePage } from '../../features/existencias/LotePage';
+import { TransferPage } from '../../features/existencias/TransferPage';
 import { UsersPage } from '../../features/usuarios/UsersPage';
 import { hasPermission } from '../../shared/auth/session';
 import { EmptyState } from '../../shared/ui/EmptyState';
@@ -97,6 +98,9 @@ export function ErpShell({ me }: { me: MeResponse }) {
               ) : null}
               {hasPermission(me, 'inv.stock.read') ? (
                 <Route path="existencias/lotes/:id" element={<LotePage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'inv.stock.read') ? (
+                <Route path="existencias/traslados/:id" element={<TransferPage me={me} />} />
               ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>

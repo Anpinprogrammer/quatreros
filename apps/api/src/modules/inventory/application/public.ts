@@ -12,3 +12,4 @@ export {
   traceLot,
 } from './inventory.js';
 export type { InventoryDeps } from './inventory.js';
+export { createTransfer, getTransfer, listTransfers, receiveTransfer, simulateFefo } from './transfers.js';

@@ -11,7 +11,7 @@
 | G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md` |
 | Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                 |
 | **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                   |
-| **Entrega 2**: catálogo e inventario                                          | **En curso.** 2a y 2b terminadas; sigue 2c (FEFO y traslados)             |
+| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas; sigue la entrega 3 (compras)         |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -70,55 +70,38 @@
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
 
-## 2. Siguiente tarea: entrega 2c, FEFO y traslados
+## 2. Siguiente tarea: entrega 3, compras y recepción
 
-**Estado al 2026-11-02:** 2a y 2b terminadas y verificadas. Sigue la 2c, que cierra la entrega 2 y permite demostrar el recorrido completo del inventario.
+**Estado al 2026-11-02:** entregas 1, 2a, 2b y 2c terminadas y verificadas. Sigue la 3: compra a proveedor y recepción que crea lotes de materia prima.
 
-**Objetivo demostrable de 2c:**
+### Hecho en 2c: FEFO y traslados
 
-- Asignación FEFO de lotes por vencimiento más próximo en toda salida.
-- Excepción FEFO con motivo y aprobación (AP-03, Q-INV-03).
-- Traslado bodega → punto de venta con salida, estado en tránsito y recepción en destino.
-- Novedad cuando lo recibido difiere de lo enviado (BR-089, PROVISIONAL).
-- Tarjeta "Alertas FEFO" del Command Center con datos reales.
+- Especificación en `docs/04-specifications/inv/fefo-traslados.md`.
+- `allocateFefo()` ordena por vencimiento, excluye lotes vencidos o bloqueados, reparte entre lotes y falla con `409 INSUFFICIENT_STOCK`.
+- `inventory.transfers` y `transfer_lines` con consecutivo `T-0001`, envío a la ubicación "En tránsito", recepción completa o con novedad y auditoría; la diferencia de una novedad permanece en tránsito hasta resolverse.
+- Traslados en **04. Producción → Existencias y traslados**, con detalle y recepción; tarjeta "Alertas FEFO" del Command Center con datos reales.
+- Alcance por sede en saldos, disponibilidad, lotes, kardex, resumen y traslados; la ficha de un lote ajeno responde `404`.
+- Semilla: `T-0001` ya recibido (2 paquetes de PT-2026-0001 de Bodega principal a Productos del punto).
+- **RF-113 (excepción FEFO) queda pendiente del motor de aprobaciones (RF-007).** No se implementó un bypass ni un umbral.
 
-Procedimiento: skill `.claude/skills/quatreros-entrega`.
+### Objetivo demostrable de la entrega 3
 
-### RF que quedan en la entrega 2
+- Registrar proveedores y compras con líneas de materia prima, cantidad y costo.
+- Recibir total o parcialmente una compra: crear el lote de materia prima y el movimiento de entrada en la misma transacción.
+- Ver la compra pendiente, lo recibido y el saldo por recibir.
+- Mantener bloqueados los impuestos y el desglose fiscal (BR-044, P-02): se registra el total pagado sin inventar reglas contables.
+- Resolver en la especificación el alcance de la recepción parcial (RF-052 figura como PROPOSED para el lote de MP): no ampliarlo sin decisión.
 
-| RF     | Tema                       | Estado                                    | Ojo con                                                       |
-| ------ | -------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
-| RF-112 | Asignación FEFO            | CONFIRMED                                 | Orden por vencimiento y bloqueo determinista                  |
-| RF-113 | Excepción FEFO             | CONFIRMED                                 | Q-INV-03; usa el motor de aprobaciones (RF-007)               |
-| RF-114 | Traslado entre ubicaciones | CONFIRMED · tránsito PROVISIONAL (Q-B-07) | Q-POS-01; recepción y novedad                                 |
-| RF-117 | Bloqueo de lotes           | PROPOSED                                  | Depende de P-05: **no implementar** más allá de lo conceptual |
+### RF de la entrega 3
 
-**Hecho en 2a:** RF-030, RF-031 y RF-032 (`cat/catalogo.md`).
-**Hecho en 2b:** RF-110, RF-111 (DEC-089) y RF-118 (`inv/existencias.md`).
-**Movido:** RF-033 (recetas) a la entrega 4 por DEC-092.
+| RF     | Tema                       | Estado                                 | Ojo con                                                               |
+| ------ | -------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| RF-050 | Gestión de proveedores     | CONFIRMED                              | Identificación duplicada                                              |
+| RF-051 | Registro de compra         | CONFIRMED · impuestos BLOCKED (BR-044) | Solo total pagado; no desglose fiscal                                 |
+| RF-052 | Recepción de materia prima | CONFIRMED · parcial PROPOSED (lote MP) | Transacción única con lote y movimiento; vencimiento pasado rechazado |
+| RF-053 | Anulación de compra        | PROPOSED                               | Depende de P-09: **no implementar**                                   |
 
-**Fuera de la entrega 2 (bloqueado):**
-
-- RF-116, apertura de paquetes (P-06).
-- RF-119, vencidos y retiros (P-05).
-
-**Reglas provisionales aplicables (DEC-083):**
-
-- Q-B-07: estados "en tránsito" y "en ruta".
-- Q-B-08: no se permiten existencias negativas.
-
-Impleméntalas configurables y señalizadas.
-
-### Orden sugerido
-
-1. ✅ **2a. Catálogo:** RF-030 a RF-032. Spec `docs/04-specifications/cat/catalogo.md`.
-2. ✅ **2b. Lotes, existencias y kardex:** RF-110, RF-111 y RF-118. Spec `docs/04-specifications/inv/existencias.md`.
-3. **2c. FEFO y traslados:** RF-112 a RF-114.
-   - Especificación en `docs/04-specifications/inv/fefo-traslados.md`.
-   - Implementar `allocateFefo()` con `FOR UPDATE` en orden determinista, `transfer()` con ubicación en tránsito y `receive()` con recepción y novedad.
-   - La excepción FEFO usa el motor de aprobaciones; no inventar umbrales.
-   - Pantallas: traslado desde existencias, recepción en destino, existencias en Caja (solo lectura hasta la entrega 6) y tarjeta de alertas FEFO en el Command Center.
-   - Semilla: un traslado de ejemplo bodega → punto de venta.
+Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/comp/compras.md` y esperar aprobación.
 
 En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
 

@@ -10,6 +10,10 @@ import {
   Truck,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Link } from 'react-router';
+import { hasPermission } from '../../shared/auth/session';
+import { useLots } from '../../features/existencias/api';
+import { formatDate, formatQuantity } from '../../features/existencias/format';
 import { Card } from '../../shared/ui/Card';
 import { Badge, type BadgeTone } from '../../shared/ui/Badge';
 import { EmptyState } from '../../shared/ui/EmptyState';
@@ -61,6 +65,95 @@ function BentoTile({
  * Command Center: lo que ya se puede hacer y el estado honesto de lo que falta.
  * No muestra cifras hasta que el módulo que las produce exista (Anexo B).
  */
+function FefoCard({ me }: { me: MeResponse }) {
+  const canInventory = hasPermission(me, 'inv.stock.read');
+  const inSevenDays = new Date();
+  inSevenDays.setDate(inSevenDays.getDate() + 7);
+  const expiresBefore = inSevenDays.toISOString().slice(0, 10);
+  const lots = useLots({ status: 'available', expiresBefore, limit: 3 }, { enabled: canInventory });
+
+  return (
+    <Card className="flex flex-col md:col-span-2 xl:col-span-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <CalendarClock aria-hidden className="size-4 text-warning" />
+            <h3 className="font-display text-card font-semibold text-ink">
+              Alertas FEFO y salida preferente
+            </h3>
+          </div>
+          <p className="mt-1 text-body text-ink-2">
+            Lotes vendibles que vencen en los próximos 7 días. Primero lo que vence antes.
+          </p>
+        </div>
+        <Badge tone={lots.data && lots.data.data.length > 0 ? 'warning' : 'neutral'}>
+          {lots.data ? `${String(lots.data.data.length)} por vencer` : 'Consultando…'}
+        </Badge>
+      </div>
+
+      {!canInventory ? (
+        <div className="mt-4">
+          <EmptyState
+            compact
+            title="Requiere permiso de existencias"
+            description="Tu rol no consulta el inventario; pide acceso a un administrador."
+          />
+        </div>
+      ) : null}
+      {canInventory && lots.isPending ? (
+        <p className="mt-4 text-body text-ink-2">Consultando lotes…</p>
+      ) : null}
+      {canInventory && lots.error ? (
+        <p role="alert" className="mt-4 text-body text-danger">
+          {lots.error.message}
+        </p>
+      ) : null}
+      {canInventory && lots.data && lots.data.data.length === 0 ? (
+        <div className="mt-4">
+          <EmptyState
+            compact
+            title="Sin lotes por vencer"
+            description="No hay lotes vendibles que venzan en los próximos 7 días."
+          />
+        </div>
+      ) : null}
+      {canInventory && lots.data && lots.data.data.length > 0 ? (
+        <ul className="mt-4 grid gap-2 md:grid-cols-3">
+          {lots.data.data.map((lot) => (
+            <li key={lot.id}>
+              <Link
+                to={`/erp/existencias/lotes/${lot.id}`}
+                className="block rounded-xl border border-line bg-surface-2/60 p-3 transition-colors hover:border-brand/40 hover:bg-surface-2"
+              >
+                <span className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-caption font-semibold text-brand-ink">{lot.code}</span>
+                  <span className="text-caption text-ink-2">{formatDate(lot.expiresOn)}</span>
+                </span>
+                <span className="mt-1 block truncate text-body font-semibold text-ink">{lot.itemName}</span>
+                <span className="mt-1 block font-mono text-caption text-ink-2">
+                  {formatQuantity(lot.totalQuantity)} {lot.baseUnit}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+        <p className="text-caption text-ink-2">
+          La salida FEFO se aplica en traslados y ventas; la excepción requiere aprobación.
+        </p>
+        <Link
+          to="/erp/existencias"
+          className="inline-flex min-h-10 items-center font-semibold text-brand-ink hover:text-ink"
+        >
+          Ver existencias <span aria-hidden>›</span>
+        </Link>
+      </div>
+    </Card>
+  );
+}
+
 export function CommandCenter({ me }: { me: MeResponse }) {
   useDocumentTitle('Command Center');
   const firstName = me.user.fullName.split(' ')[0] ?? me.user.fullName;
@@ -159,14 +252,7 @@ export function CommandCenter({ me }: { me: MeResponse }) {
                 delivery={4}
                 icon={<Factory className="size-4" />}
               />
-              <BentoTile
-                label="Alertas FEFO y salida preferente"
-                shows="Lotes próximos a vencer, con días restantes y paquetes en cada sede."
-                delivery={2}
-                tone="warning"
-                icon={<CalendarClock className="size-4" />}
-                className="md:col-span-2 xl:col-span-3"
-              />
+              <FefoCard me={me} />
               <BentoTile
                 label="Estado de caja POS"
                 shows="Total por caja y por medio de pago del turno abierto."

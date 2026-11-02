@@ -4,15 +4,23 @@ import type {
   LotDetail,
   LotPage,
   MovementPage,
+  FefoAllocationResponse,
   StockBalancePage,
   TraceabilityView,
+  TransferDetail,
 } from '@quatreros/contracts';
 import { eq, inArray, sql } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadActor } from '../../src/modules/admin/application/public.js';
 import { seedAdminCatalog, seedDemoSites } from '../../src/modules/admin/infrastructure/seed.js';
-import { rolePermissions, roles, userRoles, users } from '../../src/modules/admin/infrastructure/schema.js';
+import {
+  rolePermissions,
+  roles,
+  userRoles,
+  userSites,
+  users,
+} from '../../src/modules/admin/infrastructure/schema.js';
 import { seedDemoCatalog } from '../../src/modules/catalog/infrastructure/seed.js';
 import { recordMovement } from '../../src/modules/inventory/application/movements.js';
 import { seedDemoInventory } from '../../src/modules/inventory/infrastructure/seed.js';
@@ -61,7 +69,11 @@ let reader: Agent;
 let adminUserId = '';
 let lotId = '';
 
-async function ensureRole(code: string, permissionCodes: string[]): Promise<string> {
+async function ensureRole(
+  code: string,
+  permissionCodes: string[],
+  scope: 'ALL' | 'SITE' = 'ALL',
+): Promise<string> {
   const [role] = await db
     .insert(roles)
     .values({ code, name: code, isSystem: false, requiresMfa: false })
@@ -74,7 +86,7 @@ async function ensureRole(code: string, permissionCodes: string[]): Promise<stri
     permissionCodes.map((permissionCode) => ({
       roleId: role.id,
       permissionCode,
-      scope: 'ALL' as const,
+      scope,
     })),
   );
   return role.id;
@@ -124,6 +136,8 @@ beforeAll(async () => {
     'cat.raw_material.manage',
     'inv.stock.read',
     'inv.traceability.read',
+    'inv.transfer.create',
+    'inv.transfer.receive',
   ]);
   const readerRole = await ensureRole('INV_TEST_READ', ['inv.stock.read']);
 
@@ -357,5 +371,171 @@ describe('inventario: reglas y permisos', () => {
       .send({ unitsPer: '12.000' });
     expect(composition.status).toBe(409);
     expect((composition.body as { code: string }).code).toBe('PRESENTATION_LOCKED');
+  });
+});
+
+describe('FEFO y traslados (RF-112, RF-114)', () => {
+  let presentationId = '';
+  let fromLocationId = '';
+  let toLocationId = '';
+  let pointLotId = '';
+
+  beforeAll(async () => {
+    const refs = await db.execute(sql`
+      select pr.id as "presentationId", fl.id as "fromLocationId", tl.id as "toLocationId"
+      from catalog.presentations pr
+      join catalog.products p on p.id = pr.product_id
+      join admin.locations fl on fl.name = 'Principal'
+      join admin.locations tl on tl.name = 'Productos del punto'
+      where p.name = 'Chorizo Santarrosano' and pr.name = 'Paquete x10'
+      limit 1
+    `);
+    const ref = refs.rows[0] as
+      { presentationId: string; fromLocationId: string; toLocationId: string } | undefined;
+    if (!ref) throw new Error('La semilla no tiene la presentación y ubicaciones esperadas');
+    presentationId = ref.presentationId;
+    fromLocationId = ref.fromLocationId;
+    toLocationId = ref.toLocationId;
+
+    const pointLot = await db.execute(sql`
+      select id from inventory.lots where code = 'PT-2026-0004' limit 1
+    `);
+    pointLotId = (pointLot.rows[0] as { id: string } | undefined)?.id ?? '';
+  });
+
+  it('reparte la asignación FEFO entre lotes y no usa lotes no vendibles', async () => {
+    const res = await admin
+      .post('/api/v1/inventory/fefo-allocations')
+      .send({ presentationId, locationId: fromLocationId, quantity: '30.000' });
+    expect(res.status).toBe(200);
+    const data = (res.body as FefoAllocationResponse).data;
+    expect(data.allocations).toHaveLength(2);
+    expect(data.allocations[0]?.code).toBe('PT-2026-0001');
+    expect(data.allocations[0]?.quantity).toBe('24.000');
+    expect(data.allocations[1]?.quantity).toBe('6.000');
+    expect(data.baseQuantity).toBe('300.000');
+  });
+
+  it('falla con 409 cuando la existencia vendible no alcanza', async () => {
+    const res = await admin
+      .post('/api/v1/inventory/fefo-allocations')
+      .send({ presentationId, locationId: fromLocationId, quantity: '9999.000' });
+    expect(res.status).toBe(409);
+    expect((res.body as { code: string }).code).toBe('INSUFFICIENT_STOCK');
+    expect((res.body as { missing: string }).missing).toBeTruthy();
+  });
+
+  it('envía a tránsito, recibe en destino y no permite recibir dos veces', async () => {
+    const key = randomUUID();
+    const create = await admin
+      .post('/api/v1/inventory/transfers')
+      .set('Idempotency-Key', key)
+      .send({
+        fromLocationId,
+        toLocationId,
+        lines: [{ presentationId, quantity: '5.000' }],
+      });
+    expect(create.status).toBe(201);
+    const transfer = (create.body as { data: TransferDetail }).data;
+    expect(transfer.status).toBe('in_transit');
+    expect(transfer.lines).toHaveLength(1);
+    expect(transfer.lines[0]?.sentQuantity).toBe('5.000');
+
+    const repeated = await admin
+      .post('/api/v1/inventory/transfers')
+      .set('Idempotency-Key', key)
+      .send({
+        fromLocationId,
+        toLocationId,
+        lines: [{ presentationId, quantity: '5.000' }],
+      });
+    expect(repeated.status).toBe(201);
+    expect((repeated.body as { data: TransferDetail }).data.id).toBe(transfer.id);
+
+    const lotId = transfer.lines[0]?.lotId ?? '';
+    const afterSend = await db.execute(sql`
+      select
+        (select coalesce(sum(quantity), 0) from inventory.stock_balances
+          where lot_id = ${lotId} and presentation_id = ${presentationId}
+            and location_id = ${fromLocationId}) as origin,
+        (select coalesce(sum(quantity), 0) from inventory.stock_balances
+          where lot_id = ${lotId} and presentation_id = ${presentationId}
+            and location_id = (select id from admin.locations where kind = 'in_transit' limit 1)) as transit
+    `);
+    expect(afterSend.rows[0]).toEqual({ origin: '19.000', transit: '5.000' });
+
+    const lineId = transfer.lines[0]?.id ?? '';
+    const receive = await admin
+      .post(`/api/v1/inventory/transfers/${transfer.id}/receive`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ lines: [{ lineId, receivedQuantity: '5.000' }] });
+    expect(receive.status).toBe(200);
+    const received = (receive.body as { data: TransferDetail }).data;
+    expect(received.status).toBe('received');
+    expect(received.lines[0]?.receivedQuantity).toBe('5.000');
+
+    const afterReceive = await db.execute(sql`
+      select
+        (select coalesce(sum(quantity), 0) from inventory.stock_balances
+          where lot_id = ${lotId} and presentation_id = ${presentationId}
+            and location_id = ${toLocationId}) as destination,
+        (select coalesce(sum(quantity), 0) from inventory.stock_balances
+          where lot_id = ${lotId} and presentation_id = ${presentationId}
+            and location_id = (select id from admin.locations where kind = 'in_transit' limit 1)) as transit
+    `);
+    expect(afterReceive.rows[0]).toEqual({ destination: '5.000', transit: '0.000' });
+
+    const again = await admin
+      .post(`/api/v1/inventory/transfers/${transfer.id}/receive`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ lines: [{ lineId, receivedQuantity: '5.000' }] });
+    expect(again.status).toBe(409);
+    expect((again.body as { code: string }).code).toBe('TRANSFER_ALREADY_RECEIVED');
+  });
+
+  it('deja la diferencia en tránsito cuando se recibe con novedad', async () => {
+    const create = await admin
+      .post('/api/v1/inventory/transfers')
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        fromLocationId,
+        toLocationId,
+        lines: [{ presentationId, quantity: '4.000' }],
+      });
+    expect(create.status).toBe(201);
+    const transfer = (create.body as { data: TransferDetail }).data;
+    const line = transfer.lines[0];
+    if (!line) throw new Error('El traslado no tiene línea');
+
+    const receive = await admin
+      .post(`/api/v1/inventory/transfers/${transfer.id}/receive`)
+      .set('Idempotency-Key', randomUUID())
+      .send({ lines: [{ lineId: line.id, receivedQuantity: '3.000' }] });
+    expect(receive.status).toBe(200);
+    expect((receive.body as { data: TransferDetail }).data.status).toBe('received_with_variance');
+
+    const transit = await db.execute(sql`
+      select coalesce(sum(quantity), 0) as quantity from inventory.stock_balances
+      where lot_id = ${line.lotId} and presentation_id = ${presentationId}
+        and location_id = (select id from admin.locations where kind = 'in_transit' limit 1)
+    `);
+    expect((transit.rows[0] as { quantity: string }).quantity).toBe('1.000');
+  });
+
+  it('un usuario con alcance SITE solo ve sus sedes y no la ficha de un lote ajeno', async () => {
+    const warehouse = await db.execute(sql`select id from admin.sites where name = 'Bodega principal'`);
+    const siteId = (warehouse.rows[0] as { id: string }).id;
+    const roleId = await ensureRole('INV_TEST_SITE', ['inv.stock.read'], 'SITE');
+    const suffix = randomUUID().slice(0, 8);
+    const userId = await createUser(`inv-site-${suffix}@test.example`, roleId);
+    await db.insert(userSites).values({ userId, siteId });
+    const agent = await signIn(`inv-site-${suffix}@test.example`);
+
+    const balances = await agent.get('/api/v1/inventory/stock-balances?limit=100');
+    expect(balances.status).toBe(200);
+    const rows = (balances.body as StockBalancePage).data;
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((row) => row.siteName === 'Bodega principal')).toBe(true);
+    expect((await agent.get(`/api/v1/inventory/lots/${pointLotId}`)).status).toBe(404);
   });
 });
