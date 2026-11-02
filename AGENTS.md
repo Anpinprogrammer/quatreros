@@ -27,7 +27,7 @@ Quatreros es un ERP a medida para una productora de alimentos de Cali (chorizos 
 - **Lo bloqueado no se implementa.** Contabilización e impuestos (P-01..P-04), apertura de paquetes (P-06), mermas de cocina (P-07), liquidación de repartidores (P-08) y escrituras de la IA (P-10) quedan detrás de `requireFeature(...)` (`423 FEATURE_BLOCKED`) y en la UI aparecen como "Espera decisión".
 - **El servidor manda.** Permisos (RBAC con alcance ALL/SITE/OWN), sede, aprobaciones, validación y auditoría viven en el caso de uso. La UI solo oculta.
 - **Inventario y dinero.** Solo cambian con movimientos inmutables, en transacción, con `Idempotency-Key` y auditoría. Los montos van en `NUMERIC` o en cadenas decimales, nunca en `float`.
-- **Interfaz:** se usan solo los tokens y componentes del sistema de diseño (`apps/web/src/shared/ui/`). Cada pantalla nueva se agrega a `apps/web/e2e/accesibilidad.spec.ts` (WCAG 2.1 AA).
+- **Interfaz:** se usan solo los tokens y componentes del sistema de diseño (`apps/web/src/components/ui/`). Cada pantalla nueva se agrega a `apps/web/e2e/accesibilidad.spec.ts` (WCAG 2.1 AA).
 - **Quatreros AI (`quatreros-ai/`)** es la configuración del agente de Anthropic Managed Agents (DEC-087, ADR-023):
   - **No ejecutes `ant apply`** ni crees recursos remotos sin autorización explícita del responsable.
   - **No edites ni borres `claude-lock.json`.**
@@ -71,9 +71,13 @@ apps/api/src/
 apps/api/drizzle/          migraciones SQL versionadas (nunca editar las publicadas)
 apps/api/test/             unit/ e integration/ (PostgreSQL real o PGlite)
 apps/web/src/
-  shells/        erp (encabezado + pestañas por sección + Command Center), pos, ruta
-  features/<m>/  pantallas por módulo (acceso, usuarios…)
-  shared/        ui (Button, Card, Badge, TextField…), auth (sesión, RequireSession), api (cliente), modules.ts (secciones y estado de módulos)
+  pages/         pantallas por módulo y shells (erp, pos, ruta), sin lógica de datos
+  components/    ui (sistema de diseño), layout (cabecera, barra lateral), auth y piezas por módulo
+  hooks/         estado de React: sesión, tema y título de la página
+  services/      cliente HTTP y consultas/mutaciones por módulo (TanStack Query)
+  lib/           funciones puras: permisos, formatos, contraseñas y tema
+  config/        modules.ts (secciones y estado de los módulos)
+  app/           composición: providers, router y guardas
 apps/web/e2e/              Playwright: flujos + accesibilidad (axe) con capturas
 packages/contracts/        esquemas Zod compartidos API ↔ web
 quatreros-ai/              agente Quatreros AI (Managed Agents) gestionado con `ant`: agents/, environments/, claude-lock.json

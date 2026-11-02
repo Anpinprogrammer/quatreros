@@ -184,10 +184,13 @@ apps/api/src/
 apps/api/drizzle/      migraciones 0000–0005 (catálogo en 0004/0005)
 packages/contracts/    admin.ts, catalog.ts, common.ts, errors.ts
 apps/web/src/
-  features/usuarios/   entrega 1
-  features/catalogo/   2a: api, páginas, formularios, formatos
-  shells/erp/          shell ERP y rutas
-  shared/ui/           componentes del sistema de diseño
+  pages/               pantallas y shells (erp, pos, ruta)
+  components/          ui (sistema de diseño), layout, auth y piezas por módulo
+  hooks/               sesión, tema y título
+  services/            cliente HTTP y consultas/mutaciones por módulo
+  lib/                 permisos, formatos, contraseñas y tema
+  config/modules.ts    secciones y estado de los módulos
+  app/                 providers, router y guardas
 apps/web/e2e/          flujos, catálogo y accesibilidad (axe)
 docs/                  descubrimiento, requerimientos, arquitectura, specs, diseño, operación
 ```
@@ -210,4 +213,4 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Command Center y header reorganizados**: pestañas Módulos/Tablero del día, KPIs operativos reales, atención priorizada, módulos compactos y menú de usuario con tema/cierre; fuera el panel de plan del dashboard.
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **SPA reorganizada por capas** (`pages`, `components`, `hooks`, `services`, `lib`, `config`) con fronteras verificadas por `dependency-cruiser` (ADR-024, DEC-101); refactorización pura pendiente de fusión. **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Command Center y header reorganizados**: pestañas Módulos/Tablero del día, KPIs operativos reales, atención priorizada, módulos compactos y menú de usuario con tema/cierre; fuera el panel de plan del dashboard.

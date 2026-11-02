@@ -119,7 +119,7 @@ Módulo **Catálogo y precios** dentro de **04. Producción** (DEC-091), ruta `/
 | Producto (`/erp/catalogo/productos/:id`) | Ficha con tipo, unidad base, vida útil, estado; tarjetas de presentación con precio vigente en mono; histórico de precios; acciones según permiso                                  |
 | Formularios                              | Crear/editar producto, presentación, precio y materia prima. Foco al primer campo al abrir; resumen de errores con foco al fallar; cancelar cierra sin guardar                     |
 
-**Diseño:** solo tokens y componentes de `shared/ui/`. Los montos, cantidades y códigos van en `font-mono` alineados a la derecha. Se agrega `SelectField` a `shared/ui/` con los mismos tokens y altura mínima de `TextField` (48 px), porque el kit no trae selección simple; es una extensión del kit, no un lenguaje visual nuevo. Las listas usan tarjetas (`Card`) en rejilla, no tablas.
+**Diseño:** solo tokens y componentes de `components/ui/`. Los montos, cantidades y códigos van en `font-mono` alineados a la derecha. Se agrega `SelectField` a `components/ui/` con los mismos tokens y altura mínima de `TextField` (48 px), porque el kit no trae selección simple; es una extensión del kit, no un lenguaje visual nuevo. Las listas usan tarjetas (`Card`) en rejilla, no tablas.
 
 **Accesibilidad:** cada pantalla se agrega a `apps/web/e2e/accesibilidad.spec.ts` (axe sin hallazgos y sin desplazamiento horizontal) en escritorio, tableta y celular. `useDocumentTitle` en cada una; acciones con nombre accesible; estados anunciados con `aria-live`.
 
@@ -268,7 +268,7 @@ El histórico de "Chorizo Santarrosano · Unidad" conserva un precio anterior (1
 
 - Contratos, esquema y migración revisados; `catalog` agregado a `schemaFilter` y al índice de esquemas.
 - Casos de uso con permisos, transacción, auditoría e idempotencia; `InventoryUsage` como puerto con implementación vacía.
-- Semilla demo y pantallas en `/erp/catalogo`; módulo `available` en `shared/modules.ts`.
+- Semilla demo y pantallas en `/erp/catalogo`; módulo `available` en `config/modules.ts`.
 - `pnpm check`, integración con PGlite y PostgreSQL real, `pnpm build && pnpm db:reset:demo && pnpm test:e2e` en verde.
 - `PROJECT-STATUS.md`, roadmap, matriz de trazabilidad, `demo-local.md` y `HANDOFF.md` actualizados.
 

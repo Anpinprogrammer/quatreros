@@ -24,7 +24,7 @@ Si una regla de negocio no tiene origen en DM o en una `DEC-###` CONFIRMED (o `P
 
 ## Stack (DEC-060)
 
-- Frontend: React + TypeScript + Tailwind, organizado por funcionalidad (`features/<modulo>/`).
+- Frontend: React + TypeScript + Tailwind, organizado por capas (`pages/`, `components/`, `hooks/`, `services/`, `lib/`, `config/`) según ADR-024.
 - Backend: Node.js + Express + TypeScript, monolito modular.
 - Base de datos: PostgreSQL con migraciones versionadas.
 - No introducir tecnologías nuevas sin ADR en `docs/02-architecture/architecture-decisions.md`.
@@ -34,7 +34,7 @@ Si una regla de negocio no tiene origen en DM o en una `DEC-###` CONFIRMED (o `P
 - Toda pantalla, componente, mockup o propuesta visual se basa **exclusivamente** en `docs/05-design/sistema-de-diseno.md`. No se usan colores, tipografías ni componentes fuera de ese sistema.
 - Modo oscuro nativo. Tokens solo vía Tailwind (`bg-char`, `bg-smoke`, `border-grill`, `text-chalk`, `text-ash`, `bg-ember`, `success/warning/danger/info`); nada de colores sueltos.
 - Tipografía: Inter (texto) y JetBrains Mono (montos, cantidades, pesos, códigos, totales). Escala Display 28/32, Title 20/24, Body 14/20, Caption 12/16.
-- Componentes de `apps/web/src/shared/ui/`: `Button` (primary ≥ 52 px, secondary, ghost, danger), `Card`/`CardLabel` (bento), `Badge`, `TextField` (≥ 48 px), `PasswordField`, `CheckboxGroup`, `Alert`. Las pantallas no redefinen estos componentes.
+- Componentes de `apps/web/src/components/ui/`: `Button` (primary ≥ 52 px, secondary, ghost, danger), `Card`/`CardLabel` (bento), `Badge`, `TextField` (≥ 48 px), `PasswordField`, `CheckboxGroup`, `Alert`. Las pantallas no redefinen estos componentes.
 - Accesibilidad WCAG 2.1 AA según el Anexo A: etiqueta del botón primario como texto grande en negrita; borde de campos `control` (#71717A); foco Ember visible; sin movimiento con `prefers-reduced-motion`.
 - La Parte 2 (bocetos de pantallas) define cómo se ven y recorren las pantallas, no reglas de negocio (Anexo B): sin cifras inventadas; lo que dependa de decisiones abiertas (P-06, P-08, P-10, P-01..P-04) se muestra como "Espera decisión".
 - Toda pantalla nueva se agrega a `apps/web/e2e/accesibilidad.spec.ts` (axe sin hallazgos y sin desplazamiento horizontal).

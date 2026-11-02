@@ -164,3 +164,25 @@ Los módulos comparten la misma conexión transaccional: el caso de uso dueño a
 | Contabilización automática             | `feature.accounting.posting`                   | off         | P-01..P-04 resueltos                 |
 | Documento fiscal                       | `feature.pos.fiscalDocument`                   | off         | P-02 resuelto                        |
 | Escrituras asistidas                   | `feature.assistant.writes`                     | off         | Matriz de permisos aprobada (Q-B-01) |
+
+## 6. Fronteras del frontend
+
+La SPA (`apps/web/src`) se organiza por capas (ADR-024, DEC-101). Las dependencias solo apuntan hacia abajo:
+
+```
+pages → components → hooks → services → lib
+config → lib
+```
+
+| Regla (`apps/web/.dependency-cruiser.cjs`) | Qué impide                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| `componentes-sin-pages`                    | Que un componente reutilizable importe una pantalla.                     |
+| `hooks-sin-ui`                             | Que un hook importe componentes o pantallas.                             |
+| `servicios-sin-ui`                         | Que la capa de servicios importe React (componentes, hooks o pantallas). |
+| `lib-puro`                                 | Que `lib/` importe presentación, estado, servicios o configuración.      |
+| `config-sin-presentacion`                  | Que `config/` importe componentes, hooks, pantallas o servicios.         |
+| `sin-ciclos`                               | Dependencias circulares.                                                 |
+
+- Sin alias de TypeScript ni `index.ts` agregadores: la ruta relativa muestra el acoplamiento.
+- `app/` es la raíz de composición (providers, router y guardas) y puede importar cualquier capa.
+- Las pruebas (`*.test.ts`, `*.test.tsx`) viven junto al archivo que prueban y quedan fuera de estas reglas.
