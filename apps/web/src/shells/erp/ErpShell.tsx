@@ -20,6 +20,7 @@ import { EmptyState } from '../../shared/ui/EmptyState';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
 import { AppHeader } from './AppHeader';
 import { AppSidebar, MobileSidebar } from './AppSidebar';
+import { AssistantWidget } from './AssistantWidget';
 import { CommandCenter } from './CommandCenter';
 import { SectionPage } from './SectionPage';
 
@@ -89,7 +90,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
           <main
             id="contenido"
             tabIndex={-1}
-            className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 outline-none md:px-8 md:py-8"
+            className="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-6 pb-24 outline-none md:px-8 md:pt-8 lg:pb-8"
           >
             <Routes>
               <Route index element={<CommandCenter me={me} />} />
@@ -141,6 +142,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
           </main>
         </div>
       </div>
+      <AssistantWidget />
     </div>
   );
 }

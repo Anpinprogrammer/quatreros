@@ -298,6 +298,8 @@ La revisión conserva la identidad Ember y el Anexo A, pero cambia la preferenci
 
 **Componentes.** `AppSidebar`, `AppHeader`, `PageHeader`, `ModuleCard`, `StatCard`, `StatusBadge`, `EmptyState`, `SearchInput`, `FilterBar`, `DataTable`, `ConfirmDialog`, `LoadingSkeleton`, `NotificationItem`, `ResponsiveDrawer`, `PermissionGate`, `AIActionConfirmation` y `ToastProvider` viven en `apps/web/src/shared/ui/` o en el shell ERP. Las pantallas no redefinen botones, campos ni tarjetas.
 
+**Asistente (vista previa).** Burbuja fija en el borde inferior derecho con el personaje oficial; al abrirla, panel lateral de `clamp(13rem, 15vw, 24rem)` en escritorio (~15 % del ancho, con mínimo legible) y pantalla completa con botón "Volver" en móvil. Como el agente se integra en la entrega 8, el compositor está deshabilitado y el panel declara "sin conexión": no simula respuestas, conversaciones ni escrituras.
+
 **Honestidad de datos.** Los indicadores sin fuente real muestran "—" y explican qué entrega los activa. La apertura de paquetes sigue marcada como "Espera decisión P-06". El selector de sede es informativo mientras el backend no defina una sede activa por sesión: no filtra datos en el cliente.
 
 **Accesibilidad.** Se mantiene WCAG 2.1 AA: foco visible, etiquetas asociadas, contraste en claro y oscuro, `prefers-reduced-motion`, sin desplazamiento horizontal y auditoría axe por pantalla en escritorio, tableta y móvil. Las animaciones son transiciones de 150–250 ms y no hay movimiento continuo.
