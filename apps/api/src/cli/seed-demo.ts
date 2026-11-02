@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import { loadEnv } from '../config/env.js';
 import {
   DEMO_USERS,
@@ -5,6 +6,9 @@ import {
   seedDemoSites,
   seedDemoUsers,
 } from '../modules/admin/infrastructure/seed.js';
+import { users } from '../modules/admin/infrastructure/schema.js';
+import { seedDemoCatalog } from '../modules/catalog/infrastructure/seed.js';
+import { seedDemoInventory } from '../modules/inventory/infrastructure/seed.js';
 import { createAuth } from '../platform/auth/auth.js';
 import { createAuthProvisioner } from '../platform/auth/provisioner.js';
 import { createDb } from '../platform/db/client.js';
@@ -32,6 +36,14 @@ try {
   const siteIds = await seedDemoSites(handle.db);
   const auth = createAuth(handle.db, env);
   const created = await seedDemoUsers(handle.db, createAuthProvisioner(auth, handle.db), password, siteIds);
+  const [admin] = await handle.db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, 'admin@quatreros.example'))
+    .limit(1);
+  if (!admin) throw new Error('Falta el usuario administrador para sembrar el catálogo demo');
+  await seedDemoCatalog(handle.db, admin.id);
+  await seedDemoInventory(handle.db, admin.id);
   process.stdout.write(`Sedes de demostración listas. Usuarios nuevos: ${String(created.length)}\n`);
   for (const u of DEMO_USERS) process.stdout.write(`  ${u.role.padEnd(5)} ${u.email}\n`);
   process.stdout.write('Contraseña: la definida en DEMO_PASSWORD.\n');

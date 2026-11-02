@@ -30,7 +30,13 @@ const app = createApp({
   auth,
   db,
   provisioner: createAuthProvisioner(auth, db),
-  resolveActor: (authUserId) => loadActor(db, authUserId),
+  // En desarrollo/pruebas se puede desactivar la EXIGENCIA del segundo factor (DEC-043).
+  // No elimina un TOTP ya activado; solo evita la configuración obligatoria. Prohibido en staging/producción.
+  resolveActor: async (authUserId) => {
+    const actor = await loadActor(db, authUserId);
+    if (actor && env.AUTH_MFA_ENFORCEMENT_DISABLED) return { ...actor, mfaRequired: false };
+    return actor;
+  },
   webDistDir: fileURLToPath(new URL('../../web/dist', import.meta.url)),
   registerModules,
 });

@@ -50,3 +50,52 @@ test('ERP: Command Center y secciones', async ({ page }, info) => {
   await page.goto('/erp/seccion/produccion');
   await audit(page, info, 'seccion-produccion');
 });
+
+test('ERP: catálogo y ficha de producto', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/catalogo');
+  await audit(page, info, 'catalogo-productos');
+  await page.getByRole('tab', { name: 'Materias primas' }).click();
+  await audit(page, info, 'catalogo-materias-primas');
+  await page.getByRole('tab', { name: 'Productos' }).click();
+  await page
+    .getByRole('link', { name: /Abrir ficha y precios/ })
+    .first()
+    .click();
+  await audit(page, info, 'producto');
+});
+
+test('ERP: modo oscuro', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.getByRole('button', { name: 'Usar modo oscuro' }).click();
+  await audit(page, info, 'command-center-oscuro');
+  await page.goto('/erp/seccion/produccion');
+  await audit(page, info, 'produccion-oscuro');
+  await page.goto('/erp/catalogo');
+  await audit(page, info, 'catalogo-oscuro');
+});
+
+test('ERP: existencias, lotes y kardex', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/existencias');
+  await audit(page, info, 'existencias');
+  await page.getByRole('tab', { name: 'Lotes' }).click();
+  await audit(page, info, 'existencias-lotes');
+  await page.getByRole('link', { name: 'PT-2026-0001' }).first().click();
+  await audit(page, info, 'lote');
+  await page.goto('/erp/existencias');
+  await page.getByRole('tab', { name: 'Kardex' }).click();
+  await audit(page, info, 'existencias-kardex');
+});
+
+test('ERP: trazabilidad de lote', async ({ page }, info) => {
+  await signIn(page, 'produccion@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/existencias');
+  await page.getByRole('tab', { name: 'Lotes' }).click();
+  await page.getByRole('link', { name: 'PT-2026-0001' }).first().click();
+  await audit(page, info, 'lote-trazabilidad');
+});

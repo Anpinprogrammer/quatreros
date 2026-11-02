@@ -75,9 +75,9 @@ export function MfaSetupPage() {
   };
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-10">
+    <main className="mx-auto min-h-dvh max-w-xl px-4 py-10">
       <BrandMark size="lg" />
-      <h1 className="mt-4 text-display font-bold">Verificación en dos pasos</h1>
+      <h1 className="mt-4 font-display text-display font-bold text-ink">Verificación en dos pasos</h1>
       <p className="mt-2 text-ash">
         Tu rol maneja información sensible, así que además de la contraseña pediremos un código de tu celular
         al ingresar.
@@ -90,7 +90,7 @@ export function MfaSetupPage() {
             <li
               key={label}
               aria-current={i === index ? 'step' : undefined}
-              className={`rounded-xl border px-3 py-2 text-caption ${i === index ? 'border-ember bg-ember/10 font-semibold text-chalk' : i < index ? 'border-grill text-green-400' : 'border-grill text-ash'}`}
+              className={`rounded-xl border px-3 py-2 text-caption ${i === index ? 'border-brand/30 bg-brand-soft font-semibold text-brand-ink' : i < index ? 'border-success/30 bg-success/10 text-success' : 'border-line bg-surface text-ink-2'}`}
             >
               <span className="block font-mono">{String(i + 1).padStart(2, '0')}</span>
               {label}
@@ -99,7 +99,7 @@ export function MfaSetupPage() {
         })}
       </ol>
 
-      <div className="mt-4 rounded-2xl border border-grill bg-smoke p-5 shadow-xl md:p-6">
+      <div className="mt-4 rounded-2xl border border-line bg-surface p-5 shadow-card md:p-6">
         {error ? (
           <div className="mb-4">
             <Alert>{error}</Alert>
@@ -132,7 +132,7 @@ export function MfaSetupPage() {
               autenticación.
             </p>
             {qr ? (
-              <div className="mx-auto rounded-2xl bg-chalk p-3">
+              <div className="mx-auto rounded-2xl bg-white p-3 ring-1 ring-line">
                 <img src={qr} alt="Código QR para vincular la aplicación" className="size-52" />
               </div>
             ) : null}
@@ -141,7 +141,7 @@ export function MfaSetupPage() {
               <p
                 data-testid="clave-manual"
                 data-key={manualKey ?? ''}
-                className="mt-2 rounded-xl border border-grill bg-char px-3 py-2 font-mono text-base font-semibold tracking-wide text-chalk"
+                className="mt-2 rounded-xl border border-line bg-surface-2 px-3 py-2 font-mono text-base font-semibold tracking-wide text-ink"
               >
                 {manualKey?.match(/.{1,4}/g)?.join(' ')}
               </p>

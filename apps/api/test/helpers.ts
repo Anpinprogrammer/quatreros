@@ -17,6 +17,7 @@ export const testEnv: Env = {
   BETTER_AUTH_SECRET: randomBytes(32).toString('base64'),
   APP_VERSION: 'test',
   AUTH_RATE_LIMIT_DISABLED: false,
+  AUTH_MFA_ENFORCEMENT_DISABLED: false,
 };
 
 export const allFlagsOff: FeatureFlagReader = { isEnabled: () => Promise.resolve(false) };

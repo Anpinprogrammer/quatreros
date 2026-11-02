@@ -264,8 +264,8 @@ La Parte 2 define **cómo se ven y se recorren** las pantallas. Las reglas de ne
 - Los **datos de ejemplo** de los bocetos (montos, lotes, clientes, porcentajes) son ilustrativos; el prototipo muestra datos de la semilla demo cuando el módulo exista, y estados vacíos honestos antes.
 - Elementos que dependen de decisiones abiertas se construyen cuando se resuelvan: **Abrir paquete / desglose 1→10** (P-06), **impuestos en el ticket** (P-01..P-04, contador), **escrituras de la IA** (P-10, DEC-085), **liquidación del repartidor** (P-08). Hasta entonces aparecen como "Espera decisión".
 - **Encabezado:** el selector de sede aparece cuando haya una función que dependa de la sede activa (entrega 2); "Turno" aparece en Caja con la entrega 6; el botón del asistente de IA con la entrega 8.
-- **Pestañas del ERP:** se conservan las pestañas de la Parte 2 y se agregan las áreas confirmadas en requerimientos que no figuran en el boceto (Compras, Cartera y contabilidad, Administración), para que todo módulo tenga un lugar.
-- **Logo:** pendiente de recibir el archivo del isotipo; mientras tanto se usa el nombre "Quatreros" como logotipo de texto.
+- **Áreas del ERP:** se conservan las áreas de la Parte 2 y se agregan las confirmadas en requerimientos que no figuran en el boceto (Compras, Cartera y contabilidad, Administración), para que todo módulo tenga un lugar. La navegación horizontal del boceto se sustituye por la barra lateral del Anexo D (DEC-093).
+- **Logo:** integrado el 2026-11-02 con el archivo oficial entregado por el responsable. Fuente en `apps/web/public/logo.webp`; versiones optimizadas `logo-mark.webp` (marca), `favicon.png` y `apple-touch-icon.png`. Las fuentes alternativas entregadas (JPEG y PNG sin fondo) se archivan en `docs/05-design/original/`. El logotipo de texto "Quatreros" acompaña a la marca, no la reemplaza.
 
 ## Anexo C (equipo) — Implementación
 
@@ -273,3 +273,27 @@ La Parte 2 define **cómo se ven y se recorren** las pantallas. Las reglas de ne
 - Fuentes autoalojadas con Fontsource (compatibles con la CSP, sin peticiones a terceros): `@fontsource-variable/inter`, `@fontsource-variable/jetbrains-mono`.
 - Componentes en `apps/web/src/shared/ui/`: `Button` (primary/secondary/ghost/danger), `Card`, `Badge`, `TextField`, `PasswordField`, `CheckboxGroup`, `Alert`.
 - Montos, cantidades, códigos y totales en JetBrains Mono (`font-mono`), alineados a la derecha.
+
+## Anexo D (equipo) — Revisión visual v1.1 (DEC-093, 2026-11-02)
+
+La revisión conserva la identidad Ember y el Anexo A, pero cambia la preferencia visual: **modo claro como experiencia principal** y modo oscuro refinado como alternativa. Sustituye únicamente la regla de "modo oscuro por defecto" de la Parte 1; todo lo demás sigue vigente.
+
+**Tokens.** La fuente de verdad es `apps/web/src/styles.css` (`@theme inline` + variables `--q-*`). Los nombres semánticos son `canvas`, `surface`, `surface-2`, `surface-3`, `ink`, `ink-2`, `ink-3`, `line`, `line-strong`, `control`, `brand`, `brand-hover`, `brand-soft`, `brand-ink`, `success`, `warning`, `danger`, `info`. Los nombres heredados (`char`, `smoke`, `grill`, `chalk`, `ash`, `ember`) quedan como alias para no romper pantallas. Sombras: `shadow-card`, `shadow-float`, `shadow-brand` y `shadow-brand-sm`. El panel de marca del ingreso usa `panel` y `brand-on-dark`, fijos en ambos temas.
+
+- Marca: `#FD5300`; hover `#E84A00`; soft `#FFF0E6`; texto de marca sobre claro `#B84300`.
+- Claro: fondo `#FAFAF9`, superficie `#FFFFFF`, líneas `#E7E7E5`, texto `#171717` / `#5F5F5C`.
+- Oscuro: fondo `#0D0E10`, superficie `#17191D`, líneas `#2A2D33`, texto `#F8FAFC` / `#A1A1AA`.
+- Semánticos con contraste AA en ambos temas: success `#0E6F4D` / `#3DDC97`, warning `#8F5200` / `#F5B83D`, danger `#C22B2B` / `#FF7B7B`, info `#1F5CAB` / `#7CB3FF`.
+- Campos: borde `#71717A` (Anexo A), altura mínima 48 px; el botón primario conserva etiqueta de texto grande en negrita.
+
+**Tipografía.** Plus Jakarta Sans para títulos (`font-display`), Inter para texto y controles, JetBrains Mono para montos, cantidades, fechas y códigos. Display 30/36, título de sección 22/28, título de tarjeta 17/24, cuerpo 14/22, metadatos 12/16. Números tabulares en indicadores y tablas.
+
+**App Shell.** Barra lateral de 248 px expandida y 72 px contraída, agrupada en General, Operaciones, Gestión y Sistema; solo muestra secciones autorizadas. Encabezado de 72 px con migas de pan, búsqueda de navegación (⌘K / Ctrl+K), sede autorizada, notificaciones, tema y sesión. Contenido máximo de 1600 px con padding de 24–32 px. En tableta y móvil la navegación pasa a un panel deslizante con foco atrapado y cierre con Escape.
+
+**Marca.** El isotipo oficial "Los 4 Treros" se usa completo y sin recolorear (aro naranja, personaje y tipografía propios). La versión de interfaz es un WebP de 256 px con transparencia, para que funcione sobre superficies claras y oscuras; el favicon y el icono de iOS se generan del mismo archivo.
+
+**Componentes.** `AppSidebar`, `AppHeader`, `PageHeader`, `ModuleCard`, `StatCard`, `StatusBadge`, `EmptyState`, `SearchInput`, `FilterBar`, `DataTable`, `ConfirmDialog`, `LoadingSkeleton`, `NotificationItem`, `ResponsiveDrawer`, `PermissionGate`, `AIActionConfirmation` y `ToastProvider` viven en `apps/web/src/shared/ui/` o en el shell ERP. Las pantallas no redefinen botones, campos ni tarjetas.
+
+**Honestidad de datos.** Los indicadores sin fuente real muestran "—" y explican qué entrega los activa. La apertura de paquetes sigue marcada como "Espera decisión P-06". El selector de sede es informativo mientras el backend no defina una sede activa por sesión: no filtra datos en el cliente.
+
+**Accesibilidad.** Se mantiene WCAG 2.1 AA: foco visible, etiquetas asociadas, contraste en claro y oscuro, `prefers-reduced-motion`, sin desplazamiento horizontal y auditoría axe por pantalla en escritorio, tableta y móvil. Las animaciones son transiciones de 150–250 ms y no hay movimiento continuo.

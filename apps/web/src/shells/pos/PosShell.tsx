@@ -1,7 +1,10 @@
 import type { MeResponse } from '@quatreros/contracts';
+import { ChefHat, Clock3, CreditCard, ShoppingBag, Wallet } from 'lucide-react';
 import { Badge } from '../../shared/ui/Badge';
 import { Brand } from '../../shared/ui/Brand';
 import { Card, CardLabel } from '../../shared/ui/Card';
+import { EmptyState } from '../../shared/ui/EmptyState';
+import { Button } from '../../shared/ui/form';
 import { ServerStatus } from '../../shared/ui/ServerStatus';
 import { UserMenu } from '../../shared/ui/UserMenu';
 import { useDocumentTitle } from '../../shared/ui/useDocumentTitle';
@@ -16,58 +19,125 @@ export function PosShell({ me }: { me: MeResponse }) {
   useDocumentTitle('Caja');
   const site = me.sites.find((s) => s.kind === 'point_of_sale') ?? me.sites[0];
   return (
-    <div className="grid min-h-dvh grid-rows-[auto_1fr] bg-char">
-      <header className="border-b border-grill bg-smoke">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+    <div className="grid min-h-dvh grid-rows-[auto_1fr] bg-canvas">
+      <header className="sticky top-0 z-30 border-b border-line bg-header backdrop-blur-xl">
+        <div className="flex min-h-[72px] flex-wrap items-center justify-between gap-3 px-4 py-2 md:px-6">
+          <div className="flex flex-wrap items-center gap-2 md:gap-5">
             <Brand to="/" area="Caja" />
             {site ? (
-              <p className="rounded-lg border border-grill-strong bg-grill px-3 py-1.5 text-caption text-ash">
-                Sede: <span className="font-semibold text-chalk">{site.name}</span>
-              </p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-caption font-semibold whitespace-nowrap text-ink-2">
+                <Wallet aria-hidden className="size-3.5 text-brand-ink" />
+                {site.name}
+              </span>
             ) : null}
-            <ServerStatus />
+            <Badge tone="neutral">
+              <Clock3 aria-hidden className="size-3" />
+              Turno cerrado
+            </Badge>
+            <span className="hidden sm:block">
+              <ServerStatus />
+            </span>
           </div>
-          <UserMenu me={me} />
+          <UserMenu me={me} showName />
         </div>
       </header>
-      <main className="grid content-start gap-4 p-4 md:grid-cols-[1fr_22rem] md:content-stretch xl:grid-cols-[1fr_26rem]">
-        <section aria-labelledby="pos-catalogo">
+
+      <main className="grid content-start gap-4 p-4 md:grid-cols-[minmax(0,1fr)_22rem] md:content-stretch md:p-6 xl:grid-cols-[minmax(0,1fr)_26rem]">
+        <section aria-labelledby="pos-catalogo" className="min-w-0">
           <Card className="flex h-full flex-col">
-            <h1 id="pos-catalogo" className="text-title font-semibold">
-              Productos
-            </h1>
-            <div className="mt-4 grid min-h-64 flex-1 place-items-center rounded-2xl border border-dashed border-grill-strong p-8 text-center">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4">
               <div>
-                <p className="text-ash">
-                  Aquí aparece el catálogo táctil con precio y existencias. Para vender, primero se abre un
-                  turno.
+                <p className="text-caption font-semibold tracking-[0.12em] text-ink-3 uppercase">
+                  Punto de venta
                 </p>
-                <div className="mt-4">
-                  <Badge>Se activa con la entrega 6</Badge>
+                <h1 id="pos-catalogo" className="mt-1 font-display text-title font-bold text-ink">
+                  Productos
+                </h1>
+                <p className="mt-1 text-body text-ink-2">Toca un producto para agregarlo al ticket.</p>
+              </div>
+              <Badge tone="info">Catálogo táctil</Badge>
+            </div>
+
+            <div className="mt-4 grid min-h-72 flex-1 place-items-center rounded-2xl border border-dashed border-line-strong bg-surface-2/60 p-6 text-center md:p-10">
+              <EmptyState
+                icon={<ShoppingBag className="size-5" />}
+                title="El catálogo se activa con la entrega 6"
+                description="Aquí aparecerán los productos con precio y existencias. Para vender, primero se abre un turno de caja."
+              />
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-xl border border-line bg-surface-2/50 p-3.5">
+                <span
+                  aria-hidden
+                  className="grid size-9 shrink-0 place-items-center rounded-xl bg-surface text-ink-2"
+                >
+                  <ChefHat className="size-4" />
+                </span>
+                <div>
+                  <p className="text-body font-semibold text-ink">Monitor de cocina</p>
+                  <p className="text-caption text-ink-2">
+                    Conteos y merma teórica se activan con la entrega 6.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-xl border border-line bg-surface-2/50 p-3.5">
+                <span
+                  aria-hidden
+                  className="grid size-9 shrink-0 place-items-center rounded-xl bg-surface text-ink-2"
+                >
+                  <CreditCard className="size-4" />
+                </span>
+                <div>
+                  <p className="text-body font-semibold text-ink">Pagos mixtos</p>
+                  <p className="text-caption text-ink-2">
+                    Efectivo, Nequi y tarjeta en una misma venta (POS-01).
+                  </p>
                 </div>
               </div>
             </div>
           </Card>
         </section>
-        <aside aria-labelledby="pos-ticket">
+
+        <aside aria-labelledby="pos-ticket" className="min-w-0 md:sticky md:top-[88px] md:self-start">
           <Card className="flex h-full flex-col">
-            <h2 id="pos-ticket" className="text-title font-semibold">
-              Venta actual
-            </h2>
-            <p className="mt-4 text-ash md:flex-1">Sin productos en la venta.</p>
-            <dl className="mt-6 space-y-2 border-t border-grill pt-4">
+            <div className="flex items-center justify-between gap-3 border-b border-line pb-4">
+              <h2 id="pos-ticket" className="font-display text-title font-bold text-ink">
+                Venta actual
+              </h2>
+              <Badge tone="neutral">Sin turno</Badge>
+            </div>
+
+            <div className="mt-4 flex-1">
+              <EmptyState
+                compact
+                icon={<ShoppingBag className="size-5" />}
+                title="Sin productos en la venta"
+                description="El ticket se llena al tocar productos del catálogo."
+              />
+            </div>
+
+            <dl className="mt-6 space-y-2.5 border-t border-line pt-4">
               <div className="flex items-baseline justify-between">
-                <dt className="text-ash">Subtotal</dt>
-                <dd className="font-mono">{cop.format(0)}</dd>
+                <dt className="text-body text-ink-2">Subtotal</dt>
+                <dd className="tabular font-mono text-body text-ink">{cop.format(0)}</dd>
               </div>
               <div className="flex items-baseline justify-between">
                 <dt>
                   <CardLabel as="p">Total a pagar</CardLabel>
                 </dt>
-                <dd className="font-mono text-display font-bold">{cop.format(0)}</dd>
+                <dd className="tabular font-mono text-[1.75rem] leading-8 font-bold text-ink">
+                  {cop.format(0)}
+                </dd>
               </div>
             </dl>
+
+            <Button className="mt-4 w-full" disabled>
+              Cobrar e imprimir
+            </Button>
+            <p className="mt-2 text-center text-caption text-ink-3">
+              Se habilita al abrir turno (entrega 6).
+            </p>
           </Card>
         </aside>
       </main>

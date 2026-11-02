@@ -1,23 +1,45 @@
 import type { ReactNode } from 'react';
+import { statusLabel, type ModuleStatus } from '../modules';
 
-/** C. Badges de estado (sistema de diseño §3.C), con la misma receta para cada semántica. */
+/** Badges de estado (sistema de diseño §3.C) con semántica que se adapta a claro y oscuro. */
 export type BadgeTone = 'danger' | 'warning' | 'info' | 'ember' | 'success' | 'neutral';
 
 const tones: Record<BadgeTone, string> = {
-  danger: 'bg-red-500/10 text-red-400 border-red-500/20', // Lote vencido
-  warning: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', // FEFO próximo / espera decisión
-  info: 'bg-blue-500/10 text-blue-400 border-blue-500/20', // Entregado parcial
-  ember: 'bg-orange-500/10 text-orange-400 border-orange-500/20', // Paquete abierto
-  success: 'bg-green-500/10 text-green-400 border-green-500/20', // Disponible / entregado
-  neutral: 'bg-grill text-ash border-grill-strong', // En construcción
+  danger: 'bg-danger/10 text-danger border-danger/20',
+  warning: 'bg-warning/10 text-warning border-warning/25',
+  info: 'bg-info/10 text-info border-info/20',
+  ember: 'bg-brand-soft text-brand-ink border-brand/25',
+  success: 'bg-success/10 text-success border-success/20',
+  neutral: 'bg-surface-2 text-ink-2 border-line-strong',
 };
 
 export function Badge({ tone = 'neutral', children }: { tone?: BadgeTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-caption font-medium whitespace-nowrap ${tones[tone]}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-caption font-semibold whitespace-nowrap ${tones[tone]}`}
     >
       {children}
     </span>
+  );
+}
+
+const statusTone: Record<ModuleStatus['kind'], BadgeTone> = {
+  available: 'success',
+  pending: 'neutral',
+  blocked: 'warning',
+};
+
+/** Estado de un módulo con el mismo lenguaje visual en toda la aplicación. */
+export function StatusBadge({ status }: { status: ModuleStatus }) {
+  return (
+    <Badge tone={statusTone[status.kind]}>
+      <span
+        aria-hidden
+        className={`size-1.5 rounded-full ${
+          status.kind === 'available' ? 'bg-success' : status.kind === 'blocked' ? 'bg-warning' : 'bg-ink-3'
+        }`}
+      />
+      {statusLabel(status)}
+    </Badge>
   );
 }

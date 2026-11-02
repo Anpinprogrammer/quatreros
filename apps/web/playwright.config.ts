@@ -39,7 +39,14 @@ export default defineConfig({
           command: 'node ../api/dist/main.js',
           url: `${baseURL}/ready`,
           reuseExistingServer: !process.env.CI,
-          env: { NODE_ENV: 'development', LOG_LEVEL: 'warn', PORT: '3000', AUTH_RATE_LIMIT_DISABLED: 'true' },
+          env: {
+            NODE_ENV: 'development',
+            LOG_LEVEL: 'warn',
+            PORT: '3000',
+            AUTH_RATE_LIMIT_DISABLED: 'true',
+            // E2E siempre valida el flujo real de MFA, aunque el .env local lo desactive.
+            AUTH_MFA_ENFORCEMENT_DISABLED: 'false',
+          },
         },
       }),
 });

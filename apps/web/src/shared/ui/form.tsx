@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref } from 'react';
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref, SelectHTMLAttributes } from 'react';
 import { useId, useState } from 'react';
 
 /**
@@ -9,17 +9,16 @@ import { useId, useState } from 'react';
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const buttonStyles: Record<ButtonVariant, string> = {
-  // A. Primary Action: Ember, texto blanco, rounded-xl, brillo de brasa, ≥ 52 px.
+  // A. Primary Action: Ember, texto blanco, ≥ 52 px. La etiqueta es texto grande en negrita (Anexo A).
   primary:
-    'min-h-[52px] px-5 text-action font-bold bg-ember text-chalk shadow-lg shadow-orange-950/50 hover:bg-ember-hover disabled:bg-grill disabled:text-ash disabled:shadow-none',
-  // A. Secondary Action: #27272A, borde #3F3F46, texto blanco.
+    'min-h-[52px] px-5 text-action font-bold bg-brand text-white shadow-brand hover:bg-brand-hover active:translate-y-px disabled:bg-surface-3 disabled:text-ink-3 disabled:shadow-none',
+  // A. Secondary Action: superficie elevada, borde visible, texto principal.
   secondary:
-    'min-h-11 px-4 font-semibold bg-grill text-chalk border border-grill-strong hover:border-ash disabled:text-ash disabled:hover:border-grill-strong',
-  // A. Ghost / Cancel: sin borde, texto Ash, hover a #27272A.
-  ghost: 'min-h-11 px-4 font-semibold text-ash hover:bg-grill hover:text-chalk',
-  // Acción destructiva con la semántica Danger (patrón de badges §3.C).
-  danger:
-    'min-h-11 px-4 font-semibold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20',
+    'min-h-11 px-4 font-semibold bg-surface text-ink border border-line-strong hover:border-ink-3 hover:bg-surface-2 disabled:text-ink-3 disabled:hover:border-line-strong disabled:hover:bg-surface',
+  // A. Ghost / Cancel: sin borde, texto secundario, hover suave.
+  ghost: 'min-h-11 px-4 font-semibold text-ink-2 hover:bg-surface-2 hover:text-ink',
+  // Acción destructiva con la semántica Danger.
+  danger: 'min-h-11 px-4 font-semibold bg-danger/10 text-danger border border-danger/30 hover:bg-danger/15',
 };
 
 export function Button({
@@ -30,7 +29,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 rounded-xl transition-colors duration-200 disabled:cursor-not-allowed ${buttonStyles[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl transition-[background-color,border-color,color,box-shadow,transform] duration-200 disabled:cursor-not-allowed ${buttonStyles[variant]} ${className}`}
       {...props}
     />
   );
@@ -51,7 +50,7 @@ export function TextField({ label, error, hint, className = '', addon, ...props 
   const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(' ');
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-body font-semibold text-chalk">
+      <label htmlFor={id} className="text-body font-semibold text-ink">
         {label}
       </label>
       <div className="flex gap-2">
@@ -60,17 +59,110 @@ export function TextField({ label, error, hint, className = '', addon, ...props 
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           {...props}
-          className={`min-h-12 min-w-0 flex-1 rounded-xl border bg-char px-3 text-base text-chalk placeholder:text-ash sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
+          className={`min-h-12 min-w-0 flex-1 rounded-xl border bg-surface px-3 text-base text-ink transition-colors duration-200 placeholder:text-ink-3 hover:border-ink-3 focus:border-brand sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
         />
         {addon}
       </div>
       {hint ? (
-        <p id={`${id}-hint`} className="text-caption text-ash">
+        <p id={`${id}-hint`} className="text-caption text-ink-2">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={`${id}-error`} className="text-caption font-semibold text-red-400">
+        <p id={`${id}-error`} className="text-caption font-semibold text-danger">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  label: string;
+  error?: string | undefined;
+  hint?: string;
+  options: { value: string; label: string }[];
+  ref?: Ref<HTMLSelectElement>;
+};
+
+/** Selección simple con los mismos tokens, borde y altura que TextField (Anexo A). */
+export function SelectField({ label, error, hint, options, className = '', ...props }: SelectFieldProps) {
+  const id = useId();
+  const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(' ');
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-body font-semibold text-ink">
+        {label}
+      </label>
+      <select
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy || undefined}
+        {...props}
+        className={`min-h-12 rounded-xl border bg-surface px-3 text-base text-ink transition-colors duration-200 hover:border-ink-3 focus:border-brand sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {hint ? (
+        <p id={`${id}-hint`} className="text-caption text-ink-2">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={`${id}-error`} className="text-caption font-semibold text-danger">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Casilla única (p. ej. "controla vencimiento") con el mismo foco Ember del kit. */
+export function CheckboxField({
+  label,
+  hint,
+  checked,
+  onChange,
+  error,
+  disabled,
+}: {
+  label: string;
+  hint?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  error?: string | undefined;
+  disabled?: boolean;
+}) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label
+        htmlFor={id}
+        className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-surface px-3 transition-colors duration-200 hover:border-control ${checked ? 'border-brand/60' : 'border-line-strong'}`}
+      >
+        <input
+          id={id}
+          type="checkbox"
+          className="size-5 accent-brand"
+          checked={checked}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+          onChange={(e) => {
+            onChange(e.target.checked);
+          }}
+        />
+        <span>
+          {label}
+          {hint ? <span className="block text-caption text-ink-2">{hint}</span> : null}
+        </span>
+      </label>
+      {error ? (
+        <p id={`${id}-error`} className="text-caption font-semibold text-danger">
           {error}
         </p>
       ) : null}
@@ -128,11 +220,11 @@ export function CheckboxGroup<T extends string>({
           return (
             <label
               key={o.value}
-              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-3 transition-colors duration-200 ${checked ? 'border-ember bg-ember/10' : 'border-grill bg-char hover:border-control'}`}
+              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-3 transition-colors duration-200 ${checked ? 'border-brand bg-brand-soft' : 'border-line-strong bg-surface hover:border-control'}`}
             >
               <input
                 type="checkbox"
-                className="size-5 accent-ember"
+                className="size-5 accent-brand"
                 checked={checked}
                 onChange={(e) => {
                   onChange(e.target.checked ? [...value, o.value] : value.filter((v) => v !== o.value));
@@ -140,14 +232,14 @@ export function CheckboxGroup<T extends string>({
               />
               <span>
                 {o.label}
-                {o.detail ? <span className="block text-caption text-ash">{o.detail}</span> : null}
+                {o.detail ? <span className="block text-caption text-ink-2">{o.detail}</span> : null}
               </span>
             </label>
           );
         })}
       </div>
       {error ? (
-        <p id={`${id}-error`} className="text-caption font-semibold text-red-400">
+        <p id={`${id}-error`} className="text-caption font-semibold text-danger">
           {error}
         </p>
       ) : null}
@@ -158,9 +250,9 @@ export function CheckboxGroup<T extends string>({
 type AlertTone = 'error' | 'success' | 'info';
 
 const alertStyles: Record<AlertTone, string> = {
-  error: 'bg-red-500/10 text-red-400 border-red-500/20',
-  success: 'bg-green-500/10 text-green-400 border-green-500/20',
-  info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  error: 'bg-danger/10 text-danger border-danger/25',
+  success: 'bg-success/10 text-success border-success/25',
+  info: 'bg-info/10 text-info border-info/25',
 };
 
 export function Alert({

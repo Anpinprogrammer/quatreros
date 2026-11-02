@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadEnv } from '../../src/config/env.js';
+import { loadEnv, trustedOriginsFor } from '../../src/config/env.js';
 
 describe('loadEnv', () => {
   it('falla con mensaje claro si falta DATABASE_URL', () => {
@@ -20,6 +20,35 @@ describe('loadEnv', () => {
     expect(() =>
       loadEnv({ DATABASE_URL: 'postgres://x', NODE_ENV: 'production', BETTER_AUTH_SECRET: 'a'.repeat(32) }),
     ).not.toThrow();
+  });
+
+  it('en desarrollo acepta 5173 y 3000; en producción solo APP_BASE_URL', () => {
+    const dev = loadEnv({ DATABASE_URL: 'postgres://x' });
+    expect(trustedOriginsFor(dev)).toEqual(
+      expect.arrayContaining(['http://localhost:5173', 'http://localhost:3000']),
+    );
+    const prod = loadEnv({
+      DATABASE_URL: 'postgres://x',
+      NODE_ENV: 'production',
+      BETTER_AUTH_SECRET: 'a'.repeat(32),
+      APP_BASE_URL: 'https://app.example',
+    });
+    expect(trustedOriginsFor(prod)).toEqual(['https://app.example']);
+  });
+
+  it('nunca permite desactivar la exigencia de MFA en producción', () => {
+    expect(() =>
+      loadEnv({
+        DATABASE_URL: 'postgres://x',
+        NODE_ENV: 'production',
+        BETTER_AUTH_SECRET: 'a'.repeat(32),
+        AUTH_MFA_ENFORCEMENT_DISABLED: 'true',
+      }),
+    ).toThrow(/AUTH_MFA_ENFORCEMENT_DISABLED/);
+    expect(
+      loadEnv({ DATABASE_URL: 'postgres://x', AUTH_MFA_ENFORCEMENT_DISABLED: 'true' })
+        .AUTH_MFA_ENFORCEMENT_DISABLED,
+    ).toBe(true);
   });
 
   it('nunca permite desactivar el límite de ingresos en producción', () => {

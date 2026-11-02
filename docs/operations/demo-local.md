@@ -42,9 +42,44 @@ Todos usan la contraseña de `DEMO_PASSWORD`.
 2. **Repartidor en celular**: ingresa como `reparto@` → portal de Distribución, una columna.
 3. **Seguridad**: contraseña equivocada → mensaje genérico (no revela si el correo existe).
 4. **Administrador**: ingresa como `admin@` → el sistema exige configurar la verificación en dos pasos (QR con Google/Microsoft Authenticator) y entrega códigos de respaldo.
-5. **Usuarios**: pestaña _08. Administración_ → _Usuarios y permisos_ → crear un repartidor nuevo con sede "Bodega principal" → cerrar sesión → ese usuario ya ingresa a Ruta.
+5. **Usuarios**: en la barra lateral, sección _08. Administración_ → _Usuarios y permisos_ → crear un repartidor nuevo con sede "Bodega principal" → cerrar sesión → ese usuario ya ingresa a Ruta.
 6. **Protecciones**: intentar desactivarse a sí mismo o dejar el sistema sin administrador → el sistema lo impide.
-7. **Command Center**: el tablero muestra qué entrega activa cada indicador; en cada pestaña, los módulos "En construcción" y los que "Esperan decisión P-xx".
+7. **Command Center**: el tablero muestra qué entrega activa cada indicador; en cada sección, los módulos "En construcción" y los que "Esperan decisión P-xx".
+
+## 4.1 Catálogo y precios (entrega 2a, ~4 minutos)
+
+La semilla deja productos, presentaciones, precios y materias primas ficticios. Todos los precios son de demostración.
+
+1. **Administrador** (con su segundo factor): en la barra lateral, sección _04. Producción_ → _Catálogo y precios_.
+2. **Productos**: se ven "Chorizo Santarrosano" (unidad $1.300 y paquete ×10 $12.000), "Rellena Mixta" y "Picada Quatreros XL". Abrir la ficha del chorizo → _Ver histórico_ muestra el precio anterior y el vigente.
+3. **Crear producto**: _Crear producto_ → nombre "Chorizo de prueba", tipo Fabricado, unidad base Unidad, vida útil 30 días → _Crear producto_.
+4. **Presentaciones y precios**: en la ficha, _Agregar presentación_ → "Unidad" con 1 unidad base; repetir con "Paquete x10" y 10. Luego _Fijar precio_ en la unidad (por ejemplo `1300.00`) → el precio queda vigente y auditado. Cambiarlo a `1400.00` → el anterior pasa al histórico.
+5. **Materias primas**: pestaña _Materias primas_. Como `compras@` se puede crear "Sal de pruebas" en kg; como `produccion@` el catálogo es solo lectura.
+
+## 4.2 Probar sin configurar el segundo factor (solo local)
+
+Para revisar funcionalidades internas sin pasar por la configuración de TOTP, agrega al `.env`:
+
+```
+AUTH_MFA_ENFORCEMENT_DISABLED=true
+```
+
+y reinicia `pnpm dev`. El servidor deja de exigir la configuración a Administrador, Manager y Contador (`/api/v1/me` devuelve `mfa.required: false`). No elimina un TOTP ya activado: si la cuenta ya lo tiene, el ingreso seguirá pidiendo el código. La variable se rechaza en staging y producción; los E2E fuerzan `false` para seguir probando el flujo real de MFA.
+
+Si vas a repetir ingresos durante las pruebas, agrega también `AUTH_RATE_LIMIT_DISABLED=true`: evita el límite de 3 intentos cada 10 s. Ambas variables son solo para desarrollo local.
+
+En desarrollo se aceptan como origen tanto `http://localhost:5173` (Vite, con recarga en caliente) como `http://localhost:3000` (app compilada servida por la API). Usa 5173 para ver los cambios al instante.
+
+## 4.3 Existencias, lotes y kardex (entrega 2b, ~4 minutos)
+
+La semilla crea 8 lotes y 12 saldos con movimientos `opening_balance`; las fechas son relativas al día de la carga.
+
+1. **Compras o Producción**: pestaña _04. Producción_ → _Existencias y traslados_.
+2. **Resumen**: productos con saldo, materias primas, lotes por vencer en 7 días y lotes vencidos.
+3. **Existencias**: tabla por producto, presentación, lote y ubicación. Filtra por "Principal" o por estado; abre el lote `PT-2026-0001` desde su código.
+4. **Ficha de lote**: saldo total en unidad base (360 unidades entre Unidad y Paquete x10), saldos por ubicación y últimos movimientos.
+5. **Kardex**: pestaña _Kardex_; verifica la carga inicial, el usuario y el documento de origen. Filtra por tipo o rango de fechas.
+6. **Trazabilidad**: entra como `produccion@` y abre el lote; verás las secciones "Hacia atrás" y "Hacia adelante" con los vacíos que activan las entregas 3, 4 y 5. Como `compras@` no se consulta trazabilidad, pero sí existencias y kardex.
 
 ## 5. Volver a empezar
 

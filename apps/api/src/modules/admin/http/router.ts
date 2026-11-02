@@ -3,6 +3,7 @@ import { Router } from 'express';
 import type { IdempotencyStore } from '../../../platform/idempotency/store.js';
 import { requireIdempotency } from '../../../platform/idempotency/middleware.js';
 import { AppError } from '../../../platform/http/errors.js';
+import { expectedVersion } from '../../../platform/http/version.js';
 import {
   createUser,
   getMe,
@@ -13,15 +14,6 @@ import {
   updateUser,
   type UsersDeps,
 } from '../application/users.js';
-
-/** Versión esperada desde If-Match (ETag "v<n>"), para edición concurrente segura. */
-function expectedVersion(header: string | undefined): number | undefined {
-  if (!header) return undefined;
-  const match = /^"?v?(\d+)"?$/.exec(header.trim());
-  if (!match?.[1])
-    throw new AppError(400, 'MALFORMED_REQUEST', 'If-Match inválido', 'Usa el valor ETag recibido.');
-  return Number(match[1]);
-}
 
 function userId(raw: string | undefined): string {
   const parsed = Uuid.safeParse(raw);

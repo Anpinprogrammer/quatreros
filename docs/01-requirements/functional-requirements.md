@@ -142,10 +142,10 @@
 - Descripción: Registrar productos fabricados y alimentos preparados con unidad base, presentaciones (unidad, paquete × N), vida útil y estado.
 - Actor responsable: Administrador
 - Precondiciones: —
-- Flujo esperado: 1. Crea producto con tipo y unidad base. 2. Define presentaciones y su composición. 3. Para fabricados, define vida útil (Q-PRO-04).
+- Flujo esperado: 1. Crea producto con tipo y unidad base. 2. Define presentaciones y su composición. 3. Para fabricados, define vida útil (DEC-090).
 - Excepciones: cambiar composición de una presentación con movimientos → se exige presentación nueva (BR-021).
 - Reglas relacionadas: BR-020, BR-021
-- Dependencias: Q-PRO-04
+- Dependencias: DEC-090
 - Prioridad sugerida: Alta
 - Estado: CONFIRMED
 - Fuente: DM §2.2, §6, DEC-015
@@ -349,8 +349,8 @@
 - Reglas relacionadas: BR-080
 - Dependencias: —
 - Prioridad sugerida: Media
-- Estado: PROPOSED
-- Fuente: DEC-P21
+- Estado: CONFIRMED
+- Fuente: DEC-P21; pantalla aprobada por DEC-089 (2026-11-02)
 
 ### RF-112 — Asignación de lotes por FEFO
 

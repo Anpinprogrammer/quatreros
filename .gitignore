@@ -15,3 +15,7 @@ test-results/
 *.dump
 *.sql.gz
 *.age
+
+# Artefactos locales del harness de agentes (no forman parte del proyecto)
+.agents/
+skills-lock.json

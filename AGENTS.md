@@ -4,6 +4,8 @@ Quatreros es un ERP a medida para una productora de alimentos de Cali (chorizos 
 
 ## 1. Lee primero (en este orden)
 
+> **Memoria viva:** [`MEMORY.md`](MEMORY.md) resume el estado actual, el entorno local, los problemas conocidos y el trabajo en curso. Léelo primero y actualízalo al cerrar cada sesión.
+
 1. [`docs/HANDOFF.md`](docs/HANDOFF.md): qué está hecho, **cuál es la siguiente tarea** y qué espera respuesta del responsable.
 2. [`docs/PROJECT-STATUS.md`](docs/PROJECT-STATUS.md) y [`docs/03-planning/roadmap-prototipo.md`](docs/03-planning/roadmap-prototipo.md).
 3. Procedimientos del proyecto en [`.claude/skills/`](.claude/skills/). Son Markdown legibles por cualquier agente; Claude Code los carga solo:

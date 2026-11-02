@@ -22,6 +22,12 @@ const EnvSchema = z
     APP_VERSION: z.string().default('0.1.0'),
     /** Solo para pruebas E2E locales/CI: desactiva el límite de intentos de ingreso. Prohibido en staging/producción. */
     AUTH_RATE_LIMIT_DISABLED: booleanFromString,
+    /**
+     * Solo para desarrollo/pruebas locales: deja de exigir configurar el segundo factor a los roles sensibles.
+     * No elimina un TOTP ya activado; solo evita la pantalla de configuración obligatoria.
+     * Prohibido en staging/producción (DEC-043).
+     */
+    AUTH_MFA_ENFORCEMENT_DISABLED: booleanFromString,
   })
   .superRefine((env, ctx) => {
     if (env.AUTH_RATE_LIMIT_DISABLED && (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production')) {
@@ -29,6 +35,13 @@ const EnvSchema = z
         code: 'custom',
         path: ['AUTH_RATE_LIMIT_DISABLED'],
         message: 'AUTH_RATE_LIMIT_DISABLED no se permite en staging ni producción',
+      });
+    }
+    if (env.AUTH_MFA_ENFORCEMENT_DISABLED && (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AUTH_MFA_ENFORCEMENT_DISABLED'],
+        message: 'AUTH_MFA_ENFORCEMENT_DISABLED no se permite en staging ni producción',
       });
     }
     const needsSecret = env.NODE_ENV === 'staging' || env.NODE_ENV === 'production';
@@ -42,6 +55,18 @@ const EnvSchema = z
   });
 
 export type Env = z.infer<typeof EnvSchema>;
+
+/** Orígenes locales aceptados solo en desarrollo/pruebas (Vite 5173 y app compilada 3000). */
+const DEV_TRUSTED_ORIGINS = ['http://localhost:5173', 'http://localhost:3000'] as const;
+
+/** Orígenes permitidos para Better Auth y la defensa CSRF. En staging/producción, solo APP_BASE_URL. */
+export function trustedOriginsFor(env: Env): string[] {
+  const origins = [new URL(env.APP_BASE_URL).origin];
+  if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') {
+    origins.push(...DEV_TRUSTED_ORIGINS);
+  }
+  return [...new Set(origins)];
+}
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const parsed = EnvSchema.safeParse(source);

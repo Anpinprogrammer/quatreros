@@ -10,6 +10,18 @@ export async function signIn(page: Page, email: string, password = DEMO_PASSWORD
   await page.getByRole('button', { name: 'Ingresar' }).click();
 }
 
+/**
+ * Navega a una sección del ERP. En escritorio la barra lateral está visible; en tableta y
+ * celular se abre el panel de navegación (patrón drawer) antes de elegir el destino.
+ */
+export async function openSection(page: Page, name: RegExp | string) {
+  const trigger = page.getByRole('button', { name: 'Abrir navegación' });
+  if (await trigger.isVisible()) {
+    await trigger.click();
+  }
+  await page.getByRole('navigation', { name: 'Secciones' }).getByRole('link', { name }).click();
+}
+
 export async function signOut(page: Page) {
   await page.getByRole('button', { name: 'Salir' }).click();
   await expect(page).toHaveURL(/\/ingresar/);
