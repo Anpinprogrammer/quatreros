@@ -1,16 +1,16 @@
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
-import { LoginPage } from '../features/acceso/LoginPage';
-import { MfaSetupPage } from '../features/acceso/MfaSetupPage';
-import { ApiError } from '../shared/api/client';
-import { FullPageMessage, ME_KEY, RequireSession } from '../shared/auth/session';
-import { ToastProvider } from '../shared/ui/Toast';
+import { LoginPage } from '../pages/acceso/LoginPage';
+import { MfaSetupPage } from '../pages/acceso/MfaSetupPage';
+import { ApiError } from '../services/client';
+import { FullPageMessage, ME_KEY, RequireSession } from '../hooks/session';
+import { ToastProvider } from '../components/ui/Toast';
 
 // Cada shell se carga por separado (división de código, ADR-014).
-const ErpShell = lazy(() => import('../shells/erp/ErpShell').then((m) => ({ default: m.ErpShell })));
-const PosShell = lazy(() => import('../shells/pos/PosShell').then((m) => ({ default: m.PosShell })));
-const RutaShell = lazy(() => import('../shells/ruta/RutaShell').then((m) => ({ default: m.RutaShell })));
+const ErpShell = lazy(() => import('../pages/erp/ErpShell').then((m) => ({ default: m.ErpShell })));
+const PosShell = lazy(() => import('../pages/pos/PosShell').then((m) => ({ default: m.PosShell })));
+const RutaShell = lazy(() => import('../pages/ruta/RutaShell').then((m) => ({ default: m.RutaShell })));
 
 function NotFound() {
   return (
