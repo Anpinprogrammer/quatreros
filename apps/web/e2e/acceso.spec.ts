@@ -82,7 +82,7 @@ test('administrador: configura el segundo factor, crea un repartidor y este ingr
   // Desactivar con confirmación dentro de la fila; la persona ya no puede ingresar.
   // Acceso directo desde el Command Center.
   await page
-    .getByRole('region', { name: 'Puedes usar' })
+    .getByRole('tabpanel', { name: 'Módulos' })
     .getByRole('link', { name: /Usuarios y permisos/ })
     .click();
   await page.getByRole('button', { name: 'Desactivar a Juan Repartidor' }).click();

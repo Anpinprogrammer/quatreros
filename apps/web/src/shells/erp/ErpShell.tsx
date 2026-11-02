@@ -69,7 +69,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
         Saltar al contenido
       </a>
       <div className="flex">
-        <AppSidebar me={me} collapsed={collapsed} onToggleCollapse={toggleCollapse} />
+        <AppSidebar me={me} collapsed={collapsed} />
         <MobileSidebar
           me={me}
           open={mobileNavOpen}
@@ -80,6 +80,8 @@ export function ErpShell({ me }: { me: MeResponse }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <AppHeader
             me={me}
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapse}
             onOpenNav={() => {
               setMobileNavOpen(true);
             }}

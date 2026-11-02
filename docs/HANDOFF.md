@@ -71,6 +71,8 @@
 - **Verificación:** `pnpm check`, `pnpm build`, E2E de acceso y catálogo en escritorio/tableta/móvil, y axe AA en claro (tres tamaños) y oscuro (ERP). Capturas de revisión en el reporte de Playwright.
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
+- **Ingreso:** rediseño luminoso 52/48, logo oficial, personaje de Los 4 Treros, formulario de 52 px con iconos y control de contraseña integrado. La atmósfera clara se conserva aunque el sistema esté en oscuro.
+- **Command Center y header:** KPIs reales de pedidos, producción y FEFO (ventas del día en estado vacío), operación con pedidos/producción y atención requerida, accesos rápidos compactos. El header agrupa colapso, migas, búsqueda, sedes, notificaciones y menú de usuario; tema y cierre de sesión viven en el menú. Se retiró el panel de plan del dashboard.
 
 ## 2. Siguiente tarea: entrega 6, caja (POS)
 

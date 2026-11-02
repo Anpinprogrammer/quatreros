@@ -91,14 +91,18 @@ export function useProductionPreview(params: {
   });
 }
 
-export function useOrders(params: {
-  status?: ProductionOrderStatus | undefined;
-  q?: string | undefined;
-  limit?: number | undefined;
-}) {
+export function useOrders(
+  params: {
+    status?: ProductionOrderStatus | undefined;
+    q?: string | undefined;
+    limit?: number | undefined;
+  },
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: [...KEY, 'orders', params],
     queryFn: () => apiRequest<ProductionOrderPage>(`/api/v1/production/orders${query(params)}`),
+    enabled: options?.enabled ?? true,
   });
 }
 

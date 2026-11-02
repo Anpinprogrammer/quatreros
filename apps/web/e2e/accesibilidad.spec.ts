@@ -46,7 +46,16 @@ test('Distribución', async ({ page }, info) => {
 test('ERP: Command Center y secciones', async ({ page }, info) => {
   await signIn(page, 'compras@quatreros.example');
   await expect(page).toHaveURL(/\/erp$/);
+  const viewTabs = page.getByRole('tablist', { name: 'Vistas del Command Center' });
+  const modulesTab = viewTabs.getByRole('tab', { name: 'Módulos' });
+  const boardTab = viewTabs.getByRole('tab', { name: 'Tablero del día' });
+  await expect(modulesTab).toHaveAttribute('aria-selected', 'true');
   await audit(page, info, 'command-center');
+  await modulesTab.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(boardTab).toHaveAttribute('aria-selected', 'true');
+  await expect(boardTab).toBeFocused();
+  await audit(page, info, 'command-center-tablero');
   await page.goto('/erp/seccion/produccion');
   await audit(page, info, 'seccion-produccion');
 });

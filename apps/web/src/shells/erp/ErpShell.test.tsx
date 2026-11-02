@@ -1,6 +1,6 @@
 import type { MeResponse } from '@quatreros/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ErpShell } from './ErpShell';
@@ -42,8 +42,15 @@ describe('ErpShell', () => {
     expect(within(tabs).getByRole('link', { name: /Producción/ })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Command Center' })).toBeInTheDocument();
     expect(screen.getByText('Hola, Ana')).toBeInTheDocument();
-    // Las tarjetas del tablero dicen qué entrega las activa.
-    expect(screen.getAllByText(/Se activa con la entrega/).length).toBeGreaterThan(0);
+    expect(screen.getByText('Todo lo que sucede en tu negocio, en un solo lugar.')).toBeInTheDocument();
+    const viewTabs = screen.getByRole('tablist', { name: 'Vistas del Command Center' });
+    expect(within(viewTabs).getByRole('tab', { name: 'Módulos' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(viewTabs).getByRole('tab', { name: 'Tablero del día' })).toBeInTheDocument();
+    fireEvent.click(within(viewTabs).getByRole('tab', { name: 'Tablero del día' }));
+    // Los KPI explican su estado cuando el rol no tiene acceso a los datos.
+    expect(screen.getByText('Ventas del día')).toBeInTheDocument();
+    expect(screen.getByText('Alertas FEFO')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Tablero del día' })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('una sección muestra sus módulos con la clave de la decisión pendiente', () => {
@@ -57,8 +64,8 @@ describe('ErpShell', () => {
 
   it('el administrador tiene acceso directo a Usuarios', () => {
     renderShell(admin);
-    const shortcuts = screen.getByRole('region', { name: 'Puedes usar' });
-    expect(within(shortcuts).getByRole('link', { name: /Usuarios y permisos/ })).toHaveAttribute(
+    const modulesPanel = screen.getByRole('tabpanel', { name: 'Módulos' });
+    expect(within(modulesPanel).getByRole('link', { name: /Usuarios y permisos/ })).toHaveAttribute(
       'href',
       '/erp/usuarios',
     );

@@ -1,5 +1,4 @@
 import type { MeResponse } from '@quatreros/contracts';
-import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import { SIDEBAR_GROUPS, sectionForPath, visibleSections, type Section } from '../../shared/modules';
 import { Brand } from '../../shared/ui/Brand';
@@ -75,15 +74,7 @@ function SidebarNav({
 }
 
 /** Barra lateral de escritorio: 248 px expandida, 72 px contraída. */
-export function AppSidebar({
-  me,
-  collapsed,
-  onToggleCollapse,
-}: {
-  me: MeResponse;
-  collapsed: boolean;
-  onToggleCollapse: () => void;
-}) {
+export function AppSidebar({ me, collapsed }: { me: MeResponse; collapsed: boolean }) {
   return (
     <aside
       className={`sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex ${collapsed ? 'w-[72px]' : 'w-[248px]'}`}
@@ -94,24 +85,8 @@ export function AppSidebar({
         <Brand to="/erp" compact={collapsed} />
       </div>
       <SidebarNav me={me} collapsed={collapsed} />
-      <div className={`shrink-0 border-t border-line p-3 ${collapsed ? 'space-y-2' : 'space-y-3'}`}>
+      <div className="shrink-0 border-t border-line p-3">
         <ServerStatus compact={collapsed} />
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          aria-label={collapsed ? 'Expandir navegación' : 'Contraer navegación'}
-          title={collapsed ? 'Expandir navegación' : 'Contraer navegación'}
-          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-line text-caption font-semibold text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
-        >
-          {collapsed ? (
-            <ChevronsRight aria-hidden className="size-4" />
-          ) : (
-            <>
-              <ChevronsLeft aria-hidden className="size-4" />
-              <span>Contraer navegación</span>
-            </>
-          )}
-        </button>
       </div>
     </aside>
   );

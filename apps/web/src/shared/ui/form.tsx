@@ -1,3 +1,4 @@
+import { Eye, EyeOff } from 'lucide-react';
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref, SelectHTMLAttributes } from 'react';
 import { useId, useState } from 'react';
 
@@ -39,28 +40,64 @@ type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   error?: string | undefined;
   hint?: string;
-  /** Contenido junto al campo (p. ej. "Mostrar" o "Generar"). */
+  /** Contenido junto al campo (p. ej. "Generar"). */
   addon?: ReactNode;
+  /** Icono decorativo al inicio del campo. */
+  leadingIcon?: ReactNode;
+  /** Acción dentro del campo, alineada a la derecha (p. ej. mostrar contraseña). */
+  trailingSlot?: ReactNode;
+  /** `lg` eleva el campo a 52 px para formularios de acceso. */
+  inputSize?: 'md' | 'lg';
+  /** Marca el campo como inválido aunque el mensaje se muestre fuera de él. */
+  invalid?: boolean;
   ref?: Ref<HTMLInputElement>;
 };
 
 /** D. Input: alto ≥ 48 px; 16 px en celular para que iOS no amplíe al enfocar (Anexo A). */
-export function TextField({ label, error, hint, className = '', addon, ...props }: TextFieldProps) {
+export function TextField({
+  label,
+  error,
+  hint,
+  className = '',
+  addon,
+  leadingIcon,
+  trailingSlot,
+  inputSize = 'md',
+  invalid = false,
+  ...props
+}: TextFieldProps) {
   const id = useId();
-  const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(' ');
+  const invalidField = Boolean(error) || invalid;
+  const { 'aria-describedby': externalDescribedBy, ...inputProps } = props;
+  const describedBy = [externalDescribedBy, error ? `${id}-error` : null, hint ? `${id}-hint` : null]
+    .filter(Boolean)
+    .join(' ');
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-body font-semibold text-ink">
         {label}
       </label>
       <div className="flex gap-2">
-        <input
-          id={id}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy || undefined}
-          {...props}
-          className={`min-h-12 min-w-0 flex-1 rounded-xl border bg-surface px-3 text-base text-ink transition-colors duration-200 placeholder:text-ink-3 hover:border-ink-3 focus:border-brand sm:text-body ${error ? 'border-danger' : 'border-control'} ${className}`}
-        />
+        <div className="group relative min-w-0 flex-1">
+          {leadingIcon ? (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-ink-3 transition-colors group-focus-within:text-brand-ink"
+            >
+              {leadingIcon}
+            </span>
+          ) : null}
+          <input
+            id={id}
+            aria-invalid={invalidField ? true : undefined}
+            aria-describedby={describedBy || undefined}
+            {...inputProps}
+            className={`w-full rounded-xl border bg-surface text-base text-ink transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-ink-3 hover:border-ink-3 focus:border-brand focus:ring-4 focus:outline-none sm:text-body ${inputSize === 'lg' ? 'min-h-[52px]' : 'min-h-12'} ${leadingIcon ? 'pl-11' : 'pl-3'} ${trailingSlot ? 'pr-11' : 'pr-3'} ${invalidField ? 'border-danger focus:ring-brand/10' : 'border-control focus:ring-brand/10'} ${className}`}
+          />
+          {trailingSlot ? (
+            <span className="absolute inset-y-0 right-1.5 flex items-center">{trailingSlot}</span>
+          ) : null}
+        </div>
         {addon}
       </div>
       {hint ? (
@@ -170,24 +207,26 @@ export function CheckboxField({
   );
 }
 
-/** Contraseña con botón "Mostrar": reduce errores de digitación en celular. */
+/** Contraseña con el control mostrar/ocultar integrado dentro del campo. */
 export function PasswordField(props: Omit<TextFieldProps, 'type' | 'addon'>) {
   const [visible, setVisible] = useState(false);
   return (
     <TextField
       {...props}
       type={visible ? 'text' : 'password'}
-      addon={
-        <Button
-          variant="secondary"
-          className="min-h-12"
+      trailingSlot={
+        <button
+          type="button"
+          aria-label={visible ? 'Ocultar' : 'Mostrar'}
           aria-pressed={visible}
+          title={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           onClick={() => {
             setVisible((v) => !v);
           }}
+          className="grid size-10 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink focus-visible:outline-offset-1"
         >
-          {visible ? 'Ocultar' : 'Mostrar'}
-        </Button>
+          {visible ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
+        </button>
       }
     />
   );

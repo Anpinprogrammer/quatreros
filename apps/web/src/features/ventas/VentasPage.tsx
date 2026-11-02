@@ -13,7 +13,7 @@ import {
 } from '@quatreros/contracts';
 import { Building2, ClipboardList, Plus, Trash2, Truck } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { newIdempotencyKey, type ApiError } from '../../shared/api/client';
 import { hasPermission } from '../../shared/auth/session';
 import { Badge, type BadgeTone } from '../../shared/ui/Badge';
@@ -56,7 +56,15 @@ const dispatchTones: Record<keyof typeof DISPATCH_STATUS_LABELS, BadgeTone> = {
 
 export function VentasPage({ me }: { me: MeResponse }) {
   useDocumentTitle('Clientes, pedidos y despachos');
-  const [tab, setTab] = useState<Tab>('customers');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const tab: Tab = requestedTab === 'orders' || requestedTab === 'dispatches' ? requestedTab : 'customers';
+  const setTab = (next: Tab) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === 'customers') params.delete('tab');
+    else params.set('tab', next);
+    setSearchParams(params, { replace: true });
+  };
   const tabs: { id: Tab; label: string }[] = [
     { id: 'customers', label: 'Clientes' },
     { id: 'orders', label: 'Pedidos' },
