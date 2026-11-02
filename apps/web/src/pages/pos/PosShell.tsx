@@ -225,7 +225,6 @@ export function PosShell({ me }: { me: MeResponse }) {
                         <button
                           type="button"
                           disabled={!item.sellable}
-                          aria-label={`Agregar ${item.productName}, ${item.presentationName}, ${formatMoney(item.price)}`}
                           onClick={() => {
                             add(item);
                           }}

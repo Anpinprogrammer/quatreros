@@ -33,8 +33,8 @@ test('cajero abre turno, vende con pago mixto y cierra con diferencia', async ({
   await expect(page.getByRole('heading', { name: 'Productos' })).toBeVisible();
   await audit(page, info, 'pos-catalogo');
 
-  await page.getByRole('button', { name: /Agregar Picada Quatreros XL/ }).click();
-  await page.getByRole('button', { name: /Agregar Chorizo Santarrosano, Unidad/ }).click();
+  await page.getByRole('button', { name: /Picada Quatreros XL/ }).click();
+  await page.getByRole('button', { name: /Chorizo Santarrosano.*Unidad/ }).click();
   await page.getByRole('button', { name: /Cobrar/ }).click();
 
   const payment = page.getByRole('dialog');

@@ -15,7 +15,7 @@ let adminSecret = '';
 test('el cajero ingresa y queda en Caja', async ({ page }) => {
   await signIn(page, 'caja@quatreros.example');
   await expect(page).toHaveURL(/\/pos$/);
-  await expect(page.getByRole('heading', { name: 'Venta actual' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Abrir caja' })).toBeVisible();
   await expect(page.getByText('Camila Caja').first()).toBeVisible();
   await signOut(page);
 });
