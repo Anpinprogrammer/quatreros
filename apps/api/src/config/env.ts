@@ -56,6 +56,18 @@ const EnvSchema = z
 
 export type Env = z.infer<typeof EnvSchema>;
 
+/** Orígenes locales aceptados solo en desarrollo/pruebas (Vite 5173 y app compilada 3000). */
+const DEV_TRUSTED_ORIGINS = ['http://localhost:5173', 'http://localhost:3000'] as const;
+
+/** Orígenes permitidos para Better Auth y la defensa CSRF. En staging/producción, solo APP_BASE_URL. */
+export function trustedOriginsFor(env: Env): string[] {
+  const origins = [new URL(env.APP_BASE_URL).origin];
+  if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') {
+    origins.push(...DEV_TRUSTED_ORIGINS);
+  }
+  return [...new Set(origins)];
+}
+
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const parsed = EnvSchema.safeParse(source);
   if (!parsed.success) {

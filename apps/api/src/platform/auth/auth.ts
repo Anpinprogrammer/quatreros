@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { twoFactor } from 'better-auth/plugins';
-import type { Env } from '../../config/env.js';
+import { trustedOriginsFor, type Env } from '../../config/env.js';
 import type { Database } from '../db/client.js';
 import * as authSchema from '../db/schema/auth.js';
 
@@ -24,7 +24,7 @@ export function createAuth(db: Database, env: Env, options: AuthOptions = {}) {
     baseURL: env.APP_BASE_URL,
     basePath: '/api/auth',
     ...(env.BETTER_AUTH_SECRET ? { secret: env.BETTER_AUTH_SECRET } : {}),
-    trustedOrigins: [env.APP_BASE_URL],
+    trustedOrigins: trustedOriginsFor(env),
     database: drizzleAdapter(db, {
       provider: 'pg',
       schema: {

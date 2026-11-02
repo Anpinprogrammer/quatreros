@@ -6,7 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { toNodeHandler } from 'better-auth/node';
-import type { Env } from './config/env.js';
+import { trustedOriginsFor, type Env } from './config/env.js';
 import type { Auth } from './platform/auth/auth.js';
 import type { AuthProvisioner } from './platform/auth/provisioner.js';
 import type { Database } from './platform/db/client.js';
@@ -41,6 +41,7 @@ export interface AppDeps {
 
 export function createApp(deps: AppDeps): Express {
   const { env, logger } = deps;
+  const allowedOrigins = new Set(trustedOriginsFor(env));
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1); // detrás del proxy del hosting
@@ -88,7 +89,7 @@ export function createApp(deps: AppDeps): Express {
   app.use('/api/v1', (req, _res, next) => {
     const origin = req.header('origin');
     const unsafe = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
-    if (unsafe && origin && origin !== new URL(env.APP_BASE_URL).origin) {
+    if (unsafe && origin && !allowedOrigins.has(origin)) {
       next(AppError.forbidden('Origen no permitido.'));
       return;
     }
