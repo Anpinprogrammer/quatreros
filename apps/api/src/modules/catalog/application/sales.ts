@@ -8,6 +8,7 @@ export interface SalePresentation {
   presentationName: string;
   productId: string;
   productName: string;
+  kind: 'manufactured' | 'prepared';
   unitsPer: string;
   price: string;
   presentationActive: boolean;
@@ -21,7 +22,8 @@ export async function loadSalePresentation(
 ): Promise<SalePresentation | undefined> {
   const result = await db.execute(sql`
     select pr.id as "presentationId", pr.name as "presentationName",
-           p.id as "productId", p.name as "productName", pr.units_per as "unitsPer",
+           p.id as "productId", p.name as "productName", p.kind,
+           pr.units_per as "unitsPer",
            ph.price, pr.is_active as "presentationActive", p.is_active as "productActive"
     from catalog.presentations pr
     join catalog.products p on p.id = pr.product_id

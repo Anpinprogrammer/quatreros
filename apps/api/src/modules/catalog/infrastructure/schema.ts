@@ -151,13 +151,16 @@ export const recipeLines = catalogSchema.table(
     recipeVersionId: uuid()
       .notNull()
       .references(() => recipeVersions.id),
-    rawMaterialId: uuid()
-      .notNull()
-      .references(() => rawMaterials.id),
+    rawMaterialId: uuid().references(() => rawMaterials.id),
+    presentationId: uuid().references(() => presentations.id),
     quantity: numeric({ precision: 14, scale: 3 }).notNull(),
   },
   (t) => [
     unique('recipe_lines_version_material_uq').on(t.recipeVersionId, t.rawMaterialId),
+    uniqueIndex('recipe_lines_version_presentation_uq')
+      .on(t.recipeVersionId, t.presentationId)
+      .where(sql`${t.presentationId} IS NOT NULL`),
+    check('recipe_lines_component_chk', sql`num_nonnulls(${t.rawMaterialId}, ${t.presentationId}) = 1`),
     check('recipe_lines_quantity_chk', sql`${t.quantity} > 0`),
   ],
 );

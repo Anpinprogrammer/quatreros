@@ -6,6 +6,7 @@ import { catalogRouter } from './catalog/http/router.js';
 import { inventoryRouter } from './inventory/http/router.js';
 import { distributionRouter } from './distribution/http/router.js';
 import { productionRouter } from './production/http/router.js';
+import { posRouter } from './pos/http/router.js';
 import { purchasingRouter } from './purchasing/http/router.js';
 import { salesRouter } from './sales/http/router.js';
 import { SqlInventoryUsage } from './inventory/infrastructure/repository.js';
@@ -40,4 +41,5 @@ export function registerModules(api: Router, deps: AppDeps, overrides: ModuleOve
   api.use(productionRouter({ db: deps.db, idempotency: deps.idempotency }));
   api.use(salesRouter({ db: deps.db, idempotency: deps.idempotency }));
   api.use(distributionRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(posRouter({ db: deps.db, idempotency: deps.idempotency }));
 }

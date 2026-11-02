@@ -91,6 +91,8 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | DEC-P20/P21          | Eventos económicos y kardex inmutable                                     | INV, CONT, todos     | database-design; ADR                                             | Aprobación técnica                   | ✅    |
 | DEC-081 (ex DEC-P24) | Contabilidad en dos capas                                                 | CONT                 | module-boundaries; roadmap                                       | Capa (b): P-01..P-04                 | 🟨    |
 | DEC-101              | SPA por capas (`pages/components/hooks/services/lib/config`)              | PLAT                 | ADR-024; `apps/web/src/README.md`; `.dependency-cruiser.cjs`     | —                                    | ✅    |
+| DEC-102              | Caja POS: turnos, ventas, pagos y revisión de diferencias                 | POS, FIN             | `docs/04-specifications/pos/caja.md`; `pos` schema               | P-02, P-06, P-07, P-09               | ✅    |
+| DEC-103              | Recetas de platos con presentaciones terminadas                           | CAT, POS             | `catalog.recipe_lines.presentation_id`; `pos/caja.md`            | —                                    | ✅    |
 
 ## 4. Proceso → decisiones → bloqueos (vista por flujo de negocio)
 

@@ -146,3 +146,20 @@ export async function registerCollection(
   }
   return { id: row.id, number };
 }
+
+export interface ActivePaymentMethod {
+  id: string;
+  name: string;
+  isCash: boolean;
+}
+
+/** Medios de pago activos para caja (Q-POS-02: solo los sembrados en el catálogo). */
+export async function listActivePaymentMethods(db: Executor): Promise<ActivePaymentMethod[]> {
+  const result = await db.execute(sql`
+    select id, name, is_cash as "isCash"
+    from finance.payment_methods
+    where is_active = true
+    order by is_cash desc, name asc
+  `);
+  return result.rows as unknown as ActivePaymentMethod[];
+}

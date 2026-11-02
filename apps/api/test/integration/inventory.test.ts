@@ -190,7 +190,7 @@ afterAll(async () => {
 describe('existencias y kardex (RF-110, RF-111)', () => {
   it('la carga inicial crea lotes, movimientos y saldos una sola vez', async () => {
     const first = await inventoryCounts();
-    expect(first).toEqual({ lots: 8, movements: 12, balances: 12 });
+    expect(first).toEqual({ lots: 8, movements: 13, balances: 13 });
 
     await seedDemoInventory(db, adminUserId);
     expect(await inventoryCounts()).toEqual(first);
@@ -213,7 +213,7 @@ describe('existencias y kardex (RF-110, RF-111)', () => {
     const res = await admin.get('/api/v1/inventory/stock-balances?limit=100');
     expect(res.status).toBe(200);
     const page = res.body as StockBalancePage;
-    expect(page.data).toHaveLength(12);
+    expect(page.data).toHaveLength(13);
 
     const chorizo = page.data.filter((row) => row.lotCode === 'PT-2026-0001');
     expect(chorizo).toHaveLength(2);

@@ -78,6 +78,8 @@
 | Q-POS-03 | ¿El POS maneja **mesas/comandas** o solo venta de mostrador?                                                                                                                                | §7.4   | 🟠   | Administración    | Alcance del POS                            | Solo mostrador en v1 salvo indicación                                                 |
 | Q-POS-04 | ¿Cómo se **clasifican y ajustan** las diferencias de cocina (merma normal, desperdicio, consumo de personal, faltante)? ¿Quién aprueba?                                                     | P-07   | 🟠   | Cocina + contador | Ajustes de inventario de cocina            | Catálogo de clasificaciones configurable; ajuste contable BLOCKED                     |
 
+> **2026-11-02 (DEC-102/DEC-103):** Q-POS-01..03 quedan cubiertas para el prototipo: consumo teórico por receta de plato sin movimiento de cocina, pago con efectivo/transferencia y venta de mostrador. Tarjeta/QR/crédito (Q-POS-02) y Q-POS-04 (P-07) siguen abiertos.
+
 ## 7. Seguridad y permisos
 
 | ID       | Pregunta                                                                                                                  | DM         | Pri.                     | Responsable               | Impacto                                                      | Recomendación                                                                     |
