@@ -1,6 +1,6 @@
 # Especificación — Entrega 7: hechos económicos (RF-303)
 
-> Estado: **BORRADOR — pendiente de aprobación** · 2026-11-02
+> Estado: **APROBADA** · 2026-11-02 (E1..E7 aprobadas por el responsable; implementación en curso)
 > Cubre RF-303 (registro de hechos económicos) como capa de eventos. **No** cubre RF-304 (contabilización) ni RF-305 (reportes contables), bloqueados por P-01..P-04.
 > Complementa `docs/04-specifications/fin/cartera-recaudos.md`.
 

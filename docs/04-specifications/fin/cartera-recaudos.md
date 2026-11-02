@@ -1,6 +1,6 @@
 # Especificación — Entrega 7: cartera, recaudos y tablero
 
-> Estado: **BORRADOR — pendiente de aprobación** · 2026-11-02
+> Estado: **APROBADA** · 2026-11-02 (D1..D9 aprobadas por el responsable; implementación en curso)
 > Cubre RF-262, RF-263, RF-264, RF-265 y la parte de cartera/recaudos/caja de RF-266.
 > RF-303 (hechos económicos) se especifica aparte en `docs/04-specifications/cont/hechos-economicos.md`.
 > Fuera de alcance: RF-266 completa (ventas, producción, inventario y cocina), liquidación de distribuidores (P-08), contabilización e impuestos (P-01..P-04), costeo (P-03), descuentos/anulaciones (P-09) y documento fiscal (P-02).
