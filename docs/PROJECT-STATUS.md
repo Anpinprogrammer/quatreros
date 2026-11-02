@@ -27,6 +27,7 @@
 | 3 ✅    | Compras y recepción: proveedores, compra con total sin impuestos, recepción total o parcial, lote MP por recepción con proveedor/vencimiento y movimiento `receipt` en la misma transacción                                         | 76 unitarias (acumuladas), 66 integración (PGlite y PostgreSQL 17 real, con concurrencia), 52 E2E con axe en tres tamaños |
 | 4 ✅    | Producción: recetas versionadas, orden planificada, consumo real por lote, cierre por presentación, lote PT con vencimiento, rendimiento con tolerancia y trazabilidad N:M                                                          | 80 unitarias (acumuladas), 71 integración (PGlite y PostgreSQL 17 real, con concurrencia), 56 E2E con axe en tres tamaños |
 | 5 ✅    | Pedidos y reparto: clientes con crédito, pedido con precio y reserva FEFO, despacho a ruta, portal del distribuidor, entrega parcial, recaudo, devolución e inspección                                                              | 80 unitarias (acumuladas), 76 integración (PGlite y PostgreSQL 17 real, con concurrencia), 60 E2E con axe en tres tamaños |
+| SPA ✅  | Refactorización pura a capas `pages / components / hooks / services / lib / config`, divisiones de sesión, tema y formulario, y fronteras automáticas con `dependency-cruiser` (ADR-024, DEC-101)                                   | 80 unitarias, 76 integración con PostgreSQL real y 67 E2E (14 omitidos por proyecto), igual que la línea base             |
 
 Cómo mostrarlo en local: `docs/operations/demo-local.md`.
 

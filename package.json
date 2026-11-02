@@ -15,7 +15,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "deps:check": "pnpm --filter @quatreros/api deps:check",
+    "deps:check": "pnpm --filter @quatreros/api deps:check && pnpm --filter @quatreros/web deps:check",
     "test": "pnpm -r test",
     "test:integration": "pnpm --filter @quatreros/api test:integration",
     "test:e2e": "pnpm --filter @quatreros/web test:e2e",

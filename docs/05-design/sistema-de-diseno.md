@@ -271,7 +271,7 @@ La Parte 2 define **cómo se ven y se recorren** las pantallas. Las reglas de ne
 
 - Tokens en `apps/web/src/styles.css` (`@theme` de Tailwind 4): `ember`, `ember-hover`, `terracotta`, `char`, `smoke`, `grill`, `grill-strong` (`#3F3F46`), `control` (`#71717A`, Anexo A), `chalk`, `ash`, `success`, `warning`, `danger`, `info`.
 - Fuentes autoalojadas con Fontsource (compatibles con la CSP, sin peticiones a terceros): `@fontsource-variable/inter`, `@fontsource-variable/jetbrains-mono`.
-- Componentes en `apps/web/src/shared/ui/`: `Button` (primary/secondary/ghost/danger), `Card`, `Badge`, `TextField`, `PasswordField`, `CheckboxGroup`, `Alert`.
+- Componentes en `apps/web/src/components/ui/`: `Button` (primary/secondary/ghost/danger), `Card`, `Badge`, `TextField`, `PasswordField`, `CheckboxGroup`, `Alert`.
 - Montos, cantidades, códigos y totales en JetBrains Mono (`font-mono`), alineados a la derecha.
 
 ## Anexo D (equipo) — Revisión visual v1.1 (DEC-093, 2026-11-02)
@@ -296,7 +296,7 @@ La revisión conserva la identidad Ember y el Anexo A, pero cambia la preferenci
 
 **Marca.** El isotipo oficial "Los 4 Treros" se usa completo y sin recolorear (aro naranja, personaje y tipografía propios). La versión de interfaz es un WebP de 256 px con transparencia, para que funcione sobre superficies claras y oscuras; el favicon y el icono de iOS se generan del mismo archivo.
 
-**Componentes.** `AppSidebar`, `AppHeader`, `PageHeader`, `ModuleCard`, `StatCard`, `StatusBadge`, `EmptyState`, `SearchInput`, `FilterBar`, `DataTable`, `ConfirmDialog`, `LoadingSkeleton`, `NotificationItem`, `ResponsiveDrawer`, `PermissionGate`, `AIActionConfirmation` y `ToastProvider` viven en `apps/web/src/shared/ui/` o en el shell ERP. Las pantallas no redefinen botones, campos ni tarjetas.
+**Componentes.** `AppSidebar`, `AppHeader`, `PageHeader`, `ModuleCard`, `StatCard`, `StatusBadge`, `EmptyState`, `SearchInput`, `FilterBar`, `DataTable`, `ConfirmDialog`, `LoadingSkeleton`, `NotificationItem`, `ResponsiveDrawer`, `PermissionGate`, `AIActionConfirmation` y `ToastProvider` viven en `apps/web/src/components/ui/` o en `apps/web/src/components/layout/`. Las pantallas no redefinen botones, campos ni tarjetas.
 
 **Asistente (vista previa).** Burbuja fija en el borde inferior derecho con el personaje oficial; al abrirla, panel lateral de `clamp(13rem, 15vw, 24rem)` en escritorio (~15 % del ancho, con mínimo legible) y pantalla completa con botón "Volver" en móvil. Como el agente se integra en la entrega 8, el compositor está deshabilitado y el panel declara "sin conexión": no simula respuestas, conversaciones ni escrituras.
 

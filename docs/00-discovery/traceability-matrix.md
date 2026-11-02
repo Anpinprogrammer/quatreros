@@ -86,10 +86,11 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | DEC-087 / DEC-088    | Quatreros AI sobre Managed Agents (`ant`); memoria no es fuente de verdad | IA, TG, PLAT         | ADR-023; ai-architecture v0.2 §1, §6, §11, §12; `quatreros-ai/`  | Q-IA-04..06                          | ✅    |
 | DEC-089              | Pantalla de consulta del kardex (RF-111) aprobada                         | INV                  | RF-111; `docs/04-specifications/inv/existencias.md` (entrega 2b) | —                                    | ✅    |
 | DEC-090              | Vida útil fija por producto, editable con permiso (Q-PRO-04)              | CAT, PROD, INV       | RF-030; `shelf_life_days`; cálculo de `expires_on`               | —                                    | ✅    |
-| DEC-091              | Catálogo y precios dentro de la pestaña 04. Producción                    | CAT, PLAT            | `shared/modules.ts`; sistema de diseño Anexo B                   | —                                    | ✅    |
+| DEC-091              | Catálogo y precios dentro de la pestaña 04. Producción                    | CAT, PLAT            | `config/modules.ts`; sistema de diseño Anexo B                   | —                                    | ✅    |
 | DEC-P14              | Controles de puesta en marcha                                             | MIG                  | Plan de migración                                                | P-16                                 | 🟨    |
 | DEC-P20/P21          | Eventos económicos y kardex inmutable                                     | INV, CONT, todos     | database-design; ADR                                             | Aprobación técnica                   | ✅    |
 | DEC-081 (ex DEC-P24) | Contabilidad en dos capas                                                 | CONT                 | module-boundaries; roadmap                                       | Capa (b): P-01..P-04                 | 🟨    |
+| DEC-101              | SPA por capas (`pages/components/hooks/services/lib/config`)              | PLAT                 | ADR-024; `apps/web/src/README.md`; `.dependency-cruiser.cjs`     | —                                    | ✅    |
 
 ## 4. Proceso → decisiones → bloqueos (vista por flujo de negocio)
 
@@ -146,7 +147,7 @@ Flujos: `business-workflows.md` WF-01..WF-11 · Datos: `data-requirements.md` DR
 | `ai-architecture.md`          | Quatreros AI (Managed Agents): sesiones, herramientas `custom`, flujo de 10 pasos, consumo, errores, agente como código | DEC-070..075, DEC-087, DEC-088, BR-230..237, ADR-023 |
 | `telegram-architecture.md`    | Vinculación, comandos, voz, clasificación con/sin IA                                                                    | DEC-076..078, BR-250..253                            |
 | `deployment-design.md`        | Topología, CI/CD, respaldos, contingencia, costos                                                                       | DEC-061/062/082, RNF-040..047, RNF-110..113          |
-| `architecture-decisions.md`   | ADR-001..022                                                                                                            | DEC-P03, P05, P06, P13, P20–P23                      |
+| `architecture-decisions.md`   | ADR-001..024                                                                                                            | DEC-P03, P05, P06, P13, P20–P23                      |
 
 ## 7. Mantenimiento de la matriz
 

@@ -4,16 +4,18 @@
 
 ## 1. Dónde está el proyecto
 
-| Etapa                                                                         | Estado                                                                    |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| A–E: descubrimiento, requerimientos, arquitectura, diseño de IA y de Telegram | Completas (`docs/00-discovery` … `docs/02-architecture`)                  |
-| F: preparación del repositorio, CI/CD, respaldos                              | Completa y verificada                                                     |
-| G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md` |
-| Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                 |
-| **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                   |
-| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                       |
-| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                            |
-| **Entrega 4**: producción                                                     | **Terminada.** Sigue la entrega 5 (pedidos y reparto)                     |
+| Etapa                                                                         | Estado                                                                                                        |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| A–E: descubrimiento, requerimientos, arquitectura, diseño de IA y de Telegram | Completas (`docs/00-discovery` … `docs/02-architecture`)                                                      |
+| F: preparación del repositorio, CI/CD, respaldos                              | Completa y verificada                                                                                         |
+| G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md`                                     |
+| Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                                                     |
+| **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                                                       |
+| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                                                           |
+| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                                                                |
+| **Entrega 4**: producción                                                     | **Terminada.**                                                                                                |
+| **Entrega 5**: pedidos y reparto                                              | **Terminada.** Sigue la entrega 6 (caja POS)                                                                  |
+| **Refactorización de la SPA**                                                 | Terminada en la rama `refactor/web-estructura-pages-components-hooks`; pendiente de fusión (ADR-024, DEC-101) |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -75,6 +77,15 @@
 - **Ingreso:** rediseño luminoso 52/48, logo oficial, personaje de Los 4 Treros, formulario de 52 px con iconos y control de contraseña integrado. La atmósfera clara se conserva aunque el sistema esté en oscuro.
 - **Command Center y header:** dos pestañas accesibles, **Módulos** y **Tablero del día**. Módulos reorganiza los accesos en un grid compacto de tres columnas; el tablero concentra KPI reales de pedidos/producción/FEFO, pedidos recientes, producción, estado de reparto y el estado de caja/cartera/IA. El header agrupa colapso, migas, búsqueda, sedes, notificaciones y menú de usuario; tema y cierre de sesión viven en el menú. Se retiró el panel de plan del dashboard.
 
+### Refactorización de la SPA (2026-11-02)
+
+- **Solo estructura:** no cambió comportamiento, JSX, textos, estilos, URLs, contratos, permisos ni pruebas. Los E2E y las capturas son la línea base.
+- **Capas:** `pages/` (pantallas y shells), `components/` (`ui` con el sistema de diseño, `layout`, `auth` y piezas por módulo), `hooks/`, `services/`, `lib/`, `config/` y `app/` para la composición.
+- **Divisiones:** `session.tsx` → `hooks/useSession.ts`, `hooks/useSignOut.ts`, `lib/session.ts` y `components/auth/RequireSession.tsx`; `theme.tsx` → `lib/theme.ts`, `hooks/useTheme.ts` y `components/ui/ThemeToggle.tsx`; `UserForm` salió de `UsersPage` a `components/usuarios/UserForm.tsx`.
+- **Fronteras:** `apps/web/.dependency-cruiser.cjs` con seis reglas (`components`↛`pages`, `hooks`↛UI, `services`↛UI, `lib` puro, `config` sin presentación y sin ciclos), encadenado a `pnpm lint` / `pnpm check`.
+- **Guía:** `apps/web/src/README.md`.
+- **Verificación:** `pnpm check` con 80 unitarias y ambas fronteras; integración 76/76 con PostgreSQL real; E2E 67 pasaron y 14 omitidos, igual que la línea base.
+
 ## 2. Siguiente tarea: entrega 6, caja (POS)
 
 **Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3, 4 y 5 terminadas y verificadas. Sigue la 6: turnos de caja, venta de mostrador, pagos mixtos y cierre.
@@ -117,7 +128,7 @@
 
 Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/pos/caja.md` y esperar aprobación.
 
-En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
+En cada PR: actualizar `config/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
@@ -131,9 +142,11 @@ En cada PR: actualizar `shared/modules.ts` (módulos `available`), la matriz de 
 | Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                                                                                    | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
 | **Quatreros AI:** autorizar la primera sincronización con `ant apply` (adopta el agente y el entorno existentes); definir quién la ejecuta y el espacio de trabajo de producción | Q-IA-04, ai-architecture §11                                                                     |
 | **Quatreros AI:** retención de conversaciones en Anthropic y confirmación del modelo `claude-haiku-5-5`                                                                          | Q-IA-05, Q-IA-06                                                                                 |
+| Fusionar el PR de la refactorización de la SPA (`refactor/web-estructura-pages-components-hooks`) cuando el CI esté en verde                                                     | ADR-024, DEC-101                                                                                 |
 
 ## 4. Notas de entorno
 
+- **Integración intermitente (preexistente, no de la refactorización):** `inventory.test.ts` puede fallar al confirmar un pedido con `duplicate key … reservations_order_line_lot_uq` cuando FEFO reparte el mismo lote desde dos ubicaciones. Se reproduce igual en `7868e84`; corregir en una tarea aparte (reservar por lote+ubicación o consolidar la asignación), no dentro de un cambio de estructura.
 - Contraseña de usuarios demo: la que pongas en `DEMO_PASSWORD`; nunca se guarda en el repositorio. CI usa una propia en su base efímera.
 - `pnpm db:reset:demo` deja la base como recién sembrada; el E2E del administrador lo necesita.
 - Para probar funcionalidades internas sin configurar TOTP: `AUTH_MFA_ENFORCEMENT_DISABLED=true` en `.env` y reiniciar `pnpm dev`. Solo desarrollo/pruebas (se rechaza en staging/producción); no borra un TOTP ya activado.

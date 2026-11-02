@@ -34,6 +34,7 @@
 | ADR-021 | Contabilidad en dos capas                                                   | ACCEPTED (aplica DEC-081)   |
 | ADR-022 | Lint y formato: ESLint + Prettier; hooks con lefthook                       | ACCEPTED                    |
 | ADR-023 | Asistente sobre Anthropic Managed Agents, configurado como código con `ant` | ACCEPTED (DEC-087)          |
+| ADR-024 | Frontend: capas `pages`, `components`, `hooks`, `services`, `lib`, `config` | ACCEPTED (DEC-101)          |
 
 ---
 
@@ -113,7 +114,7 @@
 
 ## ADR-014 — Frontend: una SPA con tres shells
 
-- **Decisión:** **React 19 + Vite 8 + Tailwind CSS 4 + React Router 8 + TanStack Query 5**. Una sola aplicación con tres "shells" cargados por ruta y división de código: `/erp` (escritorio/tableta), `/pos` (táctil, venta rápida), `/ruta` (portal móvil del distribuidor). Organización `src/features/<modulo>/`.
+- **Decisión:** **React 19 + Vite 8 + Tailwind CSS 4 + React Router 8 + TanStack Query 5**. Una sola aplicación con tres "shells" cargados por ruta y división de código: `/erp` (escritorio/tableta), `/pos` (táctil, venta rápida), `/ruta` (portal móvil del distribuidor). La organización interna es por capas (ADR-024).
 - **Alternativas:** tres aplicaciones separadas (más configuración y despliegues sin beneficio a esta escala).
 - **Consecuencias:** el usuario entra al shell según su rol; los componentes de dominio se comparten.
 
@@ -184,3 +185,13 @@ Tasa de referencia: **≈ $3.150 COP/USD** (dólar del 28-oct-2026 según [Infob
   - El costo incluye tokens **y** tiempo de ejecución de la sesión (`usage.active_seconds`); se mide con `session.usage` y `usage.list_cost` (ai-architecture §6).
   - Managed Agents está en beta y no es elegible para Zero Data Retention (riesgos R-IA-08..12).
 - **Alternativas descartadas:** AI SDK con proveedores intercambiables (ADR-016) y orquestadores de terceros (Hermes, CrewAI, Mastra), por DEC-087.
+
+## ADR-024 — Frontend por capas
+
+- **Contexto:** la organización anterior (`features/<módulo>/`) mezclaba pantallas, componentes, llamadas a la API, hooks y utilidades en la misma carpeta. Las fronteras entre módulos no se podían verificar y cada archivo admitía varias ubicaciones.
+- **Decisión:** `apps/web/src` se organiza por capas de responsabilidad: `pages/` (pantallas), `components/` (UI reutilizable, con `components/ui/` como sistema de diseño), `hooks/` (estado de React), `services/` (cliente HTTP y consultas/mutaciones por módulo), `lib/` (funciones puras) y `config/` (registro de secciones y módulos). `app/` conserva la composición del router y los providers.
+  - Las importaciones son **relativas**, sin alias ni `index.ts` agregadores.
+  - Las dependencias apuntan hacia abajo: `pages → components → hooks → services → lib`; `config` solo depende de `lib`.
+  - Las fronteras se verifican con `dependency-cruiser` (`apps/web/.dependency-cruiser.cjs`) dentro de `pnpm lint`.
+- **Alternativas:** mantener `features/` con convenciones (no verificable automáticamente); alias de TypeScript (oculta el acoplamiento y complica la lectura).
+- **Consecuencias:** es una refactorización pura, sin cambios de comportamiento, contratos ni pruebas. Cada archivo nuevo tiene una sola ubicación posible y una violación de frontera falla en CI.

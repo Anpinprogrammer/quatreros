@@ -28,10 +28,11 @@ Una entrega = una funcionalidad completa y mostrable (ver `docs/03-planning/road
 
 ## 3. Frontend
 
-1. `apps/web/src/features/<modulo>/` (api.ts con TanStack Query + páginas).
-2. Solo componentes de `shared/ui/` y tokens del sistema de diseño (DEC-086). Estados: carga, vacío, error, sin permiso.
-3. Registrar la ruta en el shell (`shells/erp/ErpShell.tsx`, `pos`, `ruta`) y marcar el módulo `available` en `shared/modules.ts`; si alimenta una tarjeta del Command Center, reemplazar su estado vacío por datos reales.
-4. `useDocumentTitle` en cada pantalla; foco al abrir formularios y tras errores; acciones con nombre accesible.
+1. Datos en `apps/web/src/services/<modulo>.ts` (TanStack Query), pantallas en `apps/web/src/pages/<modulo>/` y piezas propias en `apps/web/src/components/<modulo>/`. La estructura y sus reglas están en `apps/web/src/README.md` (ADR-024).
+2. Solo componentes de `apps/web/src/components/ui/` y tokens del sistema de diseño (DEC-086). Estados: carga, vacío, error, sin permiso.
+3. Registrar la ruta en `pages/erp/ErpShell.tsx`, `pages/pos/PosShell.tsx` o `pages/ruta/RutaShell.tsx` y marcar el módulo `available` en `config/modules.ts`; si alimenta una tarjeta del Command Center, reemplazar su estado vacío por datos reales.
+4. Respetar las capas: `pages → components → hooks → services → lib`; `config` solo depende de `lib`. `pnpm check` ejecuta `dependency-cruiser` y falla si se cruza una frontera.
+5. `useDocumentTitle` en cada pantalla; foco al abrir formularios y tras errores; acciones con nombre accesible.
 
 ## 4. Pruebas (mínimo por caso de uso de escritura)
 
