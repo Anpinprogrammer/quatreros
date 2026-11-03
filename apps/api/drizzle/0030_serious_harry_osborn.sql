@@ -1,0 +1,1 @@
+ALTER TABLE "assistant"."tickets" ADD COLUMN "archived_at" timestamp with time zone;

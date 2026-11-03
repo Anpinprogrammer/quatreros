@@ -97,6 +97,7 @@ RNF por categoría: Seguridad 001–019 · Privacidad 020–029 · Rendimiento 0
 | DEC-105              | Hechos económicos inmutables, sin contabilización                         | CONT, todos          | `docs/04-specifications/cont/hechos-economicos.md`; `accounting`  | P-01..P-04                           | ✅    |
 | DEC-106              | Asistente IA: lectura + materia prima/receta preparadas                   | IA                   | `docs/04-specifications/ia/asistente-demo.md`; `addons/assistant` | P-10 (otras escrituras)              | ✅    |
 | DEC-107              | Expiración de sesiones por inactividad (ERP/POS/ruta)                     | PLAT, ADM            | `platform/auth/activity.ts`; migración `0029`                     | —                                    | ✅    |
+| DEC-108              | Retención de sesiones de Anthropic: archivo 24 h y borrado 30 días        | IA                   | `docs/operations/ai-retention.md`; `assistant:retention`          | —                                    | ✅    |
 
 ## 4. Proceso → decisiones → bloqueos (vista por flujo de negocio)
 
