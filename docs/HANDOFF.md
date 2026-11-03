@@ -109,7 +109,7 @@
 
 - `pnpm check` en verde (67 unitarias de API, 13 de web y contratos).
 - Integración PGlite: 86 pasaron, 2 omitidas por concurrencia.
-- PostgreSQL real: el test de finanzas pasa 5/5; la suite completa queda 84/88 por el fallo intermitente preexistente de reservas de `inventory.test.ts` (`reservations_order_line_lot_uq`), ajeno a esta entrega.
+- PostgreSQL real: el test de finanzas pasa 5/5 y la suite completa 88/88; el fallo de reservas de `inventory.test.ts` quedó corregido.
 - `pnpm build` en verde y E2E 78 pasaron, 15 omitidos y 0 fallos en escritorio, tableta y móvil (con axe AA).
 - El E2E de cierre usó el ingreso original: el rediseño de `LoginPage.tsx` sin commitear tiene un contraste pendiente en la pantalla `ingreso` y debe corregirse antes de fusionarlo.
 
@@ -135,7 +135,7 @@
 
 ## 4. Notas de entorno
 
-- **Integración intermitente (preexistente, no de la refactorización):** `inventory.test.ts` puede fallar al confirmar un pedido con `duplicate key … reservations_order_line_lot_uq` cuando FEFO reparte el mismo lote desde dos ubicaciones. Se reproduce igual en `7868e84`; corregir en una tarea aparte (reservar por lote+ubicación o consolidar la asignación), no dentro de un cambio de estructura.
+- **Reservas corregidas (2026-11-03):** `reserveOrderLine` ya excluye ubicaciones en tránsito/ruta y consolida una sola reserva por lote, eligiendo la ubicación con mayor disponibilidad. `inventory.test.ts` y la suite completa de PostgreSQL pasan 88/88.
 - Contraseña de usuarios demo: la que pongas en `DEMO_PASSWORD`; nunca se guarda en el repositorio. CI usa una propia en su base efímera.
 - `pnpm db:reset:demo` deja la base como recién sembrada; el E2E del administrador lo necesita.
 - Para probar funcionalidades internas sin configurar TOTP: `AUTH_MFA_ENFORCEMENT_DISABLED=true` en `.env` y reiniciar `pnpm dev`. Solo desarrollo/pruebas (se rechaza en staging/producción); no borra un TOTP ya activado.

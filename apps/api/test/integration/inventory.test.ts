@@ -1250,6 +1250,20 @@ describe('pedidos, despacho y reparto (RF-150..152, 180..185, 260..261)', () => 
       where sales_order_line_id = ${creditOrderLineId} and status = 'active'
     `);
     expect((reservations.rows[0] as { total: number }).total).toBe(1);
+
+    // El lote PT-2026-0001 tiene saldo en "Principal" y en "En tránsito": solo se reserva
+    // la ubicación vendible, nunca el stock en tránsito ni en ruta.
+    const reservedLocation = await db.execute(sql`
+      select loc.kind, r.quantity
+      from inventory.reservations r
+      join admin.locations loc on loc.id = r.location_id
+      where r.sales_order_line_id = ${creditOrderLineId} and r.status = 'active'
+      limit 1
+    `);
+    const reservation = reservedLocation.rows[0] as { kind: string; quantity: string } | undefined;
+    expect(reservation?.quantity).toBe('10.000');
+    expect(reservation?.kind).not.toBe('in_transit');
+    expect(reservation?.kind).not.toBe('in_route');
   });
 
   it('crea el despacho, carga a ruta y entrega parcial con obligación', async () => {
