@@ -94,6 +94,21 @@ test('ingreso', async ({ page }, info) => {
   await audit(page, info, 'ingreso');
 });
 
+test('ingreso: panel de acceso', async ({ page }, info) => {
+  await page.goto('/ingresar');
+  await page
+    .getByRole('button', { name: /Administrador/ })
+    .first()
+    .click();
+  await expect(page.getByRole('heading', { name: 'Ingresa a tu operación' })).toBeVisible();
+  const panel = page.getByRole('dialog');
+  await panel.evaluate(async (element) => {
+    // La cortina anima sus paños y su contenido: se espera a todas las transiciones internas.
+    await Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished));
+  });
+  await audit(page, info, 'ingreso-acceso');
+});
+
 test('Caja', async ({ page }, info) => {
   await signIn(page, 'caja@quatreros.example');
   await expect(page).toHaveURL(/\/pos$/);

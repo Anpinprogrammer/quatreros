@@ -5,6 +5,12 @@ export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? '';
 
 export async function signIn(page: Page, email: string, password = DEMO_PASSWORD) {
   await page.goto('/ingresar');
+  // El ingreso abre con la selección de perfil: se elige Administrador para llegar al formulario.
+  const role = page.getByRole('button', { name: /Administrador/ }).first();
+  if (await role.isVisible()) {
+    await role.click();
+    await page.getByRole('heading', { name: 'Ingresa a tu operación' }).waitFor();
+  }
   await page.getByLabel('Correo').fill(email);
   await page.getByLabel('Contraseña').fill(password);
   await page.getByRole('button', { name: /^Ingresar/ }).click();

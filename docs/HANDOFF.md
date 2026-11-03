@@ -21,7 +21,7 @@
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
-- **Ingreso:** rediseño bento/glass 55/45. Panel cálido con logo, wordmark y píldora "Plataforma ERP", titular "Toda tu operación. / Un solo lugar." en degradado, cuatro tarjetas glass flotantes y el personaje sobre un pedestal. Panel derecho con tarjeta `rounded-3xl`, kicker naranja, "Ingresa a tu operación", CTA con flecha y pie del producto. En móvil, hero compacto con banner del personaje y píldoras con scroll accesible; formulario en card. Sin flujo de restablecimiento de contraseña todavía (Q-C-07).
+- **Ingreso en dos pasos con efecto cortina:** el paso 1 se organiza en cabecera, mensaje con las áreas en 2×2, tarjeta "Selecciona tu perfil" (Administrador/Cajero/Distribuidor) con el personaje y pie. Al elegir, dos paños se cierran al centro: el oscuro presenta el rol y el blanco tiene el formulario. En móvil, el paño blanco baja como persiana. Escape o "Cambiar de rol" abren la cortina y devuelven el foco al perfil. Los E2E eligen perfil antes de autenticarse.
 - **Pantalla por rol:** cada rol entra a la suya (ERP, Caja o Distribución).
 - **Gestión de usuarios:** crear (idempotente y auditado), editar roles y sedes con control de versión, desactivar y reactivar. Protege al último administrador e impide desactivarse a sí mismo.
 - **Permisos:** RBAC con alcance ALL/SITE/OWN; responde 403 sin permiso y 404 fuera de alcance.

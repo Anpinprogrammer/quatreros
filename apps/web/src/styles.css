@@ -243,37 +243,87 @@
       linear-gradient(150deg, #fff6ef 0%, #fff3ec 46%, #ffffff 100%);
   }
 
-  /* Las tarjetas del hero flotan con un desfase sutil para dar profundidad. */
-  @keyframes q-login-float {
-    0%,
-    100% {
-      transform: translateY(0);
+  /*
+   * Cortina del acceso (650 ms, LoginPage CURTAIN_MS). En escritorio dos paños se cierran
+   * desde los lados y se juntan al centro; en móvil el paño blanco baja como una persiana.
+   * Al cerrar se abren en sentido contrario. El contenido aparece cuando la cortina ya cubrió.
+   */
+  .login-curtain {
+    pointer-events: none;
+  }
+
+  .login-curtain[data-open='true'] {
+    pointer-events: auto;
+  }
+
+  .login-curtain-left,
+  .login-curtain-right {
+    transition: transform 650ms cubic-bezier(0.76, 0, 0.24, 1);
+    will-change: transform;
+  }
+
+  .login-curtain-left {
+    transform: translateX(-101%);
+  }
+
+  .login-curtain-right {
+    transform: translateY(-101%);
+  }
+
+  @media (min-width: 64rem) {
+    .login-curtain-right {
+      transform: translateX(101%);
     }
-    50% {
-      transform: translateY(-6px);
-    }
   }
 
-  .login-float {
-    animation: q-login-float 6s ease-in-out infinite;
+  .login-curtain[data-open='true'] .login-curtain-left,
+  .login-curtain[data-open='true'] .login-curtain-right {
+    transform: none;
   }
 
-  .login-float:nth-child(2) {
-    animation-delay: 0.8s;
+  .login-curtain-content {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out;
   }
 
-  .login-float:nth-child(3) {
-    animation-delay: 1.6s;
+  .login-curtain[data-open='true'] .login-curtain-content {
+    opacity: 1;
+    transform: none;
+    transition-delay: 420ms;
+    transition-duration: 250ms;
   }
 
-  .login-float:nth-child(4) {
-    animation-delay: 2.4s;
+  /* Pliegues verticales muy sutiles: el paño oscuro se lee como tela. */
+  .login-curtain-fabric {
+    background-image:
+      linear-gradient(90deg, rgb(0 0 0 / 0.25), transparent 18%, transparent 82%, rgb(255 255 255 / 0.04)),
+      repeating-linear-gradient(
+        90deg,
+        rgb(255 255 255 / 0.035) 0 1px,
+        transparent 1px 34px,
+        rgb(0 0 0 / 0.12) 34px 35px,
+        transparent 35px 68px
+      );
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .login-float {
-      animation: none;
+    .login-curtain-left,
+    .login-curtain-right,
+    .login-curtain-content {
+      transition: none;
     }
+  }
+
+  /* Cuadrícula tecnológica muy sutil que aporta profundidad al canvas de marca. */
+  .login-tech-grid {
+    background-image:
+      linear-gradient(to right, rgb(23 23 23 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(23 23 23 / 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 70% at 30% 45%, black 0%, transparent 78%);
   }
 
   .login-brand-grid {
