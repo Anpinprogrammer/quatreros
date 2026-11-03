@@ -1,16 +1,22 @@
 {
   "version": 1,
+  "origin": {
+    "base_url": "https://api.anthropic.com",
+    "organization_id": "ca8f5ceb-bd7f-4432-b660-cfd1ee35327d",
+    "workspace_id": "wrkspc_01R7WYnH862fQG13s5qcew6V"
+  },
   "resources": {
     "./agents/quatreros-ai.md": {
       "kind": "agent",
       "id": "agent_01GV2jHLsN47nJTehwGUARBi",
-      "version": "1",
-      "hash": ""
+      "version": "2",
+      "hash": "843459f097439999d25b3fb85010f94a",
+      "remote_hash": "748a30740ed8a15f7840d37c026759db"
     },
     "./environments/quatreros-ai-env.yml": {
       "kind": "environment",
       "id": "env_01BMhUH2mXL7U5UoC3ayJ1jf",
-      "hash": ""
+      "hash": "dfdb812d15935cbb4129b61d91112b3b"
     }
   }
 }
