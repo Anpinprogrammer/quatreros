@@ -21,7 +21,7 @@
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
-- **Ingreso:** correo y contraseña (Better Auth) y segundo factor TOTP obligatorio para Administrador, Manager y Contador, con códigos de respaldo.
+- **Ingreso:** rediseño bento/glass 55/45. Panel cálido con logo, wordmark y píldora "Plataforma ERP", titular "Toda tu operación. / Un solo lugar." en degradado, cuatro tarjetas glass flotantes y el personaje sobre un pedestal. Panel derecho con tarjeta `rounded-3xl`, kicker naranja, "Ingresa a tu operación", CTA con flecha y pie del producto. En móvil, hero compacto con banner del personaje y píldoras con scroll accesible; formulario en card. Sin flujo de restablecimiento de contraseña todavía (Q-C-07).
 - **Pantalla por rol:** cada rol entra a la suya (ERP, Caja o Distribución).
 - **Gestión de usuarios:** crear (idempotente y auditado), editar roles y sedes con control de versión, desactivar y reactivar. Protege al último administrador e impide desactivarse a sí mismo.
 - **Permisos:** RBAC con alcance ALL/SITE/OWN; responde 403 sin permiso y 404 fuera de alcance.
@@ -76,7 +76,7 @@
 - **Pendiente de decisión:** confirmar DEC-093 en la próxima revisión y definir si el selector de sede debe filtrar por sesión (hoy es solo informativo porque no existe sede activa en el backend).
 - **Marca:** isotipo oficial integrado (`public/logo.webp` → `logo-mark.webp`, favicon y apple-touch-icon).
 - **Asistente:** burbuja y panel de Quatreros AI implementados como **vista previa** (20 % del ancho en escritorio, pantalla completa con "Volver" en móvil). El compositor está deshabilitado hasta la entrega 8; no hay respuestas simuladas.
-- **Ingreso:** rediseño luminoso 52/48, logo oficial, personaje de Los 4 Treros, formulario de 52 px con iconos y control de contraseña integrado. En móvil, fondo cálido de marca, formulario en card, CTA de 56 px y robot al pie con chips discretos; sin scroll horizontal y con safe areas. La atmósfera clara se conserva aunque el sistema esté en oscuro.
+- **Ingreso:** rediseño luminoso 52/48. El panel cálido conserva solo el nombre y "LOS 4 TREROS" arriba a la izquierda, el mensaje y el personaje de Los 4 Treros. El logo oficial vuelve a la zona superior del panel cálido, centrado y sin texto al lado, con 140 px en escritorio y 110 px en 1024; el formulario de 52 px con iconos y control de contraseña sigue intacto. En móvil, fondo cálido de marca, formulario en card, CTA de 56 px y robot al pie con chips discretos; sin scroll horizontal y con safe areas. La atmósfera clara se conserva aunque el sistema esté en oscuro.
 - **Command Center y header:** dos pestañas accesibles, **Módulos** y **Tablero del día**. Módulos reorganiza los accesos en un grid compacto de tres columnas; el tablero concentra KPI reales de pedidos/producción/FEFO, pedidos recientes, producción, estado de reparto y el estado de caja/cartera/IA. El header agrupa colapso, migas, búsqueda, sedes, notificaciones y menú de usuario; tema y cierre de sesión viven en el menú. Se retiró el panel de plan del dashboard.
 
 ### Refactorización de la SPA (2026-11-02)

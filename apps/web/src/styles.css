@@ -238,9 +238,42 @@
 
   .login-brand-panel {
     background:
-      radial-gradient(95% 80% at 100% 8%, rgb(253 83 0 / 0.1), transparent 58%),
-      radial-gradient(90% 80% at 0% 100%, rgb(255 217 188 / 0.9), transparent 62%),
-      linear-gradient(145deg, #fff8f1 0%, #ffe8d5 54%, #ffd9bc 100%);
+      radial-gradient(90% 70% at 100% 0%, rgb(255 85 0 / 0.12), transparent 60%),
+      radial-gradient(80% 70% at 0% 100%, rgb(255 217 188 / 0.75), transparent 64%),
+      linear-gradient(150deg, #fff6ef 0%, #fff3ec 46%, #ffffff 100%);
+  }
+
+  /* Las tarjetas del hero flotan con un desfase sutil para dar profundidad. */
+  @keyframes q-login-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .login-float {
+    animation: q-login-float 6s ease-in-out infinite;
+  }
+
+  .login-float:nth-child(2) {
+    animation-delay: 0.8s;
+  }
+
+  .login-float:nth-child(3) {
+    animation-delay: 1.6s;
+  }
+
+  .login-float:nth-child(4) {
+    animation-delay: 2.4s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .login-float {
+      animation: none;
+    }
   }
 
   .login-brand-grid {
