@@ -25,6 +25,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 const REASONS: Record<string, string> = {
   disabled: 'Tu cuenta está desactivada. Habla con el administrador.',
   not_provisioned: 'Tu cuenta no tiene un rol asignado. Habla con el administrador.',
+  expired: 'Tu sesión expiró por inactividad. Vuelve a ingresar.',
 };
 
 const PROFILES = [

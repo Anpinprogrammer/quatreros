@@ -10,7 +10,10 @@ import type { Auth } from './auth.js';
 export function sessionMiddleware(auth: Auth): RequestHandler {
   return async (req, _res, next) => {
     const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
-    if (session) req.ctx.actorId = session.user.id;
+    if (session) {
+      req.ctx.actorId = session.user.id;
+      req.ctx.sessionId = session.session.id;
+    }
     next();
   };
 }

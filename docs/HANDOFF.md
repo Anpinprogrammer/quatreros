@@ -150,6 +150,8 @@
 
 ## 4. Notas de entorno
 
+- **Sesiones (RNF-006, DEC-107):** expiración por inactividad en el servidor: ERP 30 min, POS 12 h y portal móvil 8 h. La última actividad vive en `platform.session_activity`; un request vencido responde `401 SESSION_EXPIRED`. El cierre de sesión manual sigue en el menú de usuario.
+
 - **Reservas corregidas (2026-11-03):** `reserveOrderLine` ya excluye ubicaciones en tránsito/ruta y consolida una sola reserva por lote, eligiendo la ubicación con mayor disponibilidad. `inventory.test.ts` y la suite completa de PostgreSQL pasan 88/88.
 - Contraseña de usuarios demo: la que pongas en `DEMO_PASSWORD`; nunca se guarda en el repositorio. CI usa una propia en su base efímera.
 - `pnpm db:reset:demo` deja la base como recién sembrada; el E2E del administrador lo necesita.

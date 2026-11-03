@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { MeResponse, UserSummary } from '@quatreros/contracts';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { isAuthUserBlocked, loadActor } from '../../src/modules/admin/application/public.js';
@@ -100,6 +100,18 @@ describe('ingreso (RF-001)', () => {
 });
 
 describe('segundo factor obligatorio (DEC-043)', () => {
+  it('expira la sesión del ERP tras 30 minutos de inactividad', async () => {
+    const { agent } = await signIn('compras@quatreros.example');
+    expect((await agent.get('/api/v1/me')).status).toBe(200);
+    await db.execute(sql`
+      update platform.session_activity set last_seen_at = now() - interval '31 minutes'
+      where user_id = (select id::text from admin.users where email = 'compras@quatreros.example')
+    `);
+    const expired = await agent.get('/api/v1/me');
+    expect(expired.status).toBe(401);
+    expect((expired.body as { code: string }).code).toBe('SESSION_EXPIRED');
+  });
+
   it('administrador sin segundo factor: solo /me, el resto 403 MFA_SETUP_REQUIRED', async () => {
     const { agent } = await signIn('admin@quatreros.example');
     adminAgent = agent;

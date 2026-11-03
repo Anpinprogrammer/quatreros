@@ -21,16 +21,16 @@
 
 ## 2. Autenticación
 
-| Elemento      | Diseño                                                                                                                                                                           |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Librería      | Better Auth `^1.7` (ADR-007) con adaptador Drizzle; tablas en esquema `auth`                                                                                                     |
-| Credenciales  | Correo + contraseña (mín. 12 caracteres; verificación contra contraseñas filtradas — propuesta)                                                                                  |
-| Hash          | El algoritmo por defecto de la librería (scrypt) o Argon2id; nunca reversible                                                                                                    |
-| MFA           | Plugin `two-factor` TOTP. Obligatorio si algún rol del usuario tiene `requires_mfa = true` (propuesto: ADM, MGR, CONT — Q-SEC-02). Códigos de respaldo de un solo uso            |
-| Sesión        | En base de datos; cookie `HttpOnly; Secure; SameSite=Lax`; rotación al iniciar sesión y al cambiar privilegios; expiración por inactividad distinta por shell (RNF-006, PENDING) |
-| Bloqueo       | Límite de intentos por cuenta e IP (RNF-005, PENDING)                                                                                                                            |
-| Recuperación  | Enlace de un solo uso con expiración; cierra otras sesiones; restablecer MFA solo por ADM (auditado)                                                                             |
-| Desactivación | Usuario inactivo → todas sus sesiones y su vínculo de Telegram se revocan inmediatamente                                                                                         |
+| Elemento      | Diseño                                                                                                                                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Librería      | Better Auth `^1.7` (ADR-007) con adaptador Drizzle; tablas en esquema `auth`                                                                                                                                      |
+| Credenciales  | Correo + contraseña (mín. 12 caracteres; verificación contra contraseñas filtradas — propuesta)                                                                                                                   |
+| Hash          | El algoritmo por defecto de la librería (scrypt) o Argon2id; nunca reversible                                                                                                                                     |
+| MFA           | Plugin `two-factor` TOTP. Obligatorio si algún rol del usuario tiene `requires_mfa = true` (propuesto: ADM, MGR, CONT — Q-SEC-02). Códigos de respaldo de un solo uso                                             |
+| Sesión        | En base de datos; cookie `HttpOnly; Secure; SameSite=Lax`; rotación al iniciar sesión y al cambiar privilegios; expiración por inactividad distinta por shell (RNF-006, DEC-107: ERP 30 min, POS 12 h, móvil 8 h) |
+| Bloqueo       | Límite de intentos por cuenta e IP (RNF-005, PENDING)                                                                                                                                                             |
+| Recuperación  | Enlace de un solo uso con expiración; cierra otras sesiones; restablecer MFA solo por ADM (auditado)                                                                                                              |
+| Desactivación | Usuario inactivo → todas sus sesiones y su vínculo de Telegram se revocan inmediatamente                                                                                                                          |
 
 ## 3. Autorización: RBAC + sede + alcance + aprobaciones
 

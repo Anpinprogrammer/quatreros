@@ -12,6 +12,7 @@ import type { AuthProvisioner } from './platform/auth/provisioner.js';
 import type { Database } from './platform/db/client.js';
 import { actorMiddleware, mfaGate, requireAuthenticated, type ActorResolver } from './platform/http/actor.js';
 import { sessionMiddleware } from './platform/auth/session.js';
+import { sessionActivityMiddleware } from './platform/auth/activity.js';
 import { contextMiddleware } from './platform/http/context.js';
 import { AppError, errorHandler, notFoundHandler } from './platform/http/errors.js';
 import { healthRouter } from './platform/health/routes.js';
@@ -108,6 +109,7 @@ export function createApp(deps: AppDeps): Express {
 
   const api = express.Router();
   // Con resolución de usuario activa, toda ruta de negocio exige sesión y, si el rol lo pide, segundo factor.
+  if (deps.resolveActor && deps.db) api.use(sessionActivityMiddleware(deps.db));
   if (deps.resolveActor) api.use(requireAuthenticated, mfaGate);
   deps.registerModules?.(api, deps);
   app.use('/api/v1', api);

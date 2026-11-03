@@ -9,6 +9,8 @@ import type { RequestHandler } from 'express';
 export interface ExecutionContext {
   requestId: string;
   channel: Channel;
+  /** Identificador de la sesión de Better Auth (para la expiración por inactividad). */
+  sessionId?: string;
   /** Id de usuario de autenticación (Better Auth). Ausente en rutas públicas. */
   actorId?: string;
   /** Identidad de negocio resuelta por el módulo admin (roles, sedes, permisos). */
