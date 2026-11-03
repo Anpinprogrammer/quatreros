@@ -58,8 +58,11 @@ export class AnthropicAssistantProvider implements AssistantProvider {
     });
   }
 
-  stream(sessionId: string): AsyncIterable<ProviderEvent> {
-    return this.client.beta.sessions.events.stream(sessionId) as unknown as AsyncIterable<ProviderEvent>;
+  async *stream(sessionId: string): AsyncIterable<ProviderEvent> {
+    const stream = await this.client.beta.sessions.events.stream(sessionId);
+    for await (const event of stream) {
+      yield event as unknown as ProviderEvent;
+    }
   }
 
   async listEvents(sessionId: string): Promise<ProviderEvent[]> {
