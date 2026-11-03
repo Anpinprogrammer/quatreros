@@ -1,0 +1,9 @@
+{
+  "type": "custom",
+  "name": "finance_get_overdue_receivables",
+  "description": "Consulta la cartera vencida de las sedes autorizadas y la agrupa por cliente y rango de antigüedad. Úsala para preguntas sobre deudas vencidas o cobranza. No la usa para conciliar recaudos ni para modificar obligaciones. Devuelve totales y clientes con saldo vencido.",
+  "input_schema": {
+    "type": "object",
+    "properties": {}
+  }
+}

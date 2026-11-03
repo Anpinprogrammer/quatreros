@@ -117,12 +117,13 @@
 ### Entrega 8 implementada (DEC-106)
 
 - Especificación aprobada: `docs/04-specifications/ia/asistente-demo.md`.
-- Backend: esquema `assistant` (`tickets`, `tool_calls`, `proposals`, `requests`), migraciones `0027`–`0028`, `ToolGateway` con 8 lecturas y 2 escrituras preparadas, servicio de turnos, propuestas, consumo y configuración.
+- Backend: esquema `assistant` (`tickets`, `tool_calls`, `proposals`, `requests`), migraciones `0027`–`0028`, `ToolGateway` con 9 lecturas y 2 escrituras preparadas, servicio de turnos, propuestas, consumo y configuración.
 - Frontend: burbuja funcional, panel de chat con streaming SSE, tarjeta de confirmación reutilizada, pestaña de tickets y pantalla de consumo/configuración.
 - Tickets por sesión con petición inicial y resumen de resolución; no se guarda la transcripción completa.
 - Techos: USD 3/día, USD 10/semana y USD 30/mes; presupuesto por sesión USD 0,25; alertas 80/100.
 - Otras escrituras siguen bloqueadas por P-10 y responden `423 FEATURE_BLOCKED`.
-- **Activación real pendiente:** las herramientas `custom` deben declararse en `quatreros-ai/` y aplicarse con `ant apply` (Q-IA-04); sin eso el agente solo conversa. No ejecutar `ant apply` sin autorización (DEC-087).
+- **Herramientas declaradas:** 9 lecturas y 2 escrituras preparadas en `quatreros-ai/agents/tools/`; el agente las incluye con `./tools/*.json`.
+- **Activación real pendiente:** ejecutar `ant apply` con autorización (Q-IA-04) para publicar las herramientas y configurar las credenciales; sin eso el agente solo conversa. No ejecutar `ant apply` sin autorización (DEC-087).
 - Quedan abiertas Q-IA-04 (`ant apply`), Q-IA-05 (retención) y Q-IA-06 (modelo).
 
 ### Verificación al cierre de 8

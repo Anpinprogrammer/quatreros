@@ -1,0 +1,35 @@
+{
+  "type": "custom",
+  "name": "prepare_raw_material",
+  "description": "Prepara la creación de una materia prima con nombre, unidad base y control de vencimiento. Úsala solo si el usuario pide crear una materia prima y tiene permiso de gestión. No crea nada: genera una propuesta que el humano debe confirmar en la interfaz. Si faltan datos, pídelos antes de llamar la herramienta.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Nombre único de la materia prima."
+      },
+      "unit": {
+        "type": "string",
+        "enum": [
+          "unidad",
+          "kg",
+          "g",
+          "l",
+          "ml",
+          "m"
+        ],
+        "description": "Unidad base de la materia prima."
+      },
+      "tracksExpiry": {
+        "type": "boolean",
+        "description": "Indica si la materia prima controla vencimiento por lote."
+      }
+    },
+    "required": [
+      "name",
+      "unit",
+      "tracksExpiry"
+    ]
+  }
+}

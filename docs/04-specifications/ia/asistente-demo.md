@@ -321,12 +321,13 @@ El `ToolGateway` envuelve casos de uso existentes. No hay SQL en el asistente ni
 | `inventory_get_expiring_lots`     | `listLots` con `expiresBefore`      | `inv.stock.read`        | 2       |
 | `inventory_trace_lot`             | `traceLot`                          | `inv.traceability.read` | 2       |
 | `catalog_search_products`         | `listProducts`                      | `cat.product.read`      | 2       |
+| `catalog_search_raw_materials`    | `listRawMaterials`                  | `cat.raw_material.read` | 2       |
 | `sales_list_open_orders`          | `listOrders` con estados pendientes | `com.order.read`        | 5       |
 | `sales_search_customers`          | `listCustomers`                     | `com.customer.read`     | 5       |
 | `finance_get_customer_balance`    | `getCustomerBalance`                | `fin.receivable.read`   | 7       |
 | `finance_get_overdue_receivables` | `agingReport` / cartera vencida     | `fin.receivable.read`   | 7       |
 
-La consulta de la demo usa cinco de estas herramientas: existencias, lotes por vencer, saldo de cliente, cartera vencida y pedidos pendientes.
+La consulta de la demo usa cinco de estas herramientas: existencias, lotes por vencer, saldo de cliente, cartera vencida y pedidos pendientes. Las otras cuatro quedan disponibles para resolver nombres e ingredientes.
 
 ### 5.2 Escritura preparada (lista blanca DEC-106)
 
@@ -337,7 +338,7 @@ La consulta de la demo usa cinco de estas herramientas: existencias, lotes por v
 
 - `prepare_raw_material` recibe `{ name, unit, tracksExpiry }`; el resumen muestra nombre, unidad y control de vencimiento.
 - `prepare_recipe` recibe `{ productId, baseOutputQty, expectedYieldPct?, tolerancePct?, lines: [{ rawMaterialId, quantity }] }`; el resumen muestra producto, cantidad base y cada materia prima con su cantidad.
-- El agente debe resolver nombres a ids con las herramientas de lectura (`catalog_search_products`, `sales_search_customers` y la lista de materias primas). Un id inexistente o inactivo se rechaza en `prepare`.
+- El agente debe resolver nombres a ids con `catalog_search_products` para el producto y `catalog_search_raw_materials` para los ingredientes. Un id inexistente o inactivo se rechaza en `prepare`.
 - No existe `prepare_recipe_version` en esta entrega.
 - Cualquier otra escritura (`prepare_purchase`, `prepare_sales_order`, `prepare_transfer`, `prepare_payment`, precios, permisos, crédito, ajustes, anulaciones) se rechaza con `423 FEATURE_BLOCKED`.
 
@@ -537,7 +538,7 @@ Escenario: Proveedor no disponible
 - Migración `assistant` aplicada en una base vacía y en la base demo.
 - Complemento apagado por defecto; activarlo sin credenciales devuelve `ASSISTANT_NOT_CONFIGURED`.
 - Las cinco consultas aprobadas funcionan con datos reales y respetan permisos y sede.
-- Las ocho herramientas de lectura y las dos de escritura preparada quedan detrás de `ToolGateway`; ninguna consulta usa SQL directo.
+- Las nueve herramientas de lectura y las dos de escritura preparada quedan detrás de `ToolGateway`; ninguna consulta usa SQL directo.
 - La creación de materia prima y receta funciona solo con propuesta, resumen, confirmación humana, revalidación, idempotencia y auditoría.
 - Cualquier otra escritura responde `423 FEATURE_BLOCKED`.
 - SSE, idempotencia, reconexión y un solo turno por ticket probados.

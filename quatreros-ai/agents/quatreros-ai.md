@@ -8,6 +8,7 @@ tools:
   - type: agent_toolset_20260401
     default_config:
       enabled: false
+  - ./tools/*.json
 metadata:
   application: quatreros
   environment: development

@@ -25,6 +25,7 @@ export const AssistantToolName = z.enum([
   'inventory_get_expiring_lots',
   'inventory_trace_lot',
   'catalog_search_products',
+  'catalog_search_raw_materials',
   'sales_list_open_orders',
   'sales_search_customers',
   'finance_get_customer_balance',

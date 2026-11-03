@@ -288,15 +288,15 @@ Los nombres se ajustan al SDK oficial (`@anthropic-ai/sdk`, que lee `ANTHROPIC_A
 
 ## 14. Estado de implementación (2026-11-03)
 
-| Pieza                                      | Estado                                                                                                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Agente y entorno en Anthropic              | Creados en la consola y exportados a `quatreros-ai/`. Aún no adoptados por `ant` (hash vacío)                               |
-| Herramientas `custom` del agente           | **Pendientes de declarar con `ant apply`.** El backend ya tiene los manejadores; sin esa aplicación el agente solo conversa |
-| Módulo `src/addons/assistant` del backend  | **Implementado** (tickets, turnos, propuestas, consumo, configuración)                                                      |
-| `ToolGateway`                              | **Implementado** con 8 lecturas y 2 escrituras preparadas                                                                   |
-| Esquema `assistant` en PostgreSQL          | **Migrado** (`0027`–`0028`)                                                                                                 |
-| Pantalla de chat y tarjeta de confirmación | **Implementadas** (widget, tickets, consumo y confirmación)                                                                 |
-| **Integración funcional**                  | **Parcial.** Backend y UI probados con proveedor simulado; falta `ant apply` (Q-IA-04) y credenciales para el agente real   |
+| Pieza                                      | Estado                                                                                                                        |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Agente y entorno en Anthropic              | Creados en la consola y exportados a `quatreros-ai/`. Aún no adoptados por `ant` (hash vacío)                                 |
+| Herramientas `custom` del agente           | **Declaradas en `quatreros-ai/agents/tools/`** (9 lecturas + 2 escrituras preparadas). Pendiente `ant apply` para publicarlas |
+| Módulo `src/addons/assistant` del backend  | **Implementado** (tickets, turnos, propuestas, consumo, configuración)                                                        |
+| `ToolGateway`                              | **Implementado** con 9 lecturas y 2 escrituras preparadas                                                                     |
+| Esquema `assistant` en PostgreSQL          | **Migrado** (`0027`–`0028`)                                                                                                   |
+| Pantalla de chat y tarjeta de confirmación | **Implementadas** (widget, tickets, consumo y confirmación)                                                                   |
+| **Integración funcional**                  | **Parcial.** Backend y UI probados con proveedor simulado; falta `ant apply` (Q-IA-04) y credenciales para el agente real     |
 
 ## 15. Dependencias para operar de verdad
 

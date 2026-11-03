@@ -32,6 +32,7 @@ export type ReadToolName =
   | 'inventory_get_expiring_lots'
   | 'inventory_trace_lot'
   | 'catalog_search_products'
+  | 'catalog_search_raw_materials'
   | 'sales_list_open_orders'
   | 'sales_search_customers'
   | 'finance_get_customer_balance'
@@ -74,6 +75,7 @@ const openOrdersInput = z.object({
     .enum(['draft', 'confirmed', 'in_dispatch', 'partially_delivered', 'delivered', 'cancelled'])
     .optional(),
 });
+const rawMaterialSearchInput = z.object({ q: z.string().trim().min(1).max(100) });
 const customerSearchInput = z.object({ q: z.string().trim().min(1).max(100) });
 const customerBalanceInput = z.object({ customerId: z.uuid() });
 const emptyInput = z.object({}).default({});
@@ -148,6 +150,20 @@ export class ToolGateway {
             name: presentation.name,
             unitsPer: presentation.unitsPer,
           })),
+        }));
+      }
+      case 'catalog_search_raw_materials': {
+        const input = rawMaterialSearchInput.parse(raw);
+        const result = await listRawMaterials({ db: this.db, inventoryUsage: NO_INVENTORY_USAGE }, toolCtx, {
+          q: input.q,
+          status: 'active',
+          limit: 10,
+        });
+        return result.data.map((material) => ({
+          id: material.id,
+          name: material.name,
+          unit: material.unit,
+          tracksExpiry: material.tracksExpiry,
         }));
       }
       case 'sales_list_open_orders': {
