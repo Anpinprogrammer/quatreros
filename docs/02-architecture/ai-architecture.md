@@ -280,7 +280,7 @@ Los nombres se ajustan al SDK oficial (`@anthropic-ai/sdk`, que lee `ANTHROPIC_A
 
 ## 13. Modelo y evaluación
 
-- La configuración actual usa `claude-haiku-5-5` con `effort: low`, una opción de bajo costo. Antes de la demo se confirma con la evaluación (Q-IA-06):
+- La configuración actual usa `claude-haiku-5-5` con `effort: low`, confirmada para la demo por DEC-109. La evaluación de Q-IA-01 se mantiene como regresión:
   1. Un conjunto fijo de 20 a 30 casos (Q-IA-01): consultas, ambigüedades, preparación de escrituras, intentos sin permiso e inyección.
   2. Se mide la exactitud de herramientas y argumentos, la latencia p95 y el **costo por conversación** (`list_cost`, que incluye tiempo de ejecución).
   3. Si no alcanza el umbral, se compara con otro modelo de Anthropic **cambiando solo el campo `model`** del agente, mediante PR y `ant apply`.
