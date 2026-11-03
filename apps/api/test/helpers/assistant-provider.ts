@@ -9,6 +9,8 @@ type Mode = 'read' | 'write' | 'blocked';
  */
 export class FakeAssistantProvider implements AssistantProvider {
   readonly configured = true;
+  readonly archived: string[] = [];
+  readonly deleted: string[] = [];
   private mode: Mode = 'read';
   private readonly pending = new Map<
     string,
@@ -87,7 +89,13 @@ export class FakeAssistantProvider implements AssistantProvider {
     return Promise.resolve([]);
   }
 
-  archiveSession(): Promise<void> {
+  archiveSession(sessionId: string): Promise<void> {
+    this.archived.push(sessionId);
+    return Promise.resolve();
+  }
+
+  deleteSession(sessionId: string): Promise<void> {
+    this.deleted.push(sessionId);
     return Promise.resolve();
   }
 }

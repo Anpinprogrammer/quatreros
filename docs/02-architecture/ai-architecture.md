@@ -317,13 +317,13 @@ En orden: la entrega 8 del roadmap, y algunas lecturas desde que exista su módu
 
 ## 16. Pendientes
 
-| Tema                                                                                  | Ref.                         |
-| ------------------------------------------------------------------------------------- | ---------------------------- |
-| Casos de uso de la demo                                                               | Q-IA-01                      |
-| Techo de costo y modelo comercial                                                     | Q-IA-02, Q-C-06, P-14        |
-| Lista blanca de escrituras                                                            | Q-C-05, Q-IA-03              |
-| Expiración de confirmaciones                                                          | Q-B-03 (provisional: 10 min) |
-| Espacios de trabajo y lockfiles de desarrollo y producción; quién ejecuta `ant apply` | Q-IA-04                      |
-| Retención de sesiones en Anthropic                                                    | Q-IA-05                      |
-| Confirmación del modelo tras la evaluación                                            | Q-IA-06                      |
-| Habilitar escrituras                                                                  | Q-B-01 (matriz de permisos)  |
+| Tema                                                                                  | Ref.                               |
+| ------------------------------------------------------------------------------------- | ---------------------------------- |
+| Casos de uso de la demo                                                               | Q-IA-01                            |
+| Techo de costo y modelo comercial                                                     | Q-IA-02, Q-C-06, P-14              |
+| Lista blanca de escrituras                                                            | Q-C-05, Q-IA-03                    |
+| Expiración de confirmaciones                                                          | Q-B-03 (provisional: 10 min)       |
+| Espacios de trabajo y lockfiles de desarrollo y producción; quién ejecuta `ant apply` | Q-IA-04                            |
+| Retención de sesiones en Anthropic                                                    | ✅ DEC-108 (`assistant:retention`) |
+| Confirmación del modelo tras la evaluación                                            | Q-IA-06                            |
+| Habilitar escrituras                                                                  | Q-B-01 (matriz de permisos)        |

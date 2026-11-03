@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { inArray, sql } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { AssistantRetentionService } from '../../src/addons/assistant/application/retention.js';
 import { loadActor } from '../../src/modules/admin/application/public.js';
 import { seedAdminCatalog, seedDemoSites } from '../../src/modules/admin/infrastructure/seed.js';
 import {
@@ -237,6 +238,40 @@ describe('asistente de IA (DEC-106)', () => {
     };
     expect(data.data.totals.requests).toBeGreaterThan(0);
     expect(data.data.totals.listCostCents).toBeGreaterThanOrEqual(0);
+  });
+
+  it('archiva a las 24 h y borra la sesión a los 30 días (Q-IA-05)', async () => {
+    const ticket = await db.execute(sql`
+      select id, anthropic_session_id as "sessionId" from assistant.tickets
+      where anthropic_session_id is not null order by started_at asc limit 1
+    `);
+    const row = ticket.rows[0] as { id: string; sessionId: string } | undefined;
+    expect(row).toBeDefined();
+    await db.execute(sql`
+      update assistant.tickets set status = 'closed', last_activity_at = now() - interval '25 hours'
+      where id = ${row?.id}
+    `);
+    const service = new AssistantRetentionService(db, provider);
+    const archived = await service.run();
+    expect(archived.archived).toBeGreaterThan(0);
+    expect(provider.archived).toContain(row?.sessionId);
+    const archivedRow = await db.execute(sql`
+      select status, archived_at as "archivedAt" from assistant.tickets where id = ${row?.id}
+    `);
+    expect((archivedRow.rows[0] as { status: string }).status).toBe('archived');
+    expect((archivedRow.rows[0] as { archivedAt: Date | null }).archivedAt).not.toBeNull();
+
+    await db.execute(sql`
+      update assistant.tickets set archived_at = now() - interval '31 days' where id = ${row?.id}
+    `);
+    const deleted = await service.run();
+    expect(deleted.deleted).toBeGreaterThan(0);
+    expect(provider.deleted).toContain(row?.sessionId);
+    const deletedRow = await db.execute(sql`
+      select status, anthropic_session_id as "sessionId" from assistant.tickets where id = ${row?.id}
+    `);
+    expect((deletedRow.rows[0] as { status: string }).status).toBe('terminated');
+    expect((deletedRow.rows[0] as { sessionId: string | null }).sessionId).toBeNull();
   });
 
   it('oculta las rutas cuando el complemento está apagado', async () => {

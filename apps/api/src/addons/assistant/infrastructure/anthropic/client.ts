@@ -88,7 +88,11 @@ export class AnthropicAssistantProvider implements AssistantProvider {
     });
   }
 
-  async archiveSession(_sessionId: string): Promise<void> {
-    // La retención y el borrado de sesiones se resuelven con Q-IA-05.
+  async archiveSession(sessionId: string): Promise<void> {
+    await this.client.beta.sessions.archive(sessionId);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await this.client.beta.sessions.delete(sessionId);
   }
 }

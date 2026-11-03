@@ -26,6 +26,7 @@ export interface AssistantProvider {
   listEvents(sessionId: string): Promise<ProviderEvent[]>;
   sendToolResult(sessionId: string, toolUseId: string, content: unknown, isError?: boolean): Promise<void>;
   archiveSession(sessionId: string): Promise<void>;
+  deleteSession(sessionId: string): Promise<void>;
 }
 
 export interface TurnHubEvent {

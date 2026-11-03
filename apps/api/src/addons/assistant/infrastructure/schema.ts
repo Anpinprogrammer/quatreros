@@ -57,6 +57,7 @@ export const tickets = assistantSchema.table(
     startedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     lastActivityAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     closedAt: timestamp({ withTimezone: true }),
+    archivedAt: timestamp({ withTimezone: true }),
   },
   (t) => [
     check('tickets_request_text_chk', sql`char_length(${t.requestText}) between 1 and 1000`),

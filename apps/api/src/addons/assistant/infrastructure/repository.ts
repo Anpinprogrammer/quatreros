@@ -17,6 +17,7 @@ export interface TicketRow {
   startedAt: Date | string;
   lastActivityAt: Date | string;
   closedAt: Date | string | null;
+  archivedAt: Date | string | null;
 }
 
 export interface ProposalRow {
@@ -43,7 +44,8 @@ const TICKET_COLUMNS = sql`
   agent_id as "agentId", agent_version as "agentVersion", status,
   request_text as "requestText", resolution_summary as "resolutionSummary",
   tools_used as "toolsUsed", result_status as "resultStatus", cost_cents as "costCents",
-  started_at as "startedAt", last_activity_at as "lastActivityAt", closed_at as "closedAt"
+  started_at as "startedAt", last_activity_at as "lastActivityAt", closed_at as "closedAt",
+  archived_at as "archivedAt"
 `;
 
 export async function createTicketRow(
@@ -377,6 +379,47 @@ export async function countRecentMessages(db: AssistantDb, userId: string): Prom
     where user_id = ${userId} and created_at > now() - interval '10 minutes'
   `);
   return row<{ total: number }>(result)?.total ?? 0;
+}
+
+export async function archiveCandidates(db: AssistantDb, before: Date): Promise<TicketRow[]> {
+  const result = await db.execute(sql`
+    select ${TICKET_COLUMNS} from assistant.tickets
+    where anthropic_session_id is not null
+      and status in ('active', 'closed')
+      and last_activity_at < ${before.toISOString()}
+    order by last_activity_at asc
+  `);
+  return result.rows as unknown as TicketRow[];
+}
+
+export async function markTicketArchived(db: AssistantDb, id: string): Promise<void> {
+  await db.execute(sql`
+    update assistant.tickets set status = 'archived', archived_at = now(), last_activity_at = now()
+    where id = ${id}
+  `);
+  await db.execute(sql`
+    update assistant.proposals set status = 'cancelled'
+    where ticket_id = ${id} and status = 'pending_confirmation'
+  `);
+}
+
+export async function deleteCandidates(db: AssistantDb, before: Date): Promise<TicketRow[]> {
+  const result = await db.execute(sql`
+    select ${TICKET_COLUMNS} from assistant.tickets
+    where anthropic_session_id is not null
+      and status = 'archived'
+      and archived_at is not null
+      and archived_at < ${before.toISOString()}
+    order by archived_at asc
+  `);
+  return result.rows as unknown as TicketRow[];
+}
+
+export async function markTicketDeleted(db: AssistantDb, id: string): Promise<void> {
+  await db.execute(sql`
+    update assistant.tickets set status = 'terminated', anthropic_session_id = null
+    where id = ${id}
+  `);
 }
 
 export async function recordAssistantAudit(
