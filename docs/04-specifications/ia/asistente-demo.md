@@ -1,6 +1,6 @@
 # Especificación — Entrega 8: asistente de IA (demo)
 
-> Estado: **APROBADA** · 2026-11-03 (D1..D8 aprobadas por el responsable; DEC-106)
+> Estado: **APROBADA E IMPLEMENTADA** · 2026-11-03 (D1..D8 aprobadas por el responsable; DEC-106)
 > Cubre RF-340, RF-341, RF-342 (solo consultas), RF-343 (lista blanca limitada), RF-344 y RF-345.
 > Fuentes: DM §10, DEC-070..075, DEC-087, DEC-088, DEC-106, ADR-023, `ai-architecture.md` v0.2 §1–§16 y `roadmap-prototipo.md` entrega 8.
 > Alcance aprobado: consultas de lectura + **dos escrituras preparadas** (materia prima y receta inicial). El resto de escrituras sigue bloqueado por P-10.

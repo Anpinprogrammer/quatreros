@@ -57,8 +57,6 @@ export interface Section {
   modules: ModuleEntry[];
 }
 
-const soon = (delivery: number): ModuleStatus => ({ kind: 'pending', delivery });
-
 export const SECTIONS: Section[] = [
   {
     id: 'inicio',
@@ -277,9 +275,11 @@ export const SECTIONS: Section[] = [
       {
         id: 'asistente',
         name: 'Asistente de IA',
-        description: 'Consultas en lenguaje natural y registros con confirmación',
-        status: soon(8),
+        description: 'Consultas, tickets, consumo y preparación con confirmación',
+        status: { kind: 'available' },
         icon: 'ai',
+        path: '/erp/ia/asistente',
+        permission: 'ia.query',
       },
     ],
   },

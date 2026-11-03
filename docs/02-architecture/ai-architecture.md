@@ -286,17 +286,17 @@ Los nombres se ajustan al SDK oficial (`@anthropic-ai/sdk`, que lee `ANTHROPIC_A
   3. Si no alcanza el umbral, se compara con otro modelo de Anthropic **cambiando solo el campo `model`** del agente, mediante PR y `ant apply`.
 - La evaluación se repite como prueba de regresión cada vez que cambian el modelo, el prompt o las herramientas.
 
-## 14. Estado de implementación (2026-10-30)
+## 14. Estado de implementación (2026-11-03)
 
 | Pieza                                      | Estado                                                                                                                      |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | Agente y entorno en Anthropic              | Creados en la consola y exportados a `quatreros-ai/`. Aún no adoptados por `ant` (hash vacío)                               |
-| Herramientas `custom` del agente           | **Ninguna.** Hoy el agente solo puede conversar                                                                             |
-| Módulo `src/addons/assistant` del backend  | No implementado (solo existe la carpeta `addons/` con sus reglas de fronteras)                                              |
-| `ToolGateway`                              | No implementado                                                                                                             |
-| Esquema `assistant` en PostgreSQL          | Diseñado (database-design), sin migración                                                                                   |
-| Pantalla de chat y tarjeta de confirmación | No implementadas                                                                                                            |
-| **Integración funcional**                  | **No.** Se considerará completa cuando existan herramientas conectadas, controles de seguridad y pruebas verificables (§15) |
+| Herramientas `custom` del agente           | **Pendientes de declarar con `ant apply`.** El backend ya tiene los manejadores; sin esa aplicación el agente solo conversa |
+| Módulo `src/addons/assistant` del backend  | **Implementado** (tickets, turnos, propuestas, consumo, configuración)                                                      |
+| `ToolGateway`                              | **Implementado** con 8 lecturas y 2 escrituras preparadas                                                                   |
+| Esquema `assistant` en PostgreSQL          | **Migrado** (`0027`–`0028`)                                                                                                 |
+| Pantalla de chat y tarjeta de confirmación | **Implementadas** (widget, tickets, consumo y confirmación)                                                                 |
+| **Integración funcional**                  | **Parcial.** Backend y UI probados con proveedor simulado; falta `ant apply` (Q-IA-04) y credenciales para el agente real   |
 
 ## 15. Dependencias para operar de verdad
 

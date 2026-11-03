@@ -17,6 +17,7 @@ import { AppError, errorHandler, notFoundHandler } from './platform/http/errors.
 import { healthRouter } from './platform/health/routes.js';
 import type { IdempotencyStore } from './platform/idempotency/store.js';
 import type { FeatureFlagReader } from './platform/features/flags.js';
+import type { AssistantProvider } from './addons/assistant/application/ports.js';
 import type { Logger } from './platform/logger.js';
 import { buildOpenApiDocument } from './platform/openapi/document.js';
 
@@ -26,6 +27,8 @@ export interface AppDeps {
   pingDatabase: () => Promise<void>;
   idempotency: IdempotencyStore;
   flags: FeatureFlagReader;
+  /** Pruebas: proveedor simulado del asistente; en runtime se crea el cliente de Anthropic. */
+  assistantProvider?: AssistantProvider;
   /** Ausente en pruebas que no necesitan autenticación. */
   auth?: Auth;
   /** Carpeta con la SPA compilada (apps/web/dist). En producción la API la sirve (deployment-design §1). */

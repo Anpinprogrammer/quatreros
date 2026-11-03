@@ -22,4 +22,4 @@ El SDK `@anthropic-ai/sdk` solo se usa dentro de `assistant/infrastructure/anthr
 
 Estructura prevista: `docs/02-architecture/module-boundaries.md` (assistant / telegram).
 Diseño completo: `docs/02-architecture/ai-architecture.md` y `telegram-architecture.md`.
-Estado: **no implementado**. Se construye en la entrega 8 del roadmap; las herramientas de lectura, a medida que existan sus módulos (ai-architecture §14 y §15).
+Estado: **implementado en la entrega 8** (DEC-106). Incluye tickets, herramientas de lectura, dos escrituras preparadas (materia prima y receta inicial), consumo y configuración. Las herramientas del agente deben declararse en `quatreros-ai/` y aplicarse con `ant apply` para la activación real; el backend ya tiene los manejadores.

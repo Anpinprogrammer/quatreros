@@ -1,5 +1,6 @@
 import type { Router } from 'express';
 import type { AppDeps } from '../app.js';
+import { assistantRouter } from '../addons/assistant/http/router.js';
 import { accountingRouter } from './accounting/http/router.js';
 import { adminRouter } from './admin/http/router.js';
 import type { InventoryUsage } from './catalog/application/ports.js';
@@ -46,4 +47,5 @@ export function registerModules(api: Router, deps: AppDeps, overrides: ModuleOve
   api.use(posRouter({ db: deps.db, idempotency: deps.idempotency }));
   api.use(financeRouter({ db: deps.db, idempotency: deps.idempotency }));
   api.use(accountingRouter({ db: deps.db }));
+  api.use(assistantRouter(deps));
 }
