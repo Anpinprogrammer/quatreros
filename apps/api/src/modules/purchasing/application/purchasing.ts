@@ -17,6 +17,7 @@ import {
 import { Decimal } from 'decimal.js';
 import { eq, sql } from 'drizzle-orm';
 import { recordAudit } from '../../../platform/audit/audit.js';
+import { recordEvent } from '../../accounting/application/public.js';
 import type { Database } from '../../../platform/db/client.js';
 import { documentSequences } from '../../../platform/db/schema/platform.js';
 import type { ExecutionContext } from '../../../platform/http/context.js';
@@ -737,6 +738,27 @@ export async function receivePurchase(
     );
     await tx.update(purchases).set({ status }).where(eq(purchases.id, purchaseId));
 
+    const receivedTotal = input.lines
+      .reduce((sum, received) => {
+        const line = byId.get(received.purchaseLineId);
+        return line ? sum.plus(new Decimal(line.unitCost).times(received.quantity)) : sum;
+      }, new Decimal(0))
+      .toFixed(2);
+    await recordEvent(tx, {
+      type: 'PurchaseReceived',
+      sourceType: 'purchasing.receipt',
+      sourceId: receipt.id,
+      siteId: purchase.siteId,
+      amount: receivedTotal,
+      payload: {
+        number,
+        purchaseNumber: purchase.number,
+        supplierId: purchase.supplierId,
+        locationId: location.id,
+        lines: input.lines,
+        lots: createdLots,
+      },
+    });
     await recordAudit(tx, ctx, {
       action: 'comp.receipt.create',
       entityType: 'purchasing.receipt',

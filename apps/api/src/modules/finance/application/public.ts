@@ -1,9 +1,30 @@
 export {
+  agingReport,
+  cajaCsv,
+  carteraCsv,
+  createPayment,
   createReceivable,
+  createReconciliation,
   creditSnapshot,
+  financeDashboard,
+  getCollection,
   getCreditTerms,
+  getCustomerBalance,
+  getReceivable,
+  getReconciliation,
   listActivePaymentMethods,
+  listCollections,
+  listPaymentMethodsForActor,
+  listReceivables,
+  listReconciliations,
   paymentMethodId,
+  recaudosCsv,
   registerCollection,
 } from './finance.js';
-export type { ActivePaymentMethod, CollectionInput, CreditSnapshot, ReceivableInput } from './finance.js';
+export type {
+  ActivePaymentMethod,
+  CollectionAllocationInput,
+  CollectionInput,
+  CreditSnapshot,
+  ReceivableInput,
+} from './finance.js';

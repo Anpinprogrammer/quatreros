@@ -15,6 +15,8 @@ import { ExistenciasPage } from '../existencias/ExistenciasPage';
 import { LotePage } from '../existencias/LotePage';
 import { TransferPage } from '../existencias/TransferPage';
 import { UsersPage } from '../usuarios/UsersPage';
+import { CarteraPage } from '../finanzas/CarteraPage';
+import { HechosPage } from '../finanzas/HechosPage';
 import { CashReviewPage } from '../pos/CashReviewPage';
 import { DishRecipesPage } from '../pos/DishRecipesPage';
 import { hasPermission } from '../../lib/session';
@@ -144,6 +146,12 @@ export function ErpShell({ me }: { me: MeResponse }) {
               ) : null}
               {hasPermission(me, 'pos.dish_recipe.manage') ? (
                 <Route path="pos/recetas" element={<DishRecipesPage />} />
+              ) : null}
+              {hasPermission(me, 'fin.receivable.read') ? (
+                <Route path="cartera" element={<CarteraPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'cont.report.read') ? (
+                <Route path="contabilidad/hechos" element={<HechosPage />} />
               ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>

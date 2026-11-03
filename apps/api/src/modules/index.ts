@@ -1,10 +1,12 @@
 import type { Router } from 'express';
 import type { AppDeps } from '../app.js';
+import { accountingRouter } from './accounting/http/router.js';
 import { adminRouter } from './admin/http/router.js';
 import type { InventoryUsage } from './catalog/application/ports.js';
 import { catalogRouter } from './catalog/http/router.js';
 import { inventoryRouter } from './inventory/http/router.js';
 import { distributionRouter } from './distribution/http/router.js';
+import { financeRouter } from './finance/http/router.js';
 import { productionRouter } from './production/http/router.js';
 import { posRouter } from './pos/http/router.js';
 import { purchasingRouter } from './purchasing/http/router.js';
@@ -42,4 +44,6 @@ export function registerModules(api: Router, deps: AppDeps, overrides: ModuleOve
   api.use(salesRouter({ db: deps.db, idempotency: deps.idempotency }));
   api.use(distributionRouter({ db: deps.db, idempotency: deps.idempotency }));
   api.use(posRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(financeRouter({ db: deps.db, idempotency: deps.idempotency }));
+  api.use(accountingRouter({ db: deps.db }));
 }

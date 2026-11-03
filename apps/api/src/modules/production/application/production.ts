@@ -16,6 +16,7 @@ import {
 import { Decimal } from 'decimal.js';
 import { eq, sql } from 'drizzle-orm';
 import { recordAudit } from '../../../platform/audit/audit.js';
+import { recordEvent } from '../../accounting/application/public.js';
 import type { Database } from '../../../platform/db/client.js';
 import { documentSequences } from '../../../platform/db/schema/platform.js';
 import type { ExecutionContext } from '../../../platform/http/context.js';
@@ -870,6 +871,22 @@ export async function closeOrder(
       })
       .where(eq(orders.id, order.id));
 
+    await recordEvent(tx, {
+      type: 'ProductionCompleted',
+      sourceType: 'production.order',
+      sourceId: order.id,
+      siteId: order.siteId,
+      amount: null,
+      payload: {
+        number: order.number,
+        productId: order.productId,
+        actualQty: actualQty.toFixed(3),
+        yieldPct,
+        lotId: lot.lotId,
+        lotCode: lot.code,
+        outputs: outputRowsToInsert,
+      },
+    });
     await recordAudit(tx, ctx, {
       action: 'prod.order.close',
       entityType: 'production.order',

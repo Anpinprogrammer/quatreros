@@ -4,6 +4,15 @@ import { signIn } from './helpers';
 
 async function audit(page: Page, info: TestInfo, name: string) {
   await page.waitForLoadState('networkidle');
+  // Las transiciones de diálogos y overlays alteran los colores medidos por axe.
+  await page.evaluate(async () => {
+    await Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished),
+    );
+  });
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
@@ -35,7 +44,7 @@ test('cajero abre turno, vende con pago mixto y cierra con diferencia', async ({
 
   await page.getByRole('button', { name: /Picada Quatreros XL/ }).click();
   await page.getByRole('button', { name: /Chorizo Santarrosano.*Unidad/ }).click();
-  await page.getByRole('button', { name: /Cobrar/ }).click();
+  await page.getByRole('button', { name: /^Cobrar \$/ }).click();
 
   const payment = page.getByRole('dialog');
   await payment.getByLabel('Efectivo').fill('30000');
@@ -46,6 +55,16 @@ test('cajero abre turno, vende con pago mixto y cierra con diferencia', async ({
   await audit(page, info, 'pos-comprobante');
 
   await page.getByRole('dialog').getByRole('button', { name: 'Nueva venta' }).click();
+
+  await page.getByRole('button', { name: 'Cobrar cartera' }).click();
+  const portfolio = page.getByRole('dialog');
+  await portfolio.getByLabel('Cliente').selectOption({ label: 'Tienda Doña Rosa' });
+  await portfolio.getByLabel('Monto').fill('1000');
+  await audit(page, info, 'pos-cobrar-cartera');
+  await portfolio.getByRole('button', { name: 'Registrar abono' }).click();
+  await expect(portfolio.getByText('Abono registrado')).toBeVisible();
+  await portfolio.getByRole('button', { name: 'Listo' }).click();
+
   await page.locator('header').getByRole('button', { name: 'Cerrar turno' }).click();
   const close = page.getByRole('dialog');
   await close.getByLabel('Efectivo contado').fill('125000');

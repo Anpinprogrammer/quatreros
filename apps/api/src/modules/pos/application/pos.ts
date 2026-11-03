@@ -25,6 +25,7 @@ import {
 import { Decimal } from 'decimal.js';
 import { eq, sql, type SQL } from 'drizzle-orm';
 import { recordAudit } from '../../../platform/audit/audit.js';
+import { recordEvent } from '../../accounting/application/public.js';
 import type { Database } from '../../../platform/db/client.js';
 import { documentSequences } from '../../../platform/db/schema/platform.js';
 import type { ExecutionContext } from '../../../platform/http/context.js';
@@ -734,6 +735,20 @@ export async function closeShift(
         closingNote: input.note?.trim() || null,
       })
       .where(eq(shifts.id, id));
+    await recordEvent(tx, {
+      type: 'ShiftClosed',
+      sourceType: 'pos.shift',
+      sourceId: id,
+      siteId: shift.siteId,
+      amount: cashDifference,
+      payload: {
+        status,
+        cashExpected,
+        cashCounted: cashCount.countedAmount,
+        cashDifference,
+        note: input.note ?? null,
+      },
+    });
     await recordAudit(tx, ctx, {
       action: 'pos.shift.close',
       entityType: 'pos.shift',
@@ -1018,6 +1033,19 @@ export async function createSale(deps: PosDeps, ctx: ExecutionContext, raw: unkn
         amount: payment.amount,
       })),
     );
+    await recordEvent(tx, {
+      type: 'SaleCompleted',
+      sourceType: 'pos.sale',
+      sourceId: sale.id,
+      siteId: shift.siteId,
+      amount: total,
+      payload: {
+        number,
+        lines: input.lines,
+        payments: input.payments,
+        changeAmount: totals.change,
+      },
+    });
     await recordAudit(tx, ctx, {
       action: 'pos.sale.create',
       entityType: 'pos.sale',

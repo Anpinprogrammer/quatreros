@@ -14,7 +14,9 @@
 | **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                                                           |
 | **Entrega 3**: compras y recepción                                            | **Terminada.**                                                                                                |
 | **Entrega 4**: producción                                                     | **Terminada.**                                                                                                |
-| **Entrega 5**: pedidos y reparto                                              | **Terminada.** Sigue la entrega 6 (caja POS)                                                                  |
+| **Entrega 5**: pedidos y reparto                                              | **Terminada.**                                                                                                |
+| **Entrega 6**: caja (POS)                                                     | **Terminada** (rama `feat/pos-caja`, pendiente de fusión)                                                     |
+| **Entrega 7**: cartera, recaudos y hechos económicos                          | **Terminada** (rama `feat/fin-cartera-recaudos`, pendiente de fusión)                                         |
 | **Refactorización de la SPA**                                                 | Terminada en la rama `refactor/web-estructura-pages-components-hooks`; pendiente de fusión (ADR-024, DEC-101) |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
@@ -86,49 +88,36 @@
 - **Guía:** `apps/web/src/README.md`.
 - **Verificación:** `pnpm check` con 80 unitarias y ambas fronteras; integración 76/76 con PostgreSQL real; E2E 67 pasaron y 14 omitidos, igual que la línea base.
 
-## 2. Siguiente tarea: entrega 6, caja (POS)
+## 2. Siguiente tarea: entrega 8, asistente de IA (demo)
 
-**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3, 4 y 5 terminadas y verificadas. Sigue la 6: turnos de caja, venta de mostrador, pagos mixtos y cierre.
+**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3, 4, 5, 6 y 7 terminadas y verificadas. Sigue la 8: preguntas en lenguaje natural y un registro con resumen y confirmación (RF-340–345), con el agente Quatreros AI ya creado (DEC-087, ai-architecture §15).
 
-### Hecho en 5: pedidos y reparto
+### Hecho en 7: cartera, recaudos, conciliación y hechos económicos
 
-- Especificación `docs/04-specifications/com/pedidos-reparto.md`; DEC-098 reservas por lote, DEC-099 crédito con advertencia y DEC-100 recaudos.
-- Clientes con datos de entrega y crédito (cupo/plazo) configurable por el Administrador.
-- Pedido confirmado con precio vigente congelado y reserva FEFO por lote; si falta existencia queda el faltante señalado.
-- Cupo usado = cartera abierta + pedidos a crédito no entregados; exceso o mora generan advertencia, no bloqueo.
-- Despacho con pedidos confirmados, distribuidor y salida a "En ruta"; reservas consumidas.
-- Portal móvil del distribuidor con entrega total/parcial, recaudo efectivo/transferencia y devolución.
-- Obligación a crédito al entregar, con vencimiento entrega + plazo; abono opcional.
-- Devolución a "En inspección" y reincorporación a la bodega; descarte pendiente AP-08.
-- Pantallas **03. Distribución → Clientes, pedidos y despachos** y portal **Ruta**.
-- Semilla: dos clientes, `P-0001` a crédito y `D-0001` preparado para `reparto@`.
-- **RF-153 (cancelación/descuentos) P-09 y RF-186 (liquidación) P-08 siguen fuera.**
+- Especificaciones aprobadas: `docs/04-specifications/fin/cartera-recaudos.md` (DEC-104, D1..D9) y `docs/04-specifications/cont/hechos-economicos.md` (DEC-105, E1..E7).
+- Cartera por antigüedad con cinco rangos (por vencer, 1–30, 31–60, 61–90 y +90), alcance por sede y sin intereses de mora.
+- Abonos FIFO por defecto o asignación manual; un abono mayor al saldo se rechaza con `409 ABONO_EXCEEDS_BALANCE`.
+- Recaudos por responsable y sede, conciliación con conteo por método y diferencia registrada. No liquida al distribuidor ni crea cuenta por cobrar (P-08).
+- Los pagos del POS no se duplican en `finance.collections`; la caja se consulta desde `pos`.
+- Exportación CSV UTF-8 con BOM y separador `;` para cartera, recaudos y caja.
+- Hechos económicos desde compras, producción, POS y finanzas en `accounting.economic_events`: catálogo cerrado, tabla inmutable (trigger append-only), `amount` nullable y bandeja de solo lectura.
+- Pantallas **Gestión → Cartera y recaudos** y **Sistema → Hechos económicos**; acción **Cobrar cartera** en el POS para CAJ.
+- Semilla demo: cuatro rangos de antigüedad, recaudos pendientes y una conciliación con diferencia.
+- **Siguen bloqueados:** contabilización e impuestos (P-01..P-04, RF-304/RF-305) y liquidación de distribuidores (P-08).
 
-### Objetivo demostrable de la entrega 6
+### Verificación al cierre de 7
 
-- Abrir turno de caja con base de efectivo.
-- Vender producto fabricado y platos preparados con precio vigente y pago mixto.
-- Descontar inventario de producto terminado desde la ubicación del POS con FEFO.
-- Registrar el consumo teórico de platos sin descontar automáticamente cocina (BR-147, Q-B-09).
-- Cerrar turno con efectivo esperado, contado y diferencia justificada.
-- Dejar fuera la facturación fiscal (P-02), descuentos/anulaciones (P-09) y clasificación de mermas (P-07).
+- `pnpm check` en verde (67 unitarias de API, 13 de web y contratos).
+- Integración PGlite: 86 pasaron, 2 omitidas por concurrencia.
+- PostgreSQL real: el test de finanzas pasa 5/5; la suite completa queda 84/88 por el fallo intermitente preexistente de reservas de `inventory.test.ts` (`reservations_order_line_lot_uq`), ajeno a esta entrega.
+- `pnpm build` en verde y E2E 78 pasaron, 15 omitidos y 0 fallos en escritorio, tableta y móvil (con axe AA).
+- El E2E de cierre usó el ingreso original: el rediseño de `LoginPage.tsx` sin commitear tiene un contraste pendiente en la pantalla `ingreso` y debe corregirse antes de fusionarlo.
 
-### RF de la entrega 6
+### Preparación de la entrega 8
 
-| RF     | Tema                     | Estado             | Ojo con                                           |
-| ------ | ------------------------ | ------------------ | ------------------------------------------------- |
-| RF-220 | Apertura de turno        | CONFIRMED          | Un turno abierto por caja y por cajero            |
-| RF-221 | Venta de mostrador       | CONFIRMED          | Precio vigente; producto y plato; FEFO            |
-| RF-222 | Pagos mixtos y cambio    | CONFIRMED          | Suma de pagos = total; efectivo y transferencia   |
-| RF-223 | Cierre de turno y arqueo | CONFIRMED          | Esperado vs contado; diferencia con justificación |
-| RF-224 | Revisión de diferencias  | CONFIRMED          | Supervisor distinto del cajero                    |
-| RF-225 | Platos y consumo teórico | CONFIRMED · Q-B-09 | Sin descuento automático de cocina hasta decisión |
-| RF-226 | Conteos de cocina        | PENDING (P-07)     | **No implementar** clasificación ni ajustes       |
-| RF-227 | Documento al cliente     | BLOCKED (P-02)     | No se emite factura; solo comprobante interno     |
-
-Procedimiento: skill `.claude/skills/quatreros-entrega`. Antes de programar, escribir la especificación `docs/04-specifications/pos/caja.md` y esperar aprobación.
-
-En cada PR: actualizar `config/modules.ts` (módulos `available`), la matriz de trazabilidad, `PROJECT-STATUS.md`, el guion `docs/operations/demo-local.md` y este archivo.
+- Escribir `docs/04-specifications/ia/asistente-demo.md` (preguntas, lecturas permitidas, registro de conversaciones y confirmación de escrituras) y esperar aprobación.
+- No ejecutar `ant apply` ni declarar herramientas en el agente sin autorización (DEC-087). Las escrituras de la IA siguen bloqueadas (P-10).
+- Aprovechar los casos de uso de lectura ya expuestos por los módulos; no crear consultas directas a tablas desde el asistente.
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 

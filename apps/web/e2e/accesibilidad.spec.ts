@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
-import { signIn } from './helpers';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { DEMO_PASSWORD, signIn, totp } from './helpers';
 
 /**
  * Accesibilidad WCAG 2.1 AA de cada pantalla (sistema de diseño, Anexo A) y captura para revisión visual.
@@ -8,8 +10,59 @@ import { signIn } from './helpers';
  * (`pnpm --filter @quatreros/web exec playwright show-report`).
  * No usa al administrador: su segundo factor se configura en acceso.spec.ts.
  */
+const MFA_FILE = 'test-results/contabilidad-mfa.json';
+let contabilidadSecret: string | null = null;
+
+function storedSecret(): string | null {
+  if (!existsSync(MFA_FILE)) return null;
+  try {
+    return (JSON.parse(readFileSync(MFA_FILE, 'utf8')) as { secret?: string }).secret ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Ingresa como contabilidad, enrola su segundo factor la primera vez y lo reutiliza después. */
+async function signInContabilidad(page: Page): Promise<void> {
+  await signIn(page, 'contabilidad@quatreros.example');
+  const currentPassword = page.getByLabel('Tu contraseña actual');
+  const codeField = page.getByLabel('Código de 6 dígitos', { exact: true });
+  await expect(currentPassword.or(codeField).first()).toBeVisible();
+  if (await currentPassword.isVisible().catch(() => false)) {
+    await currentPassword.fill(DEMO_PASSWORD);
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.getByRole('img', { name: /Código QR/ })).toBeVisible();
+    const secret = (await page.getByTestId('clave-manual').getAttribute('data-key')) ?? '';
+    if (!secret) throw new Error('No se pudo leer la clave manual del segundo factor.');
+    contabilidadSecret = secret;
+    mkdirSync(dirname(MFA_FILE), { recursive: true });
+    writeFileSync(MFA_FILE, JSON.stringify({ secret }));
+    await page.getByLabel('Código de 6 dígitos que muestra la aplicación').fill(totp(secret));
+    await page.getByRole('button', { name: 'Activar' }).click();
+    await expect(page.getByText('Verificación en dos pasos activada.')).toBeVisible();
+    await page.getByRole('button', { name: 'Ya los guardé, continuar' }).click();
+  } else {
+    const secret = contabilidadSecret ?? storedSecret();
+    if (!secret) {
+      throw new Error('Contabilidad ya tiene segundo factor; ejecuta pnpm db:reset:demo.');
+    }
+    await codeField.fill(totp(secret));
+    await page.getByRole('button', { name: 'Verificar' }).click();
+  }
+  await expect(page).toHaveURL(/\/erp$/);
+}
+
 async function audit(page: Page, info: TestInfo, name: string) {
   await page.waitForLoadState('networkidle');
+  // Las transiciones de diálogos y overlays alteran los colores medidos por axe.
+  await page.evaluate(async () => {
+    await Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished),
+    );
+  });
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
@@ -147,6 +200,22 @@ test('ERP: producción y recetas', async ({ page }, info) => {
   await audit(page, info, 'produccion-recetas');
   await page.getByRole('link', { name: 'Abrir receta' }).first().click();
   await audit(page, info, 'produccion-receta');
+});
+
+test('ERP: cartera, recaudos y conciliación', async ({ page }, info) => {
+  await signInContabilidad(page);
+  await page.goto('/erp/cartera');
+  await audit(page, info, 'cartera');
+  await page.getByRole('tab', { name: 'Recaudos' }).click();
+  await audit(page, info, 'recaudos');
+  await page.getByRole('tab', { name: 'Conciliación' }).click();
+  await audit(page, info, 'conciliacion');
+});
+
+test('ERP: hechos económicos', async ({ page }, info) => {
+  await signInContabilidad(page);
+  await page.goto('/erp/contabilidad/hechos');
+  await audit(page, info, 'hechos-economicos');
 });
 
 test('Ruta: despachos del distribuidor', async ({ page }, info) => {

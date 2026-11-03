@@ -45,6 +45,7 @@ import { ModuleIcon } from '../../components/ui/ModuleIcon';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { isUsable, SECTIONS, type ModuleEntry } from '../../config/modules';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { FinanceSummaryCard } from '../../components/finanzas/FinanceSummaryCard';
 
 const TABS = [
   { id: 'modules', label: 'Módulos' },
@@ -751,7 +752,11 @@ function BoardTab({ me }: { me: MeResponse }) {
               </div>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 <CapabilityTile icon={Wallet} title="Caja POS" status="Sin datos" />
-                <CapabilityTile icon={CreditCard} title="Crédito y cartera" status="No disponible" />
+                {hasPermission(me, 'fin.receivable.read') ? (
+                  <FinanceSummaryCard />
+                ) : (
+                  <CapabilityTile icon={CreditCard} title="Crédito y cartera" status="No disponible" />
+                )}
                 <CapabilityTile icon={ShieldCheck} title="Aprobaciones" status="No disponible" />
                 <CapabilityTile icon={Sparkles} title="Sugerencia de IA" status="Sin conexión" />
               </div>

@@ -10,10 +10,12 @@ import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
 import { ServerStatus } from '../../components/ui/ServerStatus';
 import { UserMenu } from '../../components/ui/UserMenu';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { hasPermission } from '../../lib/session';
 import { formatMoney, formatQuantity } from '../../lib/format/pos';
 import { newIdempotencyKey } from '../../services/client';
 import { useCreateSale, useCurrentShift, usePosCatalog } from '../../services/pos';
 import { CloseShiftDialog } from '../../components/pos/CloseShiftDialog';
+import { PaymentForm } from '../../components/finanzas/PaymentForm';
 import { OpenShiftPanel } from '../../components/pos/OpenShiftPanel';
 import { PaymentDialog } from '../../components/pos/PaymentDialog';
 import { PosDialog } from '../../components/pos/PosDialog';
@@ -38,6 +40,8 @@ export function PosShell({ me }: { me: MeResponse }) {
   const [closingShiftId, setClosingShiftId] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<SaleDetail | null>(null);
   const [closedShift, setClosedShift] = useState<ShiftDetail | null>(null);
+  const [collectOpen, setCollectOpen] = useState(false);
+  const canCollectPortfolio = hasPermission(me, 'fin.receivable_payment.create');
 
   if (!site) {
     return (
@@ -121,6 +125,16 @@ export function PosShell({ me }: { me: MeResponse }) {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {canCollectPortfolio ? (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setCollectOpen(true);
+                }}
+              >
+                Cobrar cartera
+              </Button>
+            ) : null}
             {shift.data && methods.length > 0 ? (
               <Button
                 variant="secondary"
@@ -397,6 +411,24 @@ export function PosShell({ me }: { me: MeResponse }) {
           }}
         />
       ) : null}
+
+      <PosDialog
+        open={collectOpen}
+        title="Cobrar cartera"
+        description="Registra un abono de un cliente. Se aplica a la obligación más antigua o a las que selecciones."
+        onClose={() => {
+          setCollectOpen(false);
+        }}
+        wide
+      >
+        <PaymentForm
+          me={me}
+          siteId={site.id}
+          onDone={() => {
+            setCollectOpen(false);
+          }}
+        />
+      </PosDialog>
 
       <PosDialog
         open={Boolean(receipt)}
