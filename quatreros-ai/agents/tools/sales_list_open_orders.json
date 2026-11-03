@@ -1,0 +1,22 @@
+{
+  "type": "custom",
+  "name": "sales_list_open_orders",
+  "description": "Lista pedidos de clientes que aún no fueron entregados ni cancelados, en las sedes autorizadas. Úsala para preguntas sobre pedidos pendientes, despachos o faltantes. No la uses para crear o modificar pedidos. Devuelve número, cliente, estado, fecha y total.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "confirmed",
+          "in_dispatch",
+          "partially_delivered",
+          "delivered",
+          "cancelled"
+        ],
+        "description": "Filtra por estado del pedido."
+      }
+    }
+  }
+}

@@ -24,6 +24,7 @@ export default defineConfig({
     'finance',
     'pos',
     'accounting',
+    'assistant',
   ],
   dbCredentials: {
     url: process.env.DATABASE_MIGRATIONS_URL ?? process.env.DATABASE_URL ?? '',

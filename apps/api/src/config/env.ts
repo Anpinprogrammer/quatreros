@@ -28,6 +28,12 @@ const EnvSchema = z
      * Prohibido en staging/producción (DEC-043).
      */
     AUTH_MFA_ENFORCEMENT_DISABLED: booleanFromString,
+    /** Credenciales del agente Quatreros AI (DEC-087); opcionales hasta activar el complemento. */
+    ANTHROPIC_API_KEY: z.string().optional(),
+    ANTHROPIC_AGENT_ID: z.string().optional(),
+    ANTHROPIC_AGENT_VERSION: z.string().optional(),
+    ANTHROPIC_ENVIRONMENT_ID: z.string().optional(),
+    ASSISTANT_SESSION_BUDGET_CENTS: z.coerce.number().int().min(0).default(25),
   })
   .superRefine((env, ctx) => {
     if (env.AUTH_RATE_LIMIT_DISABLED && (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production')) {

@@ -17,6 +17,7 @@ import { TransferPage } from '../existencias/TransferPage';
 import { UsersPage } from '../usuarios/UsersPage';
 import { CarteraPage } from '../finanzas/CarteraPage';
 import { HechosPage } from '../finanzas/HechosPage';
+import { AssistantPage } from '../ia/AssistantPage';
 import { CashReviewPage } from '../pos/CashReviewPage';
 import { DishRecipesPage } from '../pos/DishRecipesPage';
 import { hasPermission } from '../../lib/session';
@@ -153,12 +154,15 @@ export function ErpShell({ me }: { me: MeResponse }) {
               {hasPermission(me, 'cont.report.read') ? (
                 <Route path="contabilidad/hechos" element={<HechosPage />} />
               ) : null}
+              {hasPermission(me, 'ia.query') ? (
+                <Route path="ia/asistente" element={<AssistantPage me={me} />} />
+              ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
         </div>
       </div>
-      <AssistantWidget />
+      <AssistantWidget me={me} />
     </div>
   );
 }

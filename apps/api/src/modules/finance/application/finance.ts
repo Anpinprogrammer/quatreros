@@ -466,8 +466,9 @@ export async function getCustomerBalance(
   db: Executor,
   ctx: ExecutionContext,
   customerId: string,
+  permission = 'fin.receivable_payment.create',
 ): Promise<CustomerBalance> {
-  authorize(ctx, 'fin.receivable_payment.create');
+  authorize(ctx, permission);
   const customerResult = await db.execute(sql`
     select id, name, is_active as "isActive" from sales.customers where id = ${customerId} limit 1
   `);
@@ -476,7 +477,7 @@ export async function getCustomerBalance(
   if (!customer.isActive) {
     throw AppError.conflict('CUSTOMER_INACTIVE', 'Cliente inactivo', 'No se pueden registrar abonos.');
   }
-  const scope = scopeFor(ctx, 'fin.receivable_payment.create');
+  const scope = scopeFor(ctx, permission);
   const conditions = [
     sql`r.customer_id = ${customerId}`,
     sql`r.balance > 0`,

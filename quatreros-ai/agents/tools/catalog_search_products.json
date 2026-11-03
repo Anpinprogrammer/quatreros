@@ -1,0 +1,25 @@
+{
+  "type": "custom",
+  "name": "catalog_search_products",
+  "description": "Busca productos del catálogo por nombre y devuelve sus ids, tipo y presentaciones. Úsala para resolver nombres antes de preparar una receta o responder sobre un producto. No la uses para crear o modificar productos. Solo devuelve productos activos de la empresa.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": "string",
+        "description": "Nombre o parte del nombre del producto."
+      },
+      "kind": {
+        "type": "string",
+        "enum": [
+          "manufactured",
+          "prepared"
+        ],
+        "description": "Filtra por producto fabricado o preparado."
+      }
+    },
+    "required": [
+      "q"
+    ]
+  }
+}

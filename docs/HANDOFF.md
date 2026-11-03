@@ -4,24 +4,25 @@
 
 ## 1. Dónde está el proyecto
 
-| Etapa                                                                         | Estado                                                                                                        |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| A–E: descubrimiento, requerimientos, arquitectura, diseño de IA y de Telegram | Completas (`docs/00-discovery` … `docs/02-architecture`)                                                      |
-| F: preparación del repositorio, CI/CD, respaldos                              | Completa y verificada                                                                                         |
-| G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md`                                     |
-| Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                                                     |
-| **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                                                       |
-| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                                                           |
-| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                                                                |
-| **Entrega 4**: producción                                                     | **Terminada.**                                                                                                |
-| **Entrega 5**: pedidos y reparto                                              | **Terminada.**                                                                                                |
-| **Entrega 6**: caja (POS)                                                     | **Terminada** (rama `feat/pos-caja`, pendiente de fusión)                                                     |
-| **Entrega 7**: cartera, recaudos y hechos económicos                          | **Terminada** (rama `feat/fin-cartera-recaudos`, pendiente de fusión)                                         |
-| **Refactorización de la SPA**                                                 | Terminada en la rama `refactor/web-estructura-pages-components-hooks`; pendiente de fusión (ADR-024, DEC-101) |
+| Etapa                                                                         | Estado                                                                                                                |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| A–E: descubrimiento, requerimientos, arquitectura, diseño de IA y de Telegram | Completas (`docs/00-discovery` … `docs/02-architecture`)                                                              |
+| F: preparación del repositorio, CI/CD, respaldos                              | Completa y verificada                                                                                                 |
+| G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md`                                             |
+| Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                                                             |
+| **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                                                               |
+| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                                                                   |
+| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                                                                        |
+| **Entrega 4**: producción                                                     | **Terminada.**                                                                                                        |
+| **Entrega 5**: pedidos y reparto                                              | **Terminada.**                                                                                                        |
+| **Entrega 6**: caja (POS)                                                     | **Terminada** (rama `feat/pos-caja`, pendiente de fusión)                                                             |
+| **Entrega 7**: cartera, recaudos y hechos económicos                          | **Terminada** (rama `feat/fin-cartera-recaudos`, pendiente de fusión)                                                 |
+| **Entrega 8**: asistente de IA                                                | **Implementada** (rama `feat/ia-asistente`, pendiente de fusión) · activación real pendiente de `ant apply` (Q-IA-04) |
+| **Refactorización de la SPA**                                                 | Terminada en la rama `refactor/web-estructura-pages-components-hooks`; pendiente de fusión (ADR-024, DEC-101)         |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
-- **Ingreso en dos pasos con efecto cortina:** el paso 1 se organiza en cabecera, mensaje con las áreas en 2×2, tarjeta "Selecciona tu perfil" (Administrador/Cajero/Distribuidor) con el personaje y pie. Al elegir, dos paños se cierran al centro: el oscuro presenta el rol y el blanco tiene el formulario. En móvil, el paño blanco baja como persiana. Escape o "Cambiar de rol" abren la cortina y devuelven el foco al perfil. Los E2E eligen perfil antes de autenticarse.
+- **Ingreso en dos pasos con efecto cortina:** el paso 1 se organiza en cabecera con el logo oficial centrado y píldora "Acceso restringido" sobre el kicker, mensaje con las áreas en 2×2, tarjeta "Selecciona tu perfil" (Administrador/Cajero/Distribuidor) y pie. Al elegir, dos paños se cierran al centro: el oscuro presenta el rol y el blanco tiene el formulario. En móvil, el paño blanco baja como persiana. Escape o "Cambiar de rol" abren la cortina y devuelven el foco al perfil. Los E2E eligen perfil antes de autenticarse.
 - **Pantalla por rol:** cada rol entra a la suya (ERP, Caja o Distribución).
 - **Gestión de usuarios:** crear (idempotente y auditado), editar roles y sedes con control de versión, desactivar y reactivar. Protege al último administrador e impide desactivarse a sí mismo.
 - **Permisos:** RBAC con alcance ALL/SITE/OWN; responde 403 sin permiso y 404 fuera de alcance.
@@ -113,11 +114,25 @@
 - `pnpm build` en verde y E2E 78 pasaron, 15 omitidos y 0 fallos en escritorio, tableta y móvil (con axe AA).
 - El E2E de cierre usó el ingreso original: el rediseño de `LoginPage.tsx` sin commitear tiene un contraste pendiente en la pantalla `ingreso` y debe corregirse antes de fusionarlo.
 
-### Preparación de la entrega 8
+### Entrega 8 implementada (DEC-106)
 
-- Escribir `docs/04-specifications/ia/asistente-demo.md` (preguntas, lecturas permitidas, registro de conversaciones y confirmación de escrituras) y esperar aprobación.
-- No ejecutar `ant apply` ni declarar herramientas en el agente sin autorización (DEC-087). Las escrituras de la IA siguen bloqueadas (P-10).
-- Aprovechar los casos de uso de lectura ya expuestos por los módulos; no crear consultas directas a tablas desde el asistente.
+- Especificación aprobada: `docs/04-specifications/ia/asistente-demo.md`.
+- Backend: esquema `assistant` (`tickets`, `tool_calls`, `proposals`, `requests`), migraciones `0027`–`0028`, `ToolGateway` con 9 lecturas y 2 escrituras preparadas, servicio de turnos, propuestas, consumo y configuración.
+- Frontend: burbuja funcional, panel de chat con streaming SSE, tarjeta de confirmación reutilizada, pestaña de tickets y pantalla de consumo/configuración.
+- Tickets por sesión con petición inicial y resumen de resolución; no se guarda la transcripción completa.
+- Techos: USD 3/día, USD 10/semana y USD 30/mes; presupuesto por sesión USD 0,25; alertas 80/100.
+- Otras escrituras siguen bloqueadas por P-10 y responden `423 FEATURE_BLOCKED`.
+- **Herramientas publicadas:** 9 lecturas y 2 escrituras preparadas en `quatreros-ai/agents/tools/`; `ant apply` actualizó el agente a la versión 2 y el lockfile quedó sincronizado.
+- **Activación real verificada:** con el agente real se consultó `inventory_get_availability` y se creó una materia prima con `prepare_raw_material` + confirmación humana. Faltan Q-IA-05 (retención) y Q-IA-06 (modelo) para cerrar la demo.
+- Quedan abiertas Q-IA-04 (`ant apply`), Q-IA-05 (retención) y Q-IA-06 (modelo).
+
+### Verificación al cierre de 8
+
+- `pnpm check` en verde.
+- Integración PGlite: 92/94 (2 omitidas por concurrencia).
+- PostgreSQL real: 94/94.
+- `pnpm build` en verde y E2E 81 pasaron, 15 omitidos y 0 fallos (axe AA en escritorio, tableta y móvil).
+- El E2E del asistente cubre la bandeja de tickets; la integración real se verificó contra Anthropic: consulta de existencias y creación de materia prima con confirmación.
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
@@ -134,6 +149,8 @@
 | Fusionar el PR de la refactorización de la SPA (`refactor/web-estructura-pages-components-hooks`) cuando el CI esté en verde                                                     | ADR-024, DEC-101                                                                                 |
 
 ## 4. Notas de entorno
+
+- **Sesiones (RNF-006, DEC-107):** expiración por inactividad en el servidor: ERP 30 min, POS 12 h y portal móvil 8 h. La última actividad vive en `platform.session_activity`; un request vencido responde `401 SESSION_EXPIRED`. El cierre de sesión manual sigue en el menú de usuario.
 
 - **Reservas corregidas (2026-11-03):** `reserveOrderLine` ya excluye ubicaciones en tránsito/ruta y consolida una sola reserva por lote, eligiendo la ubicación con mayor disponibilidad. `inventory.test.ts` y la suite completa de PostgreSQL pasan 88/88.
 - Contraseña de usuarios demo: la que pongas en `DEMO_PASSWORD`; nunca se guarda en el repositorio. CI usa una propia en su base efímera.

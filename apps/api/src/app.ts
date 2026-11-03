@@ -12,11 +12,13 @@ import type { AuthProvisioner } from './platform/auth/provisioner.js';
 import type { Database } from './platform/db/client.js';
 import { actorMiddleware, mfaGate, requireAuthenticated, type ActorResolver } from './platform/http/actor.js';
 import { sessionMiddleware } from './platform/auth/session.js';
+import { sessionActivityMiddleware } from './platform/auth/activity.js';
 import { contextMiddleware } from './platform/http/context.js';
 import { AppError, errorHandler, notFoundHandler } from './platform/http/errors.js';
 import { healthRouter } from './platform/health/routes.js';
 import type { IdempotencyStore } from './platform/idempotency/store.js';
 import type { FeatureFlagReader } from './platform/features/flags.js';
+import type { AssistantProvider } from './addons/assistant/application/ports.js';
 import type { Logger } from './platform/logger.js';
 import { buildOpenApiDocument } from './platform/openapi/document.js';
 
@@ -26,6 +28,8 @@ export interface AppDeps {
   pingDatabase: () => Promise<void>;
   idempotency: IdempotencyStore;
   flags: FeatureFlagReader;
+  /** Pruebas: proveedor simulado del asistente; en runtime se crea el cliente de Anthropic. */
+  assistantProvider?: AssistantProvider;
   /** Ausente en pruebas que no necesitan autenticación. */
   auth?: Auth;
   /** Carpeta con la SPA compilada (apps/web/dist). En producción la API la sirve (deployment-design §1). */
@@ -105,6 +109,7 @@ export function createApp(deps: AppDeps): Express {
 
   const api = express.Router();
   // Con resolución de usuario activa, toda ruta de negocio exige sesión y, si el rol lo pide, segundo factor.
+  if (deps.resolveActor && deps.db) api.use(sessionActivityMiddleware(deps.db));
   if (deps.resolveActor) api.use(requireAuthenticated, mfaGate);
   deps.registerModules?.(api, deps);
   app.use('/api/v1', api);

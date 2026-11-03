@@ -79,16 +79,6 @@ async function audit(page: Page, info: TestInfo, name: string) {
   expect(overflow, `Desplazamiento horizontal en ${name}`).toBe(false);
 }
 
-/** Espera a que el panel de Quatreros AI termine su transición antes de medir contraste. */
-async function openAssistant(page: Page) {
-  await page.getByRole('button', { name: 'Abrir Quatreros AI' }).click();
-  const panel = page.locator('#quatreros-ai-panel');
-  await expect(panel).toBeVisible();
-  await panel.evaluate(async (element) => {
-    await Promise.all(element.getAnimations().map((animation) => animation.finished));
-  });
-}
-
 test('ingreso', async ({ page }, info) => {
   await page.goto('/ingresar');
   await audit(page, info, 'ingreso');
@@ -169,7 +159,7 @@ test('ERP: modo oscuro', async ({ page }, info) => {
   await audit(page, info, 'produccion-oscuro');
   await page.goto('/erp/catalogo');
   await audit(page, info, 'catalogo-oscuro');
-  await openAssistant(page);
+  await page.goto('/erp/ia/asistente');
   await audit(page, info, 'asistente-ia-oscuro');
 });
 
@@ -233,6 +223,13 @@ test('ERP: hechos económicos', async ({ page }, info) => {
   await audit(page, info, 'hechos-economicos');
 });
 
+test('ERP: asistente de IA', async ({ page }, info) => {
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.goto('/erp/ia/asistente');
+  await audit(page, info, 'asistente-ia');
+});
+
 test('Ruta: despachos del distribuidor', async ({ page }, info) => {
   await signIn(page, 'reparto@quatreros.example');
   await expect(page).toHaveURL(/\/ruta$/);
@@ -246,15 +243,6 @@ test('ERP: trazabilidad de lote', async ({ page }, info) => {
   await page.getByRole('tab', { name: 'Lotes' }).click();
   await page.getByRole('link', { name: 'PT-2026-0001' }).first().click();
   await audit(page, info, 'lote-trazabilidad');
-});
-
-test('ERP: Quatreros AI (vista previa)', async ({ page }, info) => {
-  await signIn(page, 'compras@quatreros.example');
-  await expect(page).toHaveURL(/\/erp$/);
-  await openAssistant(page);
-  await audit(page, info, 'asistente-ia');
-  await page.getByRole('button', { name: /Volver|Cerrar Quatreros AI/ }).click();
-  await expect(page.getByRole('button', { name: 'Abrir Quatreros AI' })).toBeVisible();
 });
 
 test('ERP: menú de usuario y sedes', async ({ page }, info) => {

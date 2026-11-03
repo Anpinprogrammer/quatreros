@@ -1,0 +1,57 @@
+{
+  "type": "custom",
+  "name": "prepare_recipe",
+  "description": "Prepara la creación de una receta inicial para un producto fabricado, con cantidad base e ingredientes. Úsala solo si el usuario pide crear una receta y tiene permiso de gestión. No crea ni ejecuta nada: genera una propuesta con resumen para confirmación humana. Resuelve antes el producto y las materias primas con catalog_search_products y catalog_search_raw_materials; no inventes ids.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "productId": {
+        "type": "string",
+        "description": "UUID del producto fabricado."
+      },
+      "baseOutputQty": {
+        "type": "string",
+        "pattern": "^\\d{1,11}(\\.\\d{1,3})?$",
+        "description": "Cantidad base de salida como cadena decimal."
+      },
+      "expectedYieldPct": {
+        "type": "string",
+        "pattern": "^\\d{1,3}(\\.\\d{1,2})?$",
+        "description": "Rendimiento esperado entre 0 y 100, como cadena decimal."
+      },
+      "tolerancePct": {
+        "type": "string",
+        "pattern": "^\\d{1,3}(\\.\\d{1,2})?$",
+        "description": "Tolerancia permitida en puntos porcentuales."
+      },
+      "lines": {
+        "type": "array",
+        "minItems": 1,
+        "description": "Materias primas e cantidades de la receta.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "rawMaterialId": {
+              "type": "string",
+              "description": "UUID de la materia prima."
+            },
+            "quantity": {
+              "type": "string",
+              "pattern": "^\\d{1,11}(\\.\\d{1,3})?$",
+              "description": "Cantidad como cadena decimal."
+            }
+          },
+          "required": [
+            "rawMaterialId",
+            "quantity"
+          ]
+        }
+      }
+    },
+    "required": [
+      "productId",
+      "baseOutputQty",
+      "lines"
+    ]
+  }
+}

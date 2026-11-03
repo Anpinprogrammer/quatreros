@@ -7,11 +7,14 @@ export async function signIn(page: Page, email: string, password = DEMO_PASSWORD
   await page.goto('/ingresar');
   // El ingreso abre con la selección de perfil: se elige Administrador para llegar al formulario.
   const role = page.getByRole('button', { name: /Administrador/ }).first();
+  const emailField = page.getByLabel('Correo');
+  await role.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => undefined);
   if (await role.isVisible()) {
     await role.click();
     await page.getByRole('heading', { name: 'Ingresa a tu operación' }).waitFor();
   }
-  await page.getByLabel('Correo').fill(email);
+  await expect(emailField).toBeVisible();
+  await emailField.fill(email);
   await page.getByLabel('Contraseña').fill(password);
   await page.getByRole('button', { name: /^Ingresar/ }).click();
 }

@@ -1,0 +1,17 @@
+{
+  "type": "custom",
+  "name": "catalog_search_raw_materials",
+  "description": "Busca materias primas por nombre y devuelve su id, unidad base y si controla vencimiento. Úsala para resolver los ingredientes antes de preparar una receta. No la uses para crear ni modificar materias primas. Solo devuelve materias primas activas.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": "string",
+        "description": "Nombre o parte del nombre de la materia prima."
+      }
+    },
+    "required": [
+      "q"
+    ]
+  }
+}

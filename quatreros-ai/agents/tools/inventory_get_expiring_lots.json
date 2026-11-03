@@ -1,0 +1,24 @@
+{
+  "type": "custom",
+  "name": "inventory_get_expiring_lots",
+  "description": "Lista los lotes que vencen dentro de un número de días, en las sedes autorizadas. Úsala para preguntas sobre vencimientos próximos o alertas FEFO. No la uses para consultar lotes ya vencidos ni para bloquearlos. Devuelve código de lote, presentación, vencimiento y saldo disponible.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "days": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 90,
+        "description": "Días hacia adelante para buscar vencimientos. Por defecto 7."
+      },
+      "productId": {
+        "type": "string",
+        "description": "UUID del producto para limitar la búsqueda."
+      },
+      "rawMaterialId": {
+        "type": "string",
+        "description": "UUID de la materia prima para limitar la búsqueda."
+      }
+    }
+  }
+}

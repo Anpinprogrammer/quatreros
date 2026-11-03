@@ -6,7 +6,7 @@ export const ME_KEY = ['me'] as const;
 
 export type SessionState =
   | { status: 'loading' }
-  | { status: 'anonymous'; reason?: 'disabled' | 'not_provisioned' }
+  | { status: 'anonymous'; reason?: 'disabled' | 'not_provisioned' | 'expired' }
   | { status: 'authenticated'; me: MeResponse };
 
 /** Usuario actual. `null` = sin sesión. */
@@ -19,6 +19,8 @@ export function useSession(): SessionState {
       } catch (err) {
         if (err instanceof ApiError && err.code === 'ACCOUNT_DISABLED')
           return { anonymous: 'disabled' as const };
+        if (err instanceof ApiError && err.code === 'SESSION_EXPIRED')
+          return { anonymous: 'expired' as const };
         if (err instanceof ApiError && err.code === 'ACCOUNT_NOT_PROVISIONED')
           return { anonymous: 'not_provisioned' as const };
         if (err instanceof ApiError && err.status === 401) return { anonymous: undefined };

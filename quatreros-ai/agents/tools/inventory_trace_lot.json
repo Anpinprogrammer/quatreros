@@ -1,0 +1,17 @@
+{
+  "type": "custom",
+  "name": "inventory_trace_lot",
+  "description": "Consulta la trazabilidad de un lote: origen, entradas, salidas y lotes relacionados. Úsala cuando pregunten de dónde salió un lote o qué insumos lo componen. No la uses para modificar el estado del lote. Requiere el permiso de trazabilidad y devuelve solo lotes de las sedes autorizadas.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "lotId": {
+        "type": "string",
+        "description": "UUID del lote que se quiere rastrear."
+      }
+    },
+    "required": [
+      "lotId"
+    ]
+  }
+}

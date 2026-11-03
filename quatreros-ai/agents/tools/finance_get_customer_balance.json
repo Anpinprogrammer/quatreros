@@ -1,0 +1,17 @@
+{
+  "type": "custom",
+  "name": "finance_get_customer_balance",
+  "description": "Consulta las obligaciones abiertas y el saldo total de un cliente en las sedes autorizadas. Úsala cuando pregunten cuánto debe un cliente o cuáles son sus obligaciones. No la uses para registrar abonos ni para consultar clientes de otra sede. Devuelve obligaciones, saldos y vencimientos.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "customerId": {
+        "type": "string",
+        "description": "UUID del cliente, obtenido con sales_search_customers."
+      }
+    },
+    "required": [
+      "customerId"
+    ]
+  }
+}

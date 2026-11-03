@@ -18,6 +18,7 @@ export const testEnv: Env = {
   APP_VERSION: 'test',
   AUTH_RATE_LIMIT_DISABLED: false,
   AUTH_MFA_ENFORCEMENT_DISABLED: false,
+  ASSISTANT_SESSION_BUDGET_CENTS: 25,
 };
 
 export const allFlagsOff: FeatureFlagReader = { isEnabled: () => Promise.resolve(false) };

@@ -1,0 +1,26 @@
+{
+  "type": "custom",
+  "name": "inventory_get_availability",
+  "description": "Consulta existencias disponibles por presentación o materia prima en las sedes autorizadas del usuario. Úsala cuando pregunten cuánto hay de un producto, presentación o insumo. No la uses para consultar precios ni para modificar inventario. Devuelve saldos por presentación y ubicación, filtrados por los permisos y la sede del usuario.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": "string",
+        "description": "Texto libre para buscar por nombre de producto, presentación o materia prima."
+      },
+      "presentationId": {
+        "type": "string",
+        "description": "UUID de la presentación, si ya se conoce."
+      },
+      "productId": {
+        "type": "string",
+        "description": "UUID del producto, si ya se conoce."
+      },
+      "rawMaterialId": {
+        "type": "string",
+        "description": "UUID de la materia prima, si ya se conoce."
+      }
+    }
+  }
+}

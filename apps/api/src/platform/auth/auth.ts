@@ -43,7 +43,7 @@ export function createAuth(db: Database, env: Env, options: AuthOptions = {}) {
       revokeSessionsOnPasswordReset: true,
     },
     session: {
-      expiresIn: 60 * 60 * 12, // 12 h (POS por turno); el shell ERP aplica inactividad propia (RNF-006, PENDING)
+      expiresIn: 60 * 60 * 12, // 12 h; la inactividad por shell se aplica en platform/auth/activity.ts (RNF-006, DEC-107)
       updateAge: 60 * 15,
     },
     // Incluye la regla propia de Better Auth para /sign-in (3 intentos / 10 s por IP).

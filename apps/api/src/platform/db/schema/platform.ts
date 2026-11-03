@@ -14,6 +14,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { session as authSession } from './auth.js';
 
 /**
  * Tablas transversales de plataforma (ADR-010, ADR-011, ADR-012, database-design §2).
@@ -79,6 +80,20 @@ export const addonSettings = platformSchema.table(
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [check('addon_settings_addon_chk', sql`${t.addon} IN ('assistant','telegram')`)],
+);
+
+/** Actividad de sesiones para la expiración por inactividad (RNF-006, DEC-107). */
+export const sessionActivity = platformSchema.table(
+  'session_activity',
+  {
+    sessionId: text()
+      .primaryKey()
+      .references(() => authSession.id, { onDelete: 'cascade' }),
+    userId: text().notNull(),
+    shell: text({ enum: ['erp', 'pos', 'ruta'] }).notNull(),
+    lastSeenAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('session_activity_user_idx').on(t.userId, t.lastSeenAt)],
 );
 
 /** Consecutivos legibles por tipo de documento (DR-005). */

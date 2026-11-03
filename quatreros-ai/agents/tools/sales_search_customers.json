@@ -1,0 +1,17 @@
+{
+  "type": "custom",
+  "name": "sales_search_customers",
+  "description": "Busca clientes por nombre y devuelve su id, tipo y teléfono. Úsala para resolver un cliente antes de consultar su cartera o preparar una operación. No la uses para crear, editar ni desactivar clientes. Solo devuelve clientes activos.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": "string",
+        "description": "Nombre o parte del nombre del cliente."
+      }
+    },
+    "required": [
+      "q"
+    ]
+  }
+}

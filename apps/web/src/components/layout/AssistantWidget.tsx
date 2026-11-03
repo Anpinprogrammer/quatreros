@@ -1,25 +1,59 @@
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Boxes,
-  ClipboardList,
-  CreditCard,
-  Send,
-  ShieldCheck,
-  X,
-} from 'lucide-react';
+import type { AssistantStreamEvent, MeResponse } from '@quatreros/contracts';
+import { ArrowLeft, Send, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { Badge } from '../ui/Badge';
+import { hasPermission } from '../../lib/session';
+import { newIdempotencyKey } from '../../services/client';
+import {
+  streamAssistant,
+  useAssistantStatus,
+  useCancelProposal,
+  useConfirmProposal,
+  useCreateTicket,
+  useSendMessage,
+} from '../../services/assistant';
+import { AIActionConfirmation } from '../ui/AIActionConfirmation';
+import { Alert } from '../ui/form';
 
 const PANEL_ID = 'quatreros-ai-panel';
 
-/**
- * Burbuja y panel de Quatreros AI (sistema de diseño, Parte 2 §5).
- * Es la vista previa visual del asistente: el agente se integra en la entrega 8, así que
- * el compositor está deshabilitado y no se simulan conversaciones ni respuestas.
- */
-export function AssistantWidget() {
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
+}
+
+interface PendingProposal {
+  proposalId: string;
+  summary: Record<string, unknown>;
+  expiresAt: string;
+}
+
+function textValue(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  return fallback;
+}
+
+function summaryValue(value: unknown): string {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => summaryValue(item)).join(', ');
+  }
+  if (value && typeof value === 'object') return JSON.stringify(value);
+  return '—';
+}
+
+const SUGGESTIONS = [
+  '¿Cuánto chorizo hay en Bodega principal?',
+  '¿Qué lotes vencen esta semana?',
+  '¿Qué cartera está vencida hoy?',
+  '¿Qué pedidos están pendientes de despacho?',
+];
+
+/** Asistente Quatreros AI integrado al backend (DEC-106). */
+export function AssistantWidget({ me }: { me: MeResponse }) {
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => {
     try {
@@ -28,9 +62,24 @@ export function AssistantWidget() {
       return false;
     }
   });
+  const [ticketId, setTicketId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [proposal, setProposal] = useState<PendingProposal | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLButtonElement>(null);
+  const textRef = useRef<HTMLInputElement>(null);
   const wasOpen = useRef(false);
+
+  const status = useAssistantStatus();
+  const createTicket = useCreateTicket();
+  const sendMessage = useSendMessage();
+  const confirmProposal = useConfirmProposal();
+  const cancelProposal = useCancelProposal();
+  const canUse = hasPermission(me, 'ia.query');
+  const enabled = canUse && status.data?.enabled === true;
 
   useEffect(() => {
     try {
@@ -43,7 +92,6 @@ export function AssistantWidget() {
         media.removeEventListener('change', update);
       };
     } catch {
-      // jsdom y entornos sin matchMedia: se mantiene el panel de escritorio.
       return;
     }
   }, []);
@@ -56,9 +104,9 @@ export function AssistantWidget() {
       }
       return;
     }
-
     wasOpen.current = true;
     panelRef.current?.focus();
+    requestAnimationFrame(() => textRef.current?.focus());
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -94,9 +142,111 @@ export function AssistantWidget() {
     };
   }, [open, isMobile]);
 
+  useEffect(() => {
+    if (!ticketId) return;
+    const onEvent = (event: AssistantStreamEvent) => {
+      if (event.type === 'message.delta') {
+        const delta = textValue(event.data.text);
+        if (!delta) return;
+        setMessages((current) => {
+          const last = current.at(-1);
+          if (last?.role === 'assistant') {
+            return [...current.slice(0, -1), { role: 'assistant', text: last.text + delta }];
+          }
+          return [...current, { role: 'assistant', text: delta }];
+        });
+      }
+      if (event.type === 'proposal.created') {
+        setProposal({
+          proposalId: textValue(event.data.proposalId),
+          summary: (event.data.summary as Record<string, unknown> | undefined) ?? {},
+          expiresAt: textValue(event.data.expiresAt),
+        });
+      }
+      if (event.type === 'message.completed') {
+        setBusy(false);
+      }
+      if (event.type === 'error') {
+        setBusy(false);
+        setError(textValue(event.data.message, 'El asistente no pudo responder.'));
+      }
+    };
+    return streamAssistant(ticketId, onEvent, () => {
+      // EventSource se reconecta solo; el estado se mantiene.
+    });
+  }, [ticketId]);
+
+  const submit = async () => {
+    const value = text.trim();
+    if (!value || busy) return;
+    setText('');
+    setError(null);
+    setBusy(true);
+    setMessages((current) => [...current, { role: 'user', text: value }]);
+    try {
+      let id = ticketId;
+      if (!id) {
+        const created = await createTicket.mutateAsync({
+          input: { requestText: value },
+          idempotencyKey: newIdempotencyKey(),
+        });
+        id = created.data.id;
+        setTicketId(id);
+      }
+      await sendMessage.mutateAsync({
+        ticketId: id,
+        text: value,
+        idempotencyKey: newIdempotencyKey(),
+      });
+    } catch (cause) {
+      setBusy(false);
+      setError(cause instanceof Error ? cause.message : 'No fue posible enviar el mensaje.');
+    }
+  };
+
+  const confirm = async () => {
+    if (!proposal) return;
+    setBusy(true);
+    try {
+      const result = await confirmProposal.mutateAsync(proposal.proposalId);
+      setProposal(null);
+      setMessages((current) => [...current, { role: 'assistant', text: result.data.summary }]);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No fue posible confirmar la propuesta.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancel = async () => {
+    if (!proposal) return;
+    try {
+      await cancelProposal.mutateAsync(proposal.proposalId);
+      setProposal(null);
+      setMessages((current) => [
+        ...current,
+        { role: 'assistant', text: 'Propuesta cancelada. No se guardó nada.' },
+      ]);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No fue posible cancelar la propuesta.');
+    }
+  };
+
   const close = () => {
     setOpen(false);
   };
+
+  if (!enabled) return null;
+
+  const summaryRows = proposal
+    ? Object.entries(proposal.summary)
+        .filter(([key, value]) => key !== 'text' && value !== null && value !== undefined)
+        .slice(0, 5)
+        .map(([key, value]) => ({
+          label: key,
+          value: summaryValue(value),
+        }))
+    : [];
 
   return (
     <>
@@ -165,8 +315,8 @@ export function AssistantWidget() {
                 Quatreros AI
               </h2>
               <p className="flex items-center gap-1 text-[11px] text-ink-2">
-                <span aria-hidden className="size-1.5 rounded-full bg-warning" />
-                En preparación
+                <span aria-hidden className="size-1.5 rounded-full bg-success" />
+                En línea
               </p>
             </div>
             <button
@@ -179,99 +329,122 @@ export function AssistantWidget() {
             </button>
           </header>
 
-          <div className="scroll-thin flex-1 overflow-y-auto p-3">
-            <div className="rounded-2xl border border-line bg-surface-2/60 px-3 py-4 text-center">
-              <img
-                src="/cuatreros-bot-full.webp"
-                alt=""
-                width={112}
-                height={112}
-                className="mx-auto size-28 object-contain"
-              />
-              <h3 className="mt-2 font-display text-[15px] leading-5 font-bold text-ink">
-                Hola, soy Quatreros AI
-              </h3>
-              <p className="mt-1 text-caption leading-5 text-ink-2">
-                Estoy en preparación. Aún no estoy conectado a los datos de la empresa.
-              </p>
-              <div className="mt-3 flex justify-center">
-                <Badge tone="warning">Vista previa</Badge>
-              </div>
-            </div>
-
-            <section aria-labelledby="asistente-podra" className="mt-4">
-              <p
-                id="asistente-podra"
-                className="text-[10px] font-semibold tracking-[0.12em] text-ink-3 uppercase"
-              >
-                Cuando esté activo
-              </p>
-              <ul className="mt-2 space-y-2">
-                {[
-                  { icon: <Boxes className="size-3.5" />, text: 'Consultar existencias y lotes' },
-                  { icon: <CreditCard className="size-3.5" />, text: 'Revisar cartera y cupos' },
-                  {
-                    icon: <ClipboardList className="size-3.5" />,
-                    text: 'Preparar compras para confirmar',
-                  },
-                ].map((item) => (
-                  <li key={item.text} className="flex items-start gap-2">
-                    <span
-                      aria-hidden
-                      className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand-ink"
+          <div className="scroll-thin flex-1 overflow-y-auto p-3" aria-live="polite">
+            {messages.length === 0 ? (
+              <div className="rounded-2xl border border-line bg-surface-2/60 px-3 py-4 text-center">
+                <img
+                  src="/cuatreros-bot-full.webp"
+                  alt=""
+                  width={112}
+                  height={112}
+                  className="mx-auto size-28 object-contain"
+                />
+                <h3 className="mt-2 font-display text-[15px] leading-5 font-bold text-ink">
+                  Hola, soy Quatreros AI
+                </h3>
+                <p className="mt-1 text-caption leading-5 text-ink-2">
+                  Pregúntame por existencias, lotes, cartera o pedidos. También puedo preparar materias primas
+                  y recetas.
+                </p>
+                <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                  {SUGGESTIONS.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => {
+                        setText(suggestion);
+                        textRef.current?.focus();
+                      }}
+                      className="rounded-full border border-line bg-surface px-2.5 py-1 text-[10px] font-semibold text-ink-2 hover:border-brand/50 hover:text-ink"
                     >
-                      {item.icon}
-                    </span>
-                    <span className="text-caption leading-5 text-ink-2">{item.text}</span>
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {messages.map((message, index) => (
+                  <li
+                    key={`${message.role}-${index}`}
+                    className={`max-w-[92%] rounded-2xl px-3 py-2 text-caption leading-5 ${
+                      message.role === 'user'
+                        ? 'ml-auto bg-brand text-white'
+                        : 'border border-line bg-surface-2 text-ink'
+                    }`}
+                  >
+                    {message.text}
                   </li>
                 ))}
               </ul>
-            </section>
+            )}
 
-            <div className="mt-4 rounded-xl border border-line bg-surface-2/60 p-3">
-              <p className="flex items-center gap-1.5 text-caption font-semibold text-ink">
-                <ShieldCheck aria-hidden className="size-4 shrink-0 text-success" />
-                Con confirmación humana
-              </p>
-              <p className="mt-1 text-[11px] leading-4 text-ink-2">
-                Ninguna escritura se ejecutará sin tu confirmación y la autorización del servidor.
-              </p>
-            </div>
+            {proposal ? (
+              <div className="mt-3">
+                <AIActionConfirmation
+                  rows={summaryRows}
+                  consequence={`Expira ${new Date(proposal.expiresAt).toLocaleTimeString('es-CO')}. Nada se guarda sin tu confirmación.`}
+                  busy={busy}
+                  onConfirm={() => {
+                    void confirm();
+                  }}
+                  onCancel={() => {
+                    void cancel();
+                  }}
+                />
+              </div>
+            ) : null}
 
-            <Link
-              to="/erp/seccion/ia"
-              onClick={close}
-              className="mt-3 inline-flex min-h-10 items-center gap-1 text-caption font-semibold text-brand-ink hover:text-ink"
-            >
-              Ver estado del asistente
-              <ArrowUpRight aria-hidden className="size-3.5" />
-            </Link>
+            {error ? (
+              <div className="mt-3">
+                <Alert tone="error">{error}</Alert>
+              </div>
+            ) : null}
           </div>
 
           <div className="shrink-0 border-t border-line p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             <label htmlFor="assistant-message" className="sr-only">
               Mensaje para Quatreros AI
             </label>
-            <div className="flex items-center gap-1.5">
+            <form
+              className="flex items-center gap-1.5"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void submit();
+              }}
+            >
               <input
+                ref={textRef}
                 id="assistant-message"
                 type="text"
-                disabled
-                placeholder="Próximamente"
+                value={text}
+                disabled={busy}
+                placeholder={busy ? 'Pensando…' : 'Escribe tu pregunta'}
+                onChange={(event) => {
+                  setText(event.target.value);
+                }}
                 className="min-h-10 min-w-0 flex-1 rounded-xl border border-line bg-surface-2 px-2.5 text-caption text-ink placeholder:text-ink-3 disabled:cursor-not-allowed"
               />
               <button
-                type="button"
-                disabled
+                type="submit"
+                disabled={busy || text.trim().length === 0}
                 aria-label="Enviar mensaje"
                 className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand text-white disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-ink-3"
               >
                 <Send aria-hidden className="size-4" />
               </button>
-            </div>
-            <p className="mt-2 text-[10px] leading-4 text-ink-3">
-              Sin respuestas simuladas: el chat se conectará cuando el agente esté desplegado.
+            </form>
+            <p className="mt-2 flex items-center gap-1 text-[10px] leading-4 text-ink-3">
+              <ShieldCheck aria-hidden className="size-3" />
+              Consultas y preparación de materias primas/recetas. Nada se guarda sin confirmar.
             </p>
+            <Link
+              to="/erp/ia/asistente"
+              onClick={close}
+              className="mt-1 inline-flex text-[10px] font-semibold text-brand-ink hover:text-ink"
+            >
+              Ver tickets y consumo
+            </Link>
           </div>
         </div>
       ) : null}

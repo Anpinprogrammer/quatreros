@@ -25,6 +25,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 const REASONS: Record<string, string> = {
   disabled: 'Tu cuenta está desactivada. Habla con el administrador.',
   not_provisioned: 'Tu cuenta no tiene un rol asignado. Habla con el administrador.',
+  expired: 'Tu sesión expiró por inactividad. Vuelve a ingresar.',
 };
 
 const PROFILES = [
@@ -194,23 +195,23 @@ export function LoginPage() {
         inert={open}
         className="relative z-10 mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-8 lg:px-12"
       >
-        <header className="flex items-center justify-between gap-4">
+        <header className="mt-8 flex min-h-32 items-center justify-center lg:mt-10 lg:min-h-40 xl:mt-12">
           <img
             src="/logo-mark.webp"
             alt="Quatreros"
-            width={112}
-            height={112}
+            width={160}
+            height={160}
             decoding="async"
-            className="size-20 object-contain drop-shadow-[0_14px_24px_rgba(120,60,20,0.22)] sm:size-24 lg:size-28"
+            className="pointer-events-none h-32 w-auto object-contain drop-shadow-[0_18px_26px_rgba(120,60,20,0.22)] lg:h-40"
           />
-          <p className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/70 px-3 py-1.5 text-caption font-semibold text-ink-2 shadow-[0_6px_16px_-12px_rgba(17,24,39,0.5)] backdrop-blur-xl">
-            <LockKeyhole aria-hidden className="size-3.5 text-brand-ink" />
-            Acceso restringido
-          </p>
         </header>
 
-        <div className="grid flex-1 items-center gap-10 py-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:py-10">
+        <div className="grid flex-1 items-center gap-10 py-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:py-2 xl:py-8">
           <section aria-labelledby="ingreso-titulo">
+            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/70 px-3 py-1.5 text-caption font-semibold text-ink-2 shadow-[0_6px_16px_-12px_rgba(17,24,39,0.5)] backdrop-blur-xl">
+              <LockKeyhole aria-hidden className="size-3.5 text-brand-ink" />
+              Acceso restringido
+            </p>
             <p className="text-[11px] font-semibold tracking-[0.16em] text-brand-ink uppercase">
               Plataforma de operación
             </p>
@@ -249,15 +250,7 @@ export function LoginPage() {
             </ul>
           </section>
 
-          <section aria-labelledby="perfil-titulo" className="relative mt-14 lg:mt-0">
-            <img
-              src="/cuatreros-bot-full.webp"
-              alt=""
-              width={360}
-              height={360}
-              decoding="async"
-              className="pointer-events-none absolute right-4 bottom-[calc(100%-1.25rem)] h-28 w-auto object-contain drop-shadow-[0_16px_22px_rgba(120,60,20,0.2)] sm:right-8 lg:h-36"
-            />
+          <section aria-labelledby="perfil-titulo" className="relative">
             <div className="relative rounded-[28px] border border-white/80 bg-white/80 p-5 shadow-[0_30px_60px_-30px_rgba(120,60,20,0.35)] backdrop-blur-xl sm:p-7">
               <p className="text-[11px] font-semibold tracking-[0.16em] text-brand-ink uppercase">
                 Paso 1 de 2
