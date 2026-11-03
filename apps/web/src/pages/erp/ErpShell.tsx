@@ -53,6 +53,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
     }
   });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   const toggleCollapse = () => {
     setCollapsed((current) => {
@@ -84,6 +85,15 @@ export function ErpShell({ me }: { me: MeResponse }) {
           }}
         />
         <div className="flex min-w-0 flex-1 flex-col">
+          {/* Atenúa el contenido sin tocar la barra lateral ni el encabezado. */}
+          {assistantOpen ? (
+            <div
+              aria-hidden
+              className={`pointer-events-none fixed inset-x-0 top-[72px] bottom-0 z-20 bg-[#0B0D10]/25 ${
+                collapsed ? 'lg:left-[72px]' : 'lg:left-[248px]'
+              }`}
+            />
+          ) : null}
           <AppHeader
             me={me}
             collapsed={collapsed}
@@ -162,7 +172,7 @@ export function ErpShell({ me }: { me: MeResponse }) {
           </main>
         </div>
       </div>
-      <AssistantWidget me={me} />
+      <AssistantWidget me={me} onOpenChange={setAssistantOpen} />
     </div>
   );
 }

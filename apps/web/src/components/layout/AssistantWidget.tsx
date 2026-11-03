@@ -54,7 +54,13 @@ const SUGGESTIONS = [
 ];
 
 /** Asistente Quatreros AI integrado al backend (DEC-106). */
-export function AssistantWidget({ me }: { me: MeResponse }) {
+export function AssistantWidget({
+  me,
+  onOpenChange,
+}: {
+  me: MeResponse;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => {
     try {
@@ -81,6 +87,10 @@ export function AssistantWidget({ me }: { me: MeResponse }) {
   const cancelProposal = useCancelProposal();
   const canUse = hasPermission(me, 'ia.query');
   const enabled = canUse && status.data?.enabled === true;
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   useEffect(() => {
     try {
