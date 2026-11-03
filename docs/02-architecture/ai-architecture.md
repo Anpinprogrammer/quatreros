@@ -291,7 +291,7 @@ Los nombres se ajustan al SDK oficial (`@anthropic-ai/sdk`, que lee `ANTHROPIC_A
 | Pieza                                      | Estado                                                                                                                        |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | Agente y entorno en Anthropic              | Creados en la consola y exportados a `quatreros-ai/`. Aún no adoptados por `ant` (hash vacío)                                 |
-| Herramientas `custom` del agente           | **Declaradas en `quatreros-ai/agents/tools/`** (9 lecturas + 2 escrituras preparadas). Pendiente `ant apply` para publicarlas |
+| Herramientas `custom` del agente           | **Publicadas** en `quatreros-ai/agents/tools/` (9 lecturas + 2 escrituras preparadas) y aplicadas con `ant apply` (agente v2) |
 | Módulo `src/addons/assistant` del backend  | **Implementado** (tickets, turnos, propuestas, consumo, configuración)                                                        |
 | `ToolGateway`                              | **Implementado** con 9 lecturas y 2 escrituras preparadas                                                                     |
 | Esquema `assistant` en PostgreSQL          | **Migrado** (`0027`–`0028`)                                                                                                   |

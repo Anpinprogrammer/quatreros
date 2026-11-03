@@ -122,8 +122,8 @@
 - Tickets por sesión con petición inicial y resumen de resolución; no se guarda la transcripción completa.
 - Techos: USD 3/día, USD 10/semana y USD 30/mes; presupuesto por sesión USD 0,25; alertas 80/100.
 - Otras escrituras siguen bloqueadas por P-10 y responden `423 FEATURE_BLOCKED`.
-- **Herramientas declaradas:** 9 lecturas y 2 escrituras preparadas en `quatreros-ai/agents/tools/`; el agente las incluye con `./tools/*.json`.
-- **Activación real pendiente:** ejecutar `ant apply` con autorización (Q-IA-04) para publicar las herramientas y configurar las credenciales; sin eso el agente solo conversa. No ejecutar `ant apply` sin autorización (DEC-087).
+- **Herramientas publicadas:** 9 lecturas y 2 escrituras preparadas en `quatreros-ai/agents/tools/`; `ant apply` actualizó el agente a la versión 2 y el lockfile quedó sincronizado.
+- **Activación real verificada:** con el agente real se consultó `inventory_get_availability` y se creó una materia prima con `prepare_raw_material` + confirmación humana. Faltan Q-IA-05 (retención) y Q-IA-06 (modelo) para cerrar la demo.
 - Quedan abiertas Q-IA-04 (`ant apply`), Q-IA-05 (retención) y Q-IA-06 (modelo).
 
 ### Verificación al cierre de 8
@@ -132,7 +132,7 @@
 - Integración PGlite: 92/94 (2 omitidas por concurrencia).
 - PostgreSQL real: 94/94.
 - `pnpm build` en verde y E2E 81 pasaron, 15 omitidos y 0 fallos (axe AA en escritorio, tableta y móvil).
-- El E2E del asistente cubre la bandeja de tickets; las conversaciones reales se prueban con el proveedor simulado hasta que se autorice `ant apply`.
+- El E2E del asistente cubre la bandeja de tickets; la integración real se verificó contra Anthropic: consulta de existencias y creación de materia prima con confirmación.
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
