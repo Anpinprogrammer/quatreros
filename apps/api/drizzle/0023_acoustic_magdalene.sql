@@ -1,0 +1,2 @@
+ALTER TABLE "pos"."sale_lines" ADD CONSTRAINT "sale_lines_kind_chk" CHECK ("pos"."sale_lines"."product_kind" IN ('manufactured','prepared'));--> statement-breakpoint
+ALTER TABLE "pos"."sales" ADD CONSTRAINT "sales_status_chk" CHECK ("pos"."sales"."status" = 'completed');

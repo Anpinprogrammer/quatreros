@@ -16,24 +16,15 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 | **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción   |
 | **Entrega 4**: producción                                        | ✅ Terminada: recetas, consumo por lote y lote PT             |
 | **Entrega 5**: pedidos y reparto                                 | ✅ Terminada: reservas, despacho, entregas y recaudo          |
+| **Entrega 6**: caja (POS)                                        | ✅ Terminada: turnos, venta, pago mixto y arqueo              |
+| **Entrega 7**: cartera y hechos económicos                       | ✅ Terminada: antigüedad, abonos, conciliación y eventos      |
 | Entrega 8: Quatreros AI                                          | Configurada, sin integración funcional                        |
 
 ## 2. Dónde estamos (2026-11-02)
 
-- Rama activa: **`feat/cat-catalogo-precios`**. `main` intacto; sin push ni PR.
-- Commits de esta rama:
-  - `2df3f57` — especificación 2a y decisiones.
-  - `33428b4` — implementación 2a (catálogo, precios, materias primas).
-  - `4e9d495` — interruptor de desarrollo para la exigencia de MFA.
-  - `80f58ed` — orígenes 5173/3000 aceptados en desarrollo.
-  - `1ad7041` — rediseño visual v1.1 (DEC-093), App Shell y kit de componentes.
-  - `2d95eab` — especificación de existencias, kardex y trazabilidad (2b).
-  - `077a6ca` — implementación 2b (lotes, existencias, kardex y trazabilidad).
-  - `3363038` — isotipo oficial en la marca y el ingreso.
-  - `38d7094` — FEFO y traslados con tránsito (entrega 2c).
-  - `6961043` — compras, proveedores y recepción con lote MP (entrega 3).
-  - `4d0dc93` — recetas, consumo y lote terminado (entrega 4).
-- Entorno local recreado, migraciones `0000`–`0021` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001` y `D-0001`).
+- Ramas publicadas pendientes de fusión: `feat/pos-caja` (entrega 6), `docs/entrega-7-spec` y `feat/fin-cartera-recaudos` (entrega 7). `main` intacto.
+- La entrega 7 está implementada y verificada; el PR cita DEC-104, DEC-105, RF-262..266 y RF-303.
+- Entorno local recreado, migraciones `0000`–`0026` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001`, `D-0001`, `CONC-0001` y los hechos económicos demo).
 
 ### Entrega 2a (hecha)
 
@@ -100,11 +91,27 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Verificación: 80 unitarias, 76 integración (PGlite y PostgreSQL 17 real) y 60 E2E con axe.
 - **RF-153 (cancelación/descuentos) P-09; RF-186 (liquidación) P-08.**
 
-### Siguiente: entrega 6 (caja POS)
+### Entrega 6 (hecha)
 
-- RF-220 apertura de turno, RF-221 venta de mostrador, RF-222 pagos mixtos, RF-223 cierre/arqueo, RF-224 revisión de diferencias.
-- RF-225 platos con consumo teórico sin descuento automático de cocina (Q-B-09); RF-226 conteos P-07; RF-227 documento fiscal BLOCKED P-02.
-- La especificación `docs/04-specifications/pos/caja.md` se escribe antes de programar; el plan está en `docs/HANDOFF.md`.
+- Turnos de caja con apertura, venta de fabricados y platos, pago mixto con cambio, comprobante interno y cierre con arqueo.
+- Revisión de diferencias por supervisor distinto del cajero; recetas de platos versionadas.
+- Pantalla **05. POS y cocina → Caja**; portal **Caja** para CAJ.
+- Migraciones `0022`–`0024`; verificación 59 unitarias, 81 integración PGlite y 72 E2E.
+
+### Entrega 7 (hecha)
+
+- Cartera por antigüedad (por vencer, 1–30, 31–60, 61–90 y +90), abonos FIFO o manuales y rechazo de abono en exceso (`409 ABONO_EXCEEDS_BALANCE`).
+- Recaudos por responsable y sede, conciliación con conteo por método y diferencia registrada; no liquida distribuidores ni crea CxC (P-08).
+- Exportación CSV UTF-8 con BOM y `;`; pagos del POS no duplicados en finanzas.
+- Hechos económicos inmutables desde compras, producción, POS y finanzas; bandeja de solo lectura, sin contabilización (P-01..P-04).
+- Pantallas **Gestión → Cartera y recaudos** y **Sistema → Hechos económicos**; acción **Cobrar cartera** en el POS.
+- Migraciones `0025`–`0026`; semilla de cartera, recaudos, conciliación y eventos.
+
+### Siguiente: entrega 8 (asistente de IA)
+
+- RF-340–345: preguntas en lenguaje natural y un registro con resumen y confirmación.
+- Escribir `docs/04-specifications/ia/asistente-demo.md` antes de programar; no `ant apply` ni herramientas nuevas sin autorización (DEC-087).
+- Las escrituras de la IA siguen bloqueadas (P-10); los casos de uso de lectura de los módulos son la base.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
 
@@ -197,7 +204,7 @@ docs/                  descubrimiento, requerimientos, arquitectura, specs, dise
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-El **rediseño v1.1 está commiteado** (`1ad7041`) y las entregas 2a–2c también. Las entregas 3, 4 y 5 se commitean con este cierre; la siguiente tarea es la entrega 6.
+Las entregas 6 y 7 están en ramas publicadas pendientes de decisión del responsable. **No fusiones a `main`** ni incluyas en un commit el rediseño de `LoginPage.tsx` (y sus cambios en `styles.css` y el sistema de diseño) mientras el responsable no lo pida: ese trabajo está sin commitear y tiene un contraste pendiente en accesibilidad.
 
 El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
@@ -213,4 +220,6 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **SPA reorganizada por capas** (`pages`, `components`, `hooks`, `services`, `lib`, `config`) con fronteras verificadas por `dependency-cruiser` (ADR-024, DEC-101); refactorización pura pendiente de fusión. **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Command Center y header reorganizados**: pestañas Módulos/Tablero del día, KPIs operativos reales, atención priorizada, módulos compactos y menú de usuario con tema/cierre; fuera el panel de plan del dashboard.
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **SPA reorganizada por capas** (`pages`, `components`, `hooks`, `services`, `lib`, `config`) con fronteras verificadas por `dependency-cruiser` (ADR-024, DEC-101); refactorización pura pendiente de fusión. **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Móvil del ingreso** con fondo cálido, card premium, CTA de 56 px y robot al pie. **Ingreso en dos pasos con efecto cortina**: paso 1 en retícula (cabecera, mensaje + áreas 2×2, tarjeta de perfiles con personaje, pie) y paso 2 con dos paños que se cierran al centro (rol en oscuro, formulario en blanco); en móvil, persiana desde arriba. Sin movimiento continuo. Sin flujo de restablecimiento de contraseña (Q-C-07). **Command Center y header reorganizados**: pestañas Módulos/Tablero del día, KPIs operativos reales, atención priorizada, módulos compactos y menú de usuario con tema/cierre; fuera el panel de plan del dashboard. **App Shell con identidad propia**: sidebar oscura, header cálido y burbuja del asistente oscura con borde naranja; drawer móvil oscuro.
+- **2026-11-02**: entrega 6 (POS) cerrada y publicada en `feat/pos-caja`. Entrega 7 (cartera, recaudos, conciliación y hechos económicos) aprobada con DEC-104/DEC-105 e implementada en `feat/fin-cartera-recaudos`: antigüedad por rangos, abonos FIFO/manuales, conciliación con diferencia, CSV y bandeja inmutable de eventos; sin contabilización (P-01..P-04) ni liquidación de distribuidores (P-08). Verificación: `pnpm check` verde (80 unitarias), PGlite 86/88, finanzas 5/5 en PostgreSQL real y E2E 78/15/0. Sigue la entrega 8 (asistente de IA).
+- **2026-11-03**: corregido el fallo de reservas de la entrega 5 que rompía `inventory.test.ts` en PostgreSQL real. `reserveOrderLine` ahora ignora el stock en tránsito/ruta y consolida una sola reserva por lote (la ubicación con mayor disponibilidad), respetando `reservations_order_line_lot_uq`. Integración PGlite 86/88 y PostgreSQL real 88/88.

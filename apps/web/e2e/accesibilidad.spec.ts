@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
-import { signIn } from './helpers';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { DEMO_PASSWORD, signIn, totp } from './helpers';
 
 /**
  * Accesibilidad WCAG 2.1 AA de cada pantalla (sistema de diseño, Anexo A) y captura para revisión visual.
@@ -8,8 +10,59 @@ import { signIn } from './helpers';
  * (`pnpm --filter @quatreros/web exec playwright show-report`).
  * No usa al administrador: su segundo factor se configura en acceso.spec.ts.
  */
+const MFA_FILE = 'test-results/contabilidad-mfa.json';
+let contabilidadSecret: string | null = null;
+
+function storedSecret(): string | null {
+  if (!existsSync(MFA_FILE)) return null;
+  try {
+    return (JSON.parse(readFileSync(MFA_FILE, 'utf8')) as { secret?: string }).secret ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Ingresa como contabilidad, enrola su segundo factor la primera vez y lo reutiliza después. */
+async function signInContabilidad(page: Page): Promise<void> {
+  await signIn(page, 'contabilidad@quatreros.example');
+  const currentPassword = page.getByLabel('Tu contraseña actual');
+  const codeField = page.getByLabel('Código de 6 dígitos', { exact: true });
+  await expect(currentPassword.or(codeField).first()).toBeVisible();
+  if (await currentPassword.isVisible().catch(() => false)) {
+    await currentPassword.fill(DEMO_PASSWORD);
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.getByRole('img', { name: /Código QR/ })).toBeVisible();
+    const secret = (await page.getByTestId('clave-manual').getAttribute('data-key')) ?? '';
+    if (!secret) throw new Error('No se pudo leer la clave manual del segundo factor.');
+    contabilidadSecret = secret;
+    mkdirSync(dirname(MFA_FILE), { recursive: true });
+    writeFileSync(MFA_FILE, JSON.stringify({ secret }));
+    await page.getByLabel('Código de 6 dígitos que muestra la aplicación').fill(totp(secret));
+    await page.getByRole('button', { name: 'Activar' }).click();
+    await expect(page.getByText('Verificación en dos pasos activada.')).toBeVisible();
+    await page.getByRole('button', { name: 'Ya los guardé, continuar' }).click();
+  } else {
+    const secret = contabilidadSecret ?? storedSecret();
+    if (!secret) {
+      throw new Error('Contabilidad ya tiene segundo factor; ejecuta pnpm db:reset:demo.');
+    }
+    await codeField.fill(totp(secret));
+    await page.getByRole('button', { name: 'Verificar' }).click();
+  }
+  await expect(page).toHaveURL(/\/erp$/);
+}
+
 async function audit(page: Page, info: TestInfo, name: string) {
   await page.waitForLoadState('networkidle');
+  // Las transiciones de diálogos y overlays alteran los colores medidos por axe.
+  await page.evaluate(async () => {
+    await Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished),
+    );
+  });
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
@@ -39,6 +92,21 @@ async function openAssistant(page: Page) {
 test('ingreso', async ({ page }, info) => {
   await page.goto('/ingresar');
   await audit(page, info, 'ingreso');
+});
+
+test('ingreso: panel de acceso', async ({ page }, info) => {
+  await page.goto('/ingresar');
+  await page
+    .getByRole('button', { name: /Administrador/ })
+    .first()
+    .click();
+  await expect(page.getByRole('heading', { name: 'Ingresa a tu operación' })).toBeVisible();
+  const panel = page.getByRole('dialog');
+  await panel.evaluate(async (element) => {
+    // La cortina anima sus paños y su contenido: se espera a todas las transiciones internas.
+    await Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished));
+  });
+  await audit(page, info, 'ingreso-acceso');
 });
 
 test('Caja', async ({ page }, info) => {
@@ -149,6 +217,22 @@ test('ERP: producción y recetas', async ({ page }, info) => {
   await audit(page, info, 'produccion-receta');
 });
 
+test('ERP: cartera, recaudos y conciliación', async ({ page }, info) => {
+  await signInContabilidad(page);
+  await page.goto('/erp/cartera');
+  await audit(page, info, 'cartera');
+  await page.getByRole('tab', { name: 'Recaudos' }).click();
+  await audit(page, info, 'recaudos');
+  await page.getByRole('tab', { name: 'Conciliación' }).click();
+  await audit(page, info, 'conciliacion');
+});
+
+test('ERP: hechos económicos', async ({ page }, info) => {
+  await signInContabilidad(page);
+  await page.goto('/erp/contabilidad/hechos');
+  await audit(page, info, 'hechos-economicos');
+});
+
 test('Ruta: despachos del distribuidor', async ({ page }, info) => {
   await signIn(page, 'reparto@quatreros.example');
   await expect(page).toHaveURL(/\/ruta$/);
@@ -225,4 +309,17 @@ test('ERP: Command Center sin scroll vertical en escritorio', async ({ page }, i
   await expect(async () => {
     expect(await fits()).toBe(true);
   }).toPass();
+});
+
+test('ERP: navegación en drawer', async ({ page }, info) => {
+  test.skip(info.project.name === 'escritorio', 'El drawer se usa por debajo de 1024 px');
+  await signIn(page, 'compras@quatreros.example');
+  await expect(page).toHaveURL(/\/erp$/);
+  await page.getByRole('button', { name: 'Abrir navegación' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Navegación' });
+  await expect(drawer).toBeVisible();
+  await drawer.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  await audit(page, info, 'navegacion-drawer');
 });

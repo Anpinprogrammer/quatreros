@@ -6,7 +6,6 @@ import {
   CreditCard,
   Send,
   ShieldCheck,
-  Sparkles,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -101,7 +100,7 @@ export function AssistantWidget() {
 
   return (
     <>
-      <div className="fixed right-4 bottom-4 z-40 sm:right-6 sm:bottom-6">
+      <div className="fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 sm:right-6 sm:bottom-6">
         <button
           ref={bubbleRef}
           type="button"
@@ -113,29 +112,23 @@ export function AssistantWidget() {
           aria-controls={open ? PANEL_ID : undefined}
           aria-hidden={open || undefined}
           tabIndex={open ? -1 : 0}
-          title="Hablar con Quatreros AI"
-          className={`group relative grid size-16 place-items-center rounded-full border border-line bg-brand-soft shadow-float transition-[transform,opacity,border-color] duration-200 hover:border-brand/40 motion-safe:hover:-translate-y-0.5 focus-visible:outline-offset-4 ${
+          title="Asistente Quatreros"
+          className={`group relative grid size-16 place-items-center rounded-full border border-brand bg-[#191B20] shadow-[0_12px_28px_-12px_rgba(25,27,32,0.55)] transition-[transform,opacity,border-color,box-shadow] duration-200 hover:border-brand-hover hover:shadow-[0_18px_36px_-14px_rgba(25,27,32,0.65)] active:scale-95 motion-safe:hover:-translate-y-1 focus-visible:outline-offset-4 lg:size-[72px] dark:border-brand dark:bg-[#272A30] dark:shadow-[0_16px_36px_-14px_rgba(0,0,0,0.7)] ${
             open ? 'pointer-events-none scale-90 opacity-0' : 'opacity-100'
           }`}
         >
           <img
-            src="/cuatreros-bot-avatar.webp"
+            src="/cuatreros-bot-full.webp"
             alt=""
-            width={56}
-            height={56}
-            className="size-14 rounded-full object-cover"
+            width={360}
+            height={360}
+            className="size-14 object-contain lg:size-16"
           />
-          <span
-            aria-hidden
-            className="absolute -top-0.5 -right-0.5 grid size-5 place-items-center rounded-full border-2 border-surface bg-brand text-white"
-          >
-            <Sparkles className="size-2.5" />
-          </span>
           <span
             aria-hidden
             className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-line bg-surface px-3 py-1.5 text-caption font-semibold whitespace-nowrap text-ink opacity-0 shadow-float transition-opacity group-hover:opacity-100 lg:block"
           >
-            Hablar con Quatreros AI
+            Asistente Quatreros
           </span>
         </button>
       </div>
@@ -148,7 +141,7 @@ export function AssistantWidget() {
           aria-modal={isMobile || undefined}
           aria-labelledby="quatreros-ai-title"
           tabIndex={-1}
-          className="animate-panel-in fixed inset-0 z-50 flex h-dvh w-screen flex-col overflow-hidden border-line bg-surface shadow-float outline-none lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[clamp(13rem,15vw,24rem)] lg:border-l"
+          className="animate-panel-in fixed inset-0 z-50 flex h-dvh w-screen flex-col overflow-hidden border-line bg-surface shadow-float outline-none lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[20vw] lg:border-l"
         >
           <header className="flex shrink-0 items-center gap-2 border-b border-line px-3 py-2.5">
             <button

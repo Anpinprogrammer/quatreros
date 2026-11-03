@@ -19,14 +19,16 @@ export interface ReservationResult {
 
 /**
  * Reserva FEFO por lote para una línea de pedido (BR-093/BR-085, DEC-098).
- * Descuenta las reservas activas de cada lote/ubicación y reserva hasta donde alcance.
+ * Solo considera ubicaciones vendibles: el stock en tránsito o en ruta no se puede reservar.
+ * La restricción `(order_line, lot)` exige una sola reserva por lote: si el lote está en
+ * varias ubicaciones del mismo sitio, se elige la de mayor disponibilidad.
  */
 export async function reserveOrderLine(tx: Executor, input: ReservationInput): Promise<ReservationResult> {
   const result = await tx.execute(sql`
     select b.lot_id as "lotId", b.location_id as "locationId",
            b.quantity as "balance",
            coalesce(r.reserved, 0) as "reserved",
-           l.expires_on as "expiresOn"
+           l.expires_on as "expiresOn", l.code as "lotCode"
     from inventory.stock_balances b
     join inventory.lots l on l.id = b.lot_id
     join admin.locations loc on loc.id = b.location_id
@@ -39,6 +41,8 @@ export async function reserveOrderLine(tx: Executor, input: ReservationInput): P
     where b.presentation_id = ${input.presentationId}
       and l.product_id = ${input.productId}
       and loc.site_id = ${input.siteId}
+      and loc.is_active = true
+      and loc.kind not in ('in_transit', 'in_route')
       and b.quantity > 0
       and l.status = 'available'
       and (l.expires_on is null or l.expires_on >= current_date)
@@ -51,13 +55,30 @@ export async function reserveOrderLine(tx: Executor, input: ReservationInput): P
     locationId: string;
     balance: string;
     reserved: string;
+    expiresOn: string | null;
+    lotCode: string;
   }[];
-  let remaining = Number(input.quantity);
-  const created: ReservationResult['rows'] = [];
+
+  // Una sola fila por lote: la ubicación con más disponibilidad evita sobre-reservar
+  // una ubicación pequeña y cumple la restricción única (línea, lote).
+  const byLot = new Map<string, { row: (typeof rows)[number]; available: number }>();
   for (const row of rows) {
-    if (remaining <= 0) break;
     const available = Number(row.balance) - Number(row.reserved);
     if (available <= 0) continue;
+    const current = byLot.get(row.lotId);
+    if (!current || available > current.available) byLot.set(row.lotId, { row, available });
+  }
+  const candidates = [...byLot.values()].sort((a, b) => {
+    const expiry = (a.row.expiresOn ?? '9999-12-31').localeCompare(b.row.expiresOn ?? '9999-12-31');
+    if (expiry !== 0) return expiry;
+    const code = a.row.lotCode.localeCompare(b.row.lotCode);
+    return code !== 0 ? code : a.row.locationId.localeCompare(b.row.locationId);
+  });
+
+  let remaining = Number(input.quantity);
+  const created: ReservationResult['rows'] = [];
+  for (const { row, available } of candidates) {
+    if (remaining <= 0) break;
     const take = Math.min(available, remaining);
     if (take <= 0) continue;
     await tx.insert(reservations).values({

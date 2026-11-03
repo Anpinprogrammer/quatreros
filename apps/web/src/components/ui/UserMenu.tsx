@@ -24,11 +24,14 @@ export function UserMenu({
   me,
   compact = false,
   showName = false,
+  variant = 'default',
 }: {
   me: MeResponse;
   compact?: boolean;
   showName?: boolean;
+  variant?: 'default' | 'header';
 }) {
+  const header = variant === 'header';
   const labelId = useId();
   const signOut = useSignOut();
   const { theme, toggle } = useTheme();
@@ -109,7 +112,11 @@ export function UserMenu({
         aria-expanded={open}
         {...(!showName ? { 'aria-labelledby': labelId } : {})}
         title={me.user.fullName}
-        className={`flex min-h-11 items-center gap-2 rounded-xl px-1.5 transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 ${open ? 'bg-surface-2' : ''}`}
+        className={`flex min-h-11 items-center gap-2 rounded-xl px-1.5 transition-colors ${
+          header
+            ? `hover:bg-[var(--shell-header-surface)] focus-visible:bg-[var(--shell-header-surface)] ${open ? 'bg-[var(--shell-header-surface)]' : ''}`
+            : `hover:bg-surface-2 focus-visible:bg-surface-2 ${open ? 'bg-surface-2' : ''}`
+        }`}
       >
         {!showName ? (
           <span id={labelId} className="sr-only">
@@ -118,23 +125,37 @@ export function UserMenu({
         ) : null}
         {!compact && showName ? (
           <span className="text-right">
-            <span className="block max-w-32 truncate text-caption font-semibold text-ink">
+            <span
+              className={`block max-w-32 truncate text-caption font-semibold ${
+                header ? 'text-[var(--shell-header-text)]' : 'text-ink'
+              }`}
+            >
               {me.user.fullName}
             </span>
-            <span className="block max-w-32 truncate text-[11px] text-ink-2">
+            <span
+              className={`block max-w-32 truncate text-[11px] ${
+                header ? 'text-[var(--shell-header-muted)]' : 'text-ink-2'
+              }`}
+            >
               {me.roles.map((role) => role.name).join(', ')}
             </span>
           </span>
         ) : null}
         <span
           aria-hidden
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-line-strong bg-surface-2 text-ink"
+          className={`grid size-10 shrink-0 place-items-center rounded-full border ${
+            header
+              ? 'border-[var(--shell-header-border)] bg-[var(--shell-header-surface)] text-[var(--shell-header-text)]'
+              : 'border-line-strong bg-surface-2 text-ink'
+          }`}
         >
           <UserRound className="size-4" />
         </span>
         <ChevronDown
           aria-hidden
-          className={`size-3.5 text-ink-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`size-3.5 transition-transform duration-200 ${
+            header ? 'text-[var(--shell-header-muted)]' : 'text-ink-3'
+          } ${open ? 'rotate-180' : ''}`}
         />
       </button>
 

@@ -29,9 +29,9 @@ function SidebarNav({
         return (
           <div key={group.id} className={groupIndex === 0 ? '' : 'mt-5'}>
             {collapsed ? (
-              <div aria-hidden className="mx-2 mb-2 border-t border-line" />
+              <div aria-hidden className="mx-2 mb-2 border-t border-[var(--shell-sidebar-border)]" />
             ) : (
-              <p className="mb-1.5 px-2.5 text-[10px] font-semibold tracking-[0.14em] text-ink-3 uppercase">
+              <p className="mb-1.5 px-2.5 text-[10px] font-semibold tracking-[0.14em] text-[var(--shell-sidebar-muted)] uppercase">
                 {group.label}
               </p>
             )}
@@ -48,17 +48,17 @@ function SidebarNav({
                       onClick={onNavigate}
                       className={`relative flex min-h-11 items-center gap-3 rounded-xl px-2.5 text-body font-semibold transition-colors duration-200 ${
                         current
-                          ? 'bg-brand-soft text-brand-ink'
-                          : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+                          ? 'bg-[var(--shell-sidebar-active)] text-[var(--shell-sidebar-text)]'
+                          : 'text-[var(--shell-sidebar-muted)] hover:bg-[var(--shell-sidebar-hover)] hover:text-[var(--shell-sidebar-text)]'
                       } ${collapsed ? 'justify-center px-0' : ''}`}
                     >
                       <span
                         aria-hidden
-                        className={`absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand transition-opacity ${current ? 'opacity-100' : 'opacity-0'}`}
+                        className={`absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--shell-sidebar-accent)] transition-opacity ${current ? 'opacity-100' : 'opacity-0'}`}
                       />
                       <ModuleIcon
                         name={section.icon}
-                        className={`size-[18px] shrink-0 ${current ? 'text-brand-ink' : ''}`}
+                        className={`size-[18px] shrink-0 ${current ? 'text-[var(--shell-sidebar-accent)]' : ''}`}
                       />
                       <span className={collapsed ? 'sr-only' : 'truncate'}>{section.name}</span>
                     </Link>
@@ -77,16 +77,16 @@ function SidebarNav({
 export function AppSidebar({ me, collapsed }: { me: MeResponse; collapsed: boolean }) {
   return (
     <aside
-      className={`sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex ${collapsed ? 'w-[72px]' : 'w-[248px]'}`}
+      className={`app-sidebar sticky top-0 hidden h-dvh shrink-0 flex-col border-r transition-[width] duration-200 lg:flex ${collapsed ? 'w-[72px]' : 'w-[248px]'}`}
     >
       <div
-        className={`flex h-[72px] shrink-0 items-center border-b border-line ${collapsed ? 'justify-center px-0' : 'px-4'}`}
+        className={`flex h-[72px] shrink-0 items-center border-b border-[var(--shell-sidebar-border)] ${collapsed ? 'justify-center px-0' : 'px-4'}`}
       >
-        <Brand to="/erp" compact={collapsed} />
+        <Brand to="/erp" compact={collapsed} inverse />
       </div>
       <SidebarNav me={me} collapsed={collapsed} />
-      <div className="shrink-0 border-t border-line p-3">
-        <ServerStatus compact={collapsed} />
+      <div className="shrink-0 border-t border-[var(--shell-sidebar-border)] p-3">
+        <ServerStatus compact={collapsed} variant="sidebar" />
       </div>
     </aside>
   );
@@ -95,13 +95,13 @@ export function AppSidebar({ me, collapsed }: { me: MeResponse; collapsed: boole
 /** Navegación móvil en panel deslizante. */
 export function MobileSidebar({ me, open, onClose }: { me: MeResponse; open: boolean; onClose: () => void }) {
   return (
-    <ResponsiveDrawer open={open} onClose={onClose} title="Navegación">
-      <div className="mb-3 border-b border-line px-2 pb-4">
-        <Brand to="/erp" />
+    <ResponsiveDrawer open={open} onClose={onClose} title="Navegación" variant="dark">
+      <div className="mb-3 border-b border-[var(--shell-sidebar-border)] px-2 pb-4">
+        <Brand to="/erp" inverse />
       </div>
       <SidebarNav me={me} onNavigate={onClose} />
-      <div className="mt-4 border-t border-line px-2 pt-4">
-        <ServerStatus />
+      <div className="mt-4 border-t border-[var(--shell-sidebar-border)] px-2 pt-4">
+        <ServerStatus variant="sidebar" />
       </div>
     </ResponsiveDrawer>
   );

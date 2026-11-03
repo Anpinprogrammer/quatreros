@@ -15,6 +15,10 @@ import { ExistenciasPage } from '../existencias/ExistenciasPage';
 import { LotePage } from '../existencias/LotePage';
 import { TransferPage } from '../existencias/TransferPage';
 import { UsersPage } from '../usuarios/UsersPage';
+import { CarteraPage } from '../finanzas/CarteraPage';
+import { HechosPage } from '../finanzas/HechosPage';
+import { CashReviewPage } from '../pos/CashReviewPage';
+import { DishRecipesPage } from '../pos/DishRecipesPage';
 import { hasPermission } from '../../lib/session';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -136,6 +140,18 @@ export function ErpShell({ me }: { me: MeResponse }) {
               ) : null}
               {hasPermission(me, 'dis.dispatch.read') ? (
                 <Route path="ventas/despachos/:id" element={<DispatchPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'pos.cash_variance.review') ? (
+                <Route path="pos/revision" element={<CashReviewPage />} />
+              ) : null}
+              {hasPermission(me, 'pos.dish_recipe.manage') ? (
+                <Route path="pos/recetas" element={<DishRecipesPage />} />
+              ) : null}
+              {hasPermission(me, 'fin.receivable.read') ? (
+                <Route path="cartera" element={<CarteraPage me={me} />} />
+              ) : null}
+              {hasPermission(me, 'cont.report.read') ? (
+                <Route path="contabilidad/hechos" element={<HechosPage />} />
               ) : null}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -14,5 +14,19 @@ export {
   loadProductionRecipeVersion,
 } from './recipes.js';
 export type { ProductionRecipe, RecipeDeps } from './recipes.js';
+export {
+  createDishRecipeRow,
+  createDishRecipeVersionRow,
+  getDishRecipe,
+  listDishRecipes,
+  loadCurrentDishRecipe,
+} from './dish-recipes.js';
+export type {
+  CurrentDishRecipe,
+  DishComponentInput,
+  DishRecipe,
+  DishRecipeLine,
+  DishRecipeVersion,
+} from './dish-recipes.js';
 export { loadSalePresentation } from './sales.js';
 export type { SalePresentation } from './sales.js';

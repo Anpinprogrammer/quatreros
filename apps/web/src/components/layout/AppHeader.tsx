@@ -27,19 +27,22 @@ function Breadcrumbs() {
           return (
             <li key={`${crumb.label}-${String(index)}`} className="flex min-w-0 items-center gap-1.5">
               {index > 0 ? (
-                <ChevronRight aria-hidden className="hidden size-3.5 shrink-0 text-ink-3 sm:block" />
+                <ChevronRight
+                  aria-hidden
+                  className="hidden size-3.5 shrink-0 text-[var(--shell-header-muted)] sm:block"
+                />
               ) : null}
               {crumb.to && !last ? (
                 <Link
                   to={crumb.to}
-                  className="hidden max-w-40 truncate rounded px-1 text-ink-2 transition-colors hover:text-ink sm:block"
+                  className="hidden max-w-40 truncate rounded px-1 text-[var(--shell-header-muted)] transition-colors hover:text-[var(--shell-header-text)] sm:block"
                 >
                   {crumb.label}
                 </Link>
               ) : null}
               {!crumb.to || last ? (
                 <span
-                  className={`max-w-56 truncate font-semibold text-ink ${last ? '' : 'hidden sm:block'}`}
+                  className={`max-w-56 truncate font-semibold text-[var(--shell-header-text)] ${last ? '' : 'hidden sm:block'}`}
                   aria-current={last ? 'page' : undefined}
                 >
                   {crumb.label}
@@ -57,7 +60,7 @@ function CurrentContext() {
   const location = useLocation();
   const current = breadcrumbsFor(location.pathname).at(-1);
   return (
-    <span className="hidden max-w-48 truncate font-display text-body font-semibold text-ink sm:block lg:hidden">
+    <span className="hidden max-w-48 truncate font-display text-body font-semibold text-[var(--shell-header-text)] sm:block lg:hidden">
       {current?.label}
     </span>
   );
@@ -99,11 +102,14 @@ function SiteMenu({ me }: { me: MeResponse }) {
         aria-expanded={open}
         aria-label={`Sedes autorizadas: ${label}`}
         title={`Sedes autorizadas: ${names.join(', ')}`}
-        className="flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface px-2.5 text-caption font-semibold text-ink-2 transition-colors hover:border-line-strong hover:text-ink"
+        className="flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--shell-header-border)] bg-[var(--shell-header-surface)] px-2.5 text-caption font-semibold text-[var(--shell-header-text)] transition-colors hover:border-[var(--shell-header-muted)]"
       >
         <MapPin aria-hidden className="size-4 shrink-0 text-brand-ink" />
         <span className="hidden max-w-36 truncate xl:inline">{label}</span>
-        <ChevronDown aria-hidden className="hidden size-3.5 shrink-0 text-ink-3 xl:block" />
+        <ChevronDown
+          aria-hidden
+          className="hidden size-3.5 shrink-0 text-[var(--shell-header-muted)] xl:block"
+        />
       </button>
 
       {open ? (
@@ -165,7 +171,7 @@ function NotificationsMenu() {
         aria-expanded={open}
         aria-haspopup="dialog"
         title="Notificaciones"
-        className="grid size-11 place-items-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+        className="grid size-11 place-items-center rounded-xl text-[var(--shell-header-muted)] transition-colors hover:bg-[var(--shell-header-surface)] hover:text-[var(--shell-header-text)]"
       >
         <Bell aria-hidden className="size-5" />
       </button>
@@ -215,14 +221,14 @@ export function AppHeader({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-header backdrop-blur-xl">
+    <header className="app-header sticky top-0 z-30 border-b">
       <div className="flex h-[72px] items-center gap-2 px-4 md:gap-3 md:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-1.5 md:gap-2">
           <button
             type="button"
             onClick={onOpenNav}
             aria-label="Abrir navegación"
-            className="grid size-11 shrink-0 place-items-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink lg:hidden"
+            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--shell-header-muted)] transition-colors hover:bg-[var(--shell-header-surface)] hover:text-[var(--shell-header-text)] lg:hidden"
           >
             <Menu aria-hidden className="size-5" />
           </button>
@@ -231,7 +237,7 @@ export function AppHeader({
             onClick={onToggleCollapse}
             aria-label={collapsed ? 'Expandir navegación' : 'Contraer navegación'}
             title={collapsed ? 'Expandir navegación' : 'Contraer navegación'}
-            className="hidden size-10 shrink-0 place-items-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink lg:grid"
+            className="hidden size-10 shrink-0 place-items-center rounded-xl text-[var(--shell-header-muted)] transition-colors hover:bg-[var(--shell-header-surface)] hover:text-[var(--shell-header-text)] lg:grid"
           >
             {collapsed ? (
               <PanelLeftOpen aria-hidden className="size-5" />
@@ -252,14 +258,14 @@ export function AppHeader({
               setPaletteOpen(true);
             }}
             aria-keyshortcuts="Meta+K Control+K"
-            className="flex min-h-10 w-full max-w-md items-center gap-2 rounded-xl border border-line bg-surface px-3 text-body text-ink-2 transition-colors hover:border-line-strong hover:text-ink"
+            className="flex min-h-10 w-full max-w-md items-center gap-2 rounded-xl border border-[var(--shell-header-border)] bg-[var(--shell-header-surface)] px-3 text-body text-[var(--shell-header-muted)] transition-colors hover:border-[var(--shell-header-muted)] hover:text-[var(--shell-header-text)]"
           >
             <Search aria-hidden className="size-4 shrink-0" />
             <span className="sr-only">Buscar en Quatreros</span>
             <span className="flex-1 text-left">Buscar…</span>
             <kbd
               aria-hidden
-              className="rounded-md border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-ink-3"
+              className="rounded-md border border-[var(--shell-header-border)] bg-[var(--shell-header-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--shell-header-muted)]"
             >
               ⌘K
             </kbd>
@@ -274,13 +280,13 @@ export function AppHeader({
             }}
             aria-label="Buscar en Quatreros"
             aria-keyshortcuts="Meta+K Control+K"
-            className="grid size-11 place-items-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink md:hidden"
+            className="grid size-11 place-items-center rounded-xl text-[var(--shell-header-muted)] transition-colors hover:bg-[var(--shell-header-surface)] hover:text-[var(--shell-header-text)] md:hidden"
           >
             <Search aria-hidden className="size-5" />
           </button>
           <SiteMenu me={me} />
           <NotificationsMenu />
-          <UserMenu me={me} />
+          <UserMenu me={me} variant="header" />
         </div>
       </div>
 

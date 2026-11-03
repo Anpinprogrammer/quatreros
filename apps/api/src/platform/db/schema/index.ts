@@ -12,3 +12,5 @@ export * from '../../../modules/production/infrastructure/schema.js';
 export * from '../../../modules/sales/infrastructure/schema.js';
 export * from '../../../modules/distribution/infrastructure/schema.js';
 export * from '../../../modules/finance/infrastructure/schema.js';
+export * from '../../../modules/pos/infrastructure/schema.js';
+export * from '../../../modules/accounting/infrastructure/schema.js';

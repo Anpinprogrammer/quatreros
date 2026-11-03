@@ -87,6 +87,16 @@ export const DEMO_INVENTORY_LOTS: DemoLot[] = [
     expiresInDays: 22,
   },
   {
+    code: 'PT-2026-0003',
+    lotType: 'finished_good',
+    itemName: 'Rellena Mixta',
+    presentationName: 'Unidad',
+    locationName: 'Productos del punto',
+    quantity: '10.000',
+    manufacturedDaysAgo: 8,
+    expiresInDays: 22,
+  },
+  {
     code: 'PT-2026-0004',
     lotType: 'finished_good',
     itemName: 'Chorizo Santarrosano',

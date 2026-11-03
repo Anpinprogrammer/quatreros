@@ -13,6 +13,7 @@ export function ResponsiveDrawer({
   children,
   side = 'left',
   widthClass = 'w-[min(20rem,88vw)]',
+  variant = 'surface',
 }: {
   open: boolean;
   onClose: () => void;
@@ -20,7 +21,9 @@ export function ResponsiveDrawer({
   children: ReactNode;
   side?: 'left' | 'right';
   widthClass?: string;
+  variant?: 'surface' | 'dark';
 }) {
+  const dark = variant === 'dark';
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,15 +86,31 @@ export function ResponsiveDrawer({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className={`animate-slide-in relative flex h-full flex-col border-line bg-surface shadow-float outline-none ${widthClass} ${side === 'left' ? 'border-r' : 'ml-auto border-l'}`}
+        className={`animate-slide-in relative flex h-full flex-col shadow-float outline-none ${
+          dark ? 'app-sidebar border-[var(--shell-sidebar-border)]' : 'border-line bg-surface'
+        } ${widthClass} ${side === 'left' ? 'border-r' : 'ml-auto border-l'}`}
       >
-        <div className="flex h-[72px] items-center justify-between border-b border-line px-4">
-          <p className="font-display text-card font-semibold text-ink">{title}</p>
+        <div
+          className={`flex h-[72px] items-center justify-between border-b px-4 ${
+            dark ? 'border-[var(--shell-sidebar-border)]' : 'border-line'
+          }`}
+        >
+          <p
+            className={`font-display text-card font-semibold ${
+              dark ? 'text-[var(--shell-sidebar-text)]' : 'text-ink'
+            }`}
+          >
+            {title}
+          </p>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar panel"
-            className="grid size-11 place-items-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+            className={`grid size-11 place-items-center rounded-xl transition-colors ${
+              dark
+                ? 'text-[var(--shell-sidebar-muted)] hover:bg-[var(--shell-sidebar-hover)] hover:text-[var(--shell-sidebar-text)]'
+                : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+            }`}
           >
             <X aria-hidden className="size-5" />
           </button>

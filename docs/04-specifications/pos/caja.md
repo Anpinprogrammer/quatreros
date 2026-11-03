@@ -1,11 +1,11 @@
 # Especificación — Entrega 6: caja (POS)
 
-> Estado: **BORRADOR — pendiente de aprobación** · 2026-11-02
+> Estado: **APROBADA** · 2026-11-02 (D1..D8 aprobadas por el responsable; implementación en curso)
 > Cubre RF-220, RF-221, RF-222, RF-223, RF-224 y RF-225; incluye el **consumo teórico** de RF-226.
 > Quedan fuera los conteos físicos y las diferencias de cocina de RF-226, RF-227 (P-07), el documento fiscal (BR-150, P-02), descuentos/anulaciones/reembolsos (P-09), la venta a crédito y los medios distintos de efectivo/transferencia (Q-POS-02), la apertura de paquetes (P-06) y la contabilización (P-01..P-04).
 > Reglas provisionales: un turno por caja y por cajero (BR-141, **PROPOSED**; se aplica como PROVISIONAL en el prototipo), consumo teórico sin descuento automático de cocina (BR-147, Q-B-09) y caja = sede POS (decisión de modelo de esta especificación).
 
-## 0. Decisiones que necesitan aprobación
+## 0. Decisiones aprobadas
 
 | #   | Decisión                                                                                                                                                                                                                                                                                             | Recomendación                                                                                               | Si no se aprueba                                                                              |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -474,7 +474,7 @@ Escenario: permiso denegado
 
 **Antes de programar:**
 
-- Especificación aprobada, incluidas D1..D8.
+- Especificación aprobada, incluidas D1..D8 (registradas en DEC-102 y DEC-103).
 - Registrar las decisiones aprobadas en `decision-register.md` (nuevo `DEC-###`) y actualizar la matriz de trazabilidad.
 - Confirmar que RF-225 se implementa en esta entrega y que RF-226 solo incluye consumo teórico.
 - Aprobar la ampliación de `catalog.recipe_lines` (D3).

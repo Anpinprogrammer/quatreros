@@ -4,8 +4,10 @@ import type { Database } from '../../../platform/db/client.js';
 import { AppError } from '../../../platform/http/errors.js';
 import { movementViolation, nextBalance } from '../domain/inventory.js';
 import { stockBalances, stockMovements } from '../infrastructure/schema.js';
+import { allocateFefo, type FefoAllocation } from './fefo.js';
 
 type Executor = Pick<Database, 'select' | 'insert' | 'update'>;
+type SaleExecutor = Pick<Database, 'select' | 'insert' | 'update' | 'execute'>;
 
 export interface MovementInput {
   movementType: MovementType;
@@ -101,4 +103,41 @@ export async function recordMovement(tx: Executor, input: MovementInput): Promis
   }
 
   return movement;
+}
+
+export interface SaleIssueInput {
+  siteId: string;
+  locationId: string;
+  presentationId: string;
+  quantity: string;
+  saleId: string;
+  userId: string;
+  reason?: string | undefined;
+}
+
+/**
+ * Salida de una venta POS: asigna FEFO en la ubicación del punto, registra un movimiento
+ * `sale` por cada lote y devuelve las asignaciones para que POS guarde la trazabilidad.
+ */
+export async function issueForSale(tx: SaleExecutor, input: SaleIssueInput): Promise<FefoAllocation[]> {
+  const result = await allocateFefo(
+    tx,
+    { presentationId: input.presentationId, locationId: input.locationId, quantity: input.quantity },
+    { lock: true, siteIds: [input.siteId] },
+  );
+  for (const allocation of result.allocations) {
+    await recordMovement(tx, {
+      movementType: 'sale',
+      lotId: allocation.lotId,
+      presentationId: input.presentationId,
+      locationId: input.locationId,
+      quantity: `-${allocation.quantity}`,
+      baseQuantity: `-${allocation.baseQuantity}`,
+      sourceType: 'pos.sale',
+      sourceId: input.saleId,
+      createdBy: input.userId,
+      reason: input.reason,
+    });
+  }
+  return result.allocations;
 }

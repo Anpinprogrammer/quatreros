@@ -286,12 +286,13 @@ export function CheckboxGroup<T extends string>({
   );
 }
 
-type AlertTone = 'error' | 'success' | 'info';
+type AlertTone = 'error' | 'success' | 'info' | 'warning';
 
 const alertStyles: Record<AlertTone, string> = {
   error: 'bg-danger/10 text-danger border-danger/25',
   success: 'bg-success/10 text-success border-success/25',
   info: 'bg-info/10 text-info border-info/25',
+  warning: 'bg-warning/10 text-warning border-warning/25',
 };
 
 export function Alert({
