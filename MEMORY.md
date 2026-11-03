@@ -7,24 +7,24 @@
 
 ERP a medida para una productora de embutidos de Cali: compras, producción por lotes, inventario con FEFO, pedidos y reparto, POS, cartera y contabilidad, con IA y Telegram opcionales. Se construye por Spec-Driven Development y está en **modo prototipo** (DEC-083): 8 entregas verticales demostrables, una a la vez.
 
-| Etapa                                                            | Estado                                                                                                 |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| A–E: descubrimiento, requerimientos, arquitectura, IA y Telegram | Completas                                                                                              |
-| F: monorepo, CI/CD, Docker, respaldos                            | Completa                                                                                               |
-| **Entrega 1**: ingreso, usuarios, roles y sedes                  | ✅ Terminada                                                                                           |
-| **Entrega 2**: catálogo e inventario                             | ✅ Terminada: 2a catálogo, 2b existencias y 2c FEFO/traslados                                          |
-| **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción                                            |
-| **Entrega 4**: producción                                        | ✅ Terminada: recetas, consumo por lote y lote PT                                                      |
-| **Entrega 5**: pedidos y reparto                                 | ✅ Terminada: reservas, despacho, entregas y recaudo                                                   |
-| **Entrega 6**: caja (POS)                                        | ✅ Terminada: turnos, venta, pago mixto y arqueo                                                       |
-| **Entrega 7**: cartera y hechos económicos                       | ✅ Terminada: antigüedad, abonos, conciliación y eventos                                               |
-| **Entrega 8**: asistente de IA                                   | ✅ Implementada: tickets, consultas, 2 escrituras y consumo · activación real pendiente de `ant apply` |
+| Etapa                                                            | Estado                                                                                          |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| A–E: descubrimiento, requerimientos, arquitectura, IA y Telegram | Completas                                                                                       |
+| F: monorepo, CI/CD, Docker, respaldos                            | Completa                                                                                        |
+| **Entrega 1**: ingreso, usuarios, roles y sedes                  | ✅ Terminada                                                                                    |
+| **Entrega 2**: catálogo e inventario                             | ✅ Terminada: 2a catálogo, 2b existencias y 2c FEFO/traslados                                   |
+| **Entrega 3**: compras y recepción                               | ✅ Terminada: proveedores, compras y lotes MP por recepción                                     |
+| **Entrega 4**: producción                                        | ✅ Terminada: recetas, consumo por lote y lote PT                                               |
+| **Entrega 5**: pedidos y reparto                                 | ✅ Terminada: reservas, despacho, entregas y recaudo                                            |
+| **Entrega 6**: caja (POS)                                        | ✅ Terminada: turnos, venta, pago mixto y arqueo                                                |
+| **Entrega 7**: cartera y hechos económicos                       | ✅ Terminada: antigüedad, abonos, conciliación y eventos                                        |
+| **Entrega 8**: asistente de IA                                   | ✅ Implementada y aplicada con `ant` (agente v2); consultas y escrituras preparadas verificadas |
 
 ## 2. Dónde estamos (2026-11-02)
 
 - Rama activa de la entrega 8: `feat/ia-asistente`, creada desde `docs/entrega-8-spec`.
 - La entrega 7 está fusionada en `main` (PR #17). La entrega 8 está implementada y pendiente de fusión.
-- Entorno local recreado, migraciones `0000`–`0028` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001`, `D-0001`, `CONC-0001` y los hechos económicos demo).
+- Entorno local recreado, migraciones `0000`–`0029` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001`, `D-0001`, `CONC-0001` y los hechos económicos demo).
 
 ### Entrega 2a (hecha)
 
@@ -115,12 +115,17 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - Techos: USD 3/día, USD 10/semana y USD 30/mes; sesión USD 0,25.
 - Verificación: 94/94 integración PostgreSQL real, PGlite 92/94, E2E 81/15/0 y `pnpm check` verde.
 
-### Siguiente: activar el agente real
+### Agente real (aplicado)
 
-- Declarar las herramientas `custom` en `quatreros-ai/` y ejecutar `ant apply` con autorización del responsable (Q-IA-04).
-- Configurar `ANTHROPIC_API_KEY`, `ANTHROPIC_AGENT_ID`, `ANTHROPIC_ENVIRONMENT_ID` y `ANTHROPIC_AGENT_VERSION`.
-- Resolver Q-IA-05 (retención) y Q-IA-06 (modelo) antes de la demo con el proveedor real.
-- Sin `ant apply`, el backend y la UI funcionan con el proveedor simulado, pero el agente real solo conversa.
+- `ant apply` actualizó el agente a la versión 2 y publicó 9 lecturas + 2 escrituras preparadas. `claude-lock.json` está sincronizado.
+- Verificado contra Anthropic: consulta de existencias y creación de materia prima con propuesta + confirmación.
+- `.env` local tiene la API key y los IDs; no se versiona.
+- Quedan Q-IA-05 (retención) y Q-IA-06 (modelo) para cerrar la demo.
+
+### Sesiones (RNF-006, DEC-107)
+
+- ERP 30 min, POS 12 h y portal móvil 8 h de inactividad.
+- La actividad vive en `platform.session_activity` y el servidor responde `401 SESSION_EXPIRED`; no es solo un temporizador de UI.
 
 ## 3. Decisiones vigentes que más afectan el trabajo
 
@@ -229,7 +234,8 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 
 ## 9. Bitácora
 
-- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **SPA reorganizada por capas** (`pages`, `components`, `hooks`, `services`, `lib`, `config`) con fronteras verificadas por `dependency-cruiser` (ADR-024, DEC-101); refactorización pura pendiente de fusión. **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Móvil del ingreso** con fondo cálido, card premium, CTA de 56 px y robot al pie. **Ingreso en dos pasos con efecto cortina**: paso 1 en retícula (cabecera, mensaje + áreas 2×2, tarjeta de perfiles con personaje, pie) y paso 2 con dos paños que se cierran al centro (rol en oscuro, formulario en blanco); en móvil, persiana desde arriba. Sin movimiento continuo. Sin flujo de restablecimiento de contraseña (Q-C-07). **Command Center y header reorganizados**: pestañas Módulos/Tablero del día, KPIs operativos reales, atención priorizada, módulos compactos y menú de usuario con tema/cierre; fuera el panel de plan del dashboard. **App Shell con identidad propia**: sidebar oscura, header cálido y burbuja del asistente oscura con borde naranja; drawer móvil oscuro.
+- **2026-11-02**: entrega 2a implementada y verificada; decisiones DEC-089..092; interruptores locales de MFA y límite de ingreso; orígenes 5173/3000 aceptados en desarrollo. Rediseño v1.1 (DEC-093) revisado y commiteado en `1ad7041`. Entrega 2b (lotes, existencias, kardex y trazabilidad) implementada y verificada. Entrega 2c (FEFO, traslados con tránsito, recepción y alertas) implementada y verificada; RF-113 queda para cuando exista el motor de aprobaciones. **Logo oficial "Los 4 Treros" integrado** en la marca, el favicon y el icono de iOS (`public/logo.webp` → `logo-mark.webp`). Entrega 3 (proveedores, compras y recepción con lote MP) implementada y verificada. Entrega 4 (recetas, consumo real y lote PT) implementada y verificada. Entrega 5 (pedidos, despacho, reparto y recaudo) implementada y verificada; sigue la entrega 6 (caja POS). **SPA reorganizada por capas** (`pages`, `components`, `hooks`, `services`, `lib`, `config`) con fronteras verificadas por `dependency-cruiser` (ADR-024, DEC-101); refactorización pura pendiente de fusión. **Burbuja y panel de Quatreros AI** listos como vista previa; compositor deshabilitado hasta la entrega 8, sin respuestas simuladas. **Ingreso rediseñado** en clave luminosa (52/48, logo oficial, personaje y formulario de 52 px), manteniendo la autenticación intacta. **Móvil del ingreso** con fondo cálido, card premium, CTA de 56 px y robot al pie. **Ingreso en dos pasos con efecto cortina**: paso 1 en retícula (cabecera, mensaje + áreas 2×2, tarjeta de perfiles, pie y logo centrado en la cabecera) y paso 2 con dos paños que se cierran al centro (rol en oscuro, formulario en blanco); en móvil, persiana desde arriba. Sin movimiento continuo. Sin flujo de restablecimiento de contraseña (Q-C-07). **Command Center y header reorganizados**: pestañas Módulos/Tablero del día, KPIs operativos reales, atención priorizada, módulos compactos y menú de usuario con tema/cierre; fuera el panel de plan del dashboard. **App Shell con identidad propia**: sidebar oscura, header cálido y burbuja del asistente oscura con borde naranja; drawer móvil oscuro.
 - **2026-11-02**: entrega 6 (POS) cerrada y publicada en `feat/pos-caja`. Entrega 7 (cartera, recaudos, conciliación y hechos económicos) aprobada con DEC-104/DEC-105 e implementada en `feat/fin-cartera-recaudos`: antigüedad por rangos, abonos FIFO/manuales, conciliación con diferencia, CSV y bandeja inmutable de eventos; sin contabilización (P-01..P-04) ni liquidación de distribuidores (P-08). Verificación: `pnpm check` verde (80 unitarias), PGlite 86/88, finanzas 5/5 en PostgreSQL real y E2E 78/15/0. Sigue la entrega 8 (asistente de IA).
 - **2026-11-03**: corregido el fallo de reservas de la entrega 5 que rompía `inventory.test.ts` en PostgreSQL real. `reserveOrderLine` ahora ignora el stock en tránsito/ruta y consolida una sola reserva por lote (la ubicación con mayor disponibilidad), respetando `reservations_order_line_lot_uq`. Integración PGlite 86/88 y PostgreSQL real 88/88.
 - **2026-11-03**: entrega 8 implementada (DEC-106). Backend `assistant` + `ToolGateway`, migraciones `0027`–`0028`, tickets, streaming SSE, consumo, techos y dos escrituras preparadas con confirmación. Frontend con burbuja funcional, tickets y configuración. Verificación: 94/94 PostgreSQL real, PGlite 92/94, E2E 81/15/0. Falta `ant apply` (Q-IA-04) para conectar las herramientas al agente real.
+- **2026-11-03**: `ant apply` publicado: agente Quatreros AI v2 con 9 lecturas y 2 escrituras preparadas; verificación real de consulta y creación de materia prima. También se implementó RNF-006/DEC-107: cierre por inactividad de 30 min en ERP, 12 h en POS y 8 h en ruta, con `platform.session_activity` y `401 SESSION_EXPIRED`.
