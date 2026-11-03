@@ -13,6 +13,7 @@ import {
   useSendMessage,
 } from '../../services/assistant';
 import { AIActionConfirmation } from '../ui/AIActionConfirmation';
+import { AssistantMessage } from './AssistantMessage';
 import { Alert } from '../ui/form';
 
 const PANEL_ID = 'quatreros-ai-panel';
@@ -373,7 +374,11 @@ export function AssistantWidget({ me }: { me: MeResponse }) {
                         : 'border border-line bg-surface-2 text-ink'
                     }`}
                   >
-                    {message.text}
+                    {message.role === 'assistant' ? (
+                      <AssistantMessage text={message.text} />
+                    ) : (
+                      <span className="whitespace-pre-wrap">{message.text}</span>
+                    )}
                   </li>
                 ))}
               </ul>
