@@ -9,9 +9,9 @@
     "./agents/quatreros-ai.md": {
       "kind": "agent",
       "id": "agent_01GV2jHLsN47nJTehwGUARBi",
-      "version": "2",
-      "hash": "843459f097439999d25b3fb85010f94a",
-      "remote_hash": "748a30740ed8a15f7840d37c026759db"
+      "version": "4",
+      "hash": "9474f2339891a0e574ae163045be732b",
+      "remote_hash": "68935924662f117bfa219f394eca1de7"
     },
     "./environments/quatreros-ai-env.yml": {
       "kind": "environment",
