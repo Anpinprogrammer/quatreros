@@ -113,11 +113,13 @@
 - `pnpm build` en verde y E2E 78 pasaron, 15 omitidos y 0 fallos en escritorio, tableta y móvil (con axe AA).
 - El E2E de cierre usó el ingreso original: el rediseño de `LoginPage.tsx` sin commitear tiene un contraste pendiente en la pantalla `ingreso` y debe corregirse antes de fusionarlo.
 
-### Preparación de la entrega 8
+### Entrega 8 en especificación
 
-- Escribir `docs/04-specifications/ia/asistente-demo.md` (preguntas, lecturas permitidas, registro de conversaciones y confirmación de escrituras) y esperar aprobación.
-- No ejecutar `ant apply` ni declarar herramientas en el agente sin autorización (DEC-087). Las escrituras de la IA siguen bloqueadas (P-10).
-- Aprovechar los casos de uso de lectura ya expuestos por los módulos; no crear consultas directas a tablas desde el asistente.
+- Borrador creado en `docs/04-specifications/ia/asistente-demo.md`; queda pendiente aprobar D1..D8 y las cinco consultas de la demo (Q-IA-01).
+- Alcance propuesto: solo lectura sobre módulos existentes, activación global, consumo, techo de gasto y privacidad de conversaciones.
+- RF-343 sigue fuera: `feature.assistant.writes` apagado y confirmaciones con `423 FEATURE_BLOCKED` (P-10).
+- No ejecutar `ant apply` ni declarar herramientas en el agente sin autorización (DEC-087). Aprovechar los casos de uso de lectura ya expuestos; no crear consultas directas a tablas.
+- Nueva pregunta Q-IA-07: el Administrador solo ve consumo agregado, no el contenido de las conversaciones.
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
