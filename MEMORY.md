@@ -1,6 +1,6 @@
 # MEMORY.md — memoria viva de Quatreros
 
-> Última actualización: **2026-11-02**.
+> Última actualización: **2026-11-03**.
 > Este archivo es el punto de partida para cualquier agente o desarrollador: resume el estado real, el entorno local y el trabajo en curso. Las fuentes de verdad siguen siendo los documentos enlazados; si hay contradicción, mandan ellos y se corrige este archivo. **Actualízalo al cerrar cada sesión.**
 
 ## 1. Qué es y en qué modo está
@@ -20,11 +20,20 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 | **Entrega 7**: cartera y hechos económicos                       | ✅ Terminada: antigüedad, abonos, conciliación y eventos                                        |
 | **Entrega 8**: asistente de IA                                   | ✅ Implementada y aplicada con `ant` (agente v2); consultas y escrituras preparadas verificadas |
 
-## 2. Dónde estamos (2026-11-02)
+## 2. Dónde estamos (2026-11-03)
 
-- Rama activa de la entrega 8: `feat/ia-asistente`, creada desde `docs/entrega-8-spec`.
-- La entrega 7 está fusionada en `main` (PR #17). La entrega 8 está implementada y pendiente de fusión.
-- Entorno local recreado, migraciones `0000`–`0029` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001`, `D-0001`, `CONC-0001` y los hechos económicos demo).
+- **Las 8 entregas están terminadas y fusionadas en `main`** (PRs #17–#22). CI en verde y sin PRs de funcionalidad abiertos.
+- **El prototipo funcional está cerrado.** Sirve como base demostrable del trabajo, aunque **no es el producto final**: falta la puesta en producción, el primer administrador, la configuración del entorno y los ajustes que salgan del piloto.
+- **Entorno local recreado**, migraciones `0000`–`0030` aplicadas y semilla demo cargada (incluye `T-0001`, `C-0001`, `OP-0001`, `P-0001`, `D-0001`, `CONC-0001` y los hechos económicos demo).
+
+### Estado comercial y despliegue (2026-11-03)
+
+- **El despliegue está pendiente y detenido a propósito.** No se publica en ningún hosting hasta que el acuerdo con el cliente esté pactado: alcance, precio, forma de pago, mantenimiento e infraestructura. No adelantes trabajo de despliegue sin que el responsable lo pida.
+- **Hay una base para mostrar el trabajo**: el prototipo corre en local con datos demo y se puede demostrar de punta a punta. No hay demo público todavía.
+- Propuesta comercial en `docs/cotizacion-piloto-quatreros.md` (PR #23): ERP `$6.400.000`; asistente de IA `$1.000.000`; web `$1.500.000` o `$2.200.000`; mantenimiento `$250.000 / $500.000 / $900.000`.
+- **La facturación electrónica no aplica a este cliente**: no está obligado a facturar electrónicamente, confirmado con su contador. Queda fuera de alcance y documentada como tal.
+- **Demo de portafolio separado de la producción del cliente**: cuenta, base de datos y API key propias, con datos ficticios. Nunca se comparte la base ni las llaves del cliente.
+- Guía operativa del despliegue recomendado: `docs/operations/deployment-production.md`.
 
 ### Entrega 2a (hecha)
 
@@ -120,7 +129,7 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - `ant apply` actualizó el agente a la versión 2 y publicó 9 lecturas + 2 escrituras preparadas. `claude-lock.json` está sincronizado.
 - Verificado contra Anthropic: consulta de existencias y creación de materia prima con propuesta + confirmación.
 - `.env` local tiene la API key y los IDs; no se versiona.
-- Quedan Q-IA-05 (retención) y Q-IA-06 (modelo) para cerrar la demo.
+- Q-IA-05 (retención) cerrada con DEC-108 y Q-IA-06 (modelo) con DEC-109: `claude-haiku-5-5` con `effort: low`.
 
 ### Sesiones (RNF-006, DEC-107)
 
@@ -137,6 +146,7 @@ ERP a medida para una productora de embutidos de Cali: compras, producción por 
 - **DEC-091**: catálogo dentro de 04. Producción.
 - **DEC-092**: RF-033 (recetas) se construye en la entrega 4.
 - Bloqueado: contabilidad e impuestos (P-01..P-04), apertura de paquetes (P-06), mermas de cocina (P-07), liquidación de repartidores (P-08), escrituras de IA (P-10), vencidos/retiros (P-05). Se muestran como "Espera decisión" y no se implementan.
+- **Despliegue:** pendiente por decisión del responsable. No hay ambiente de staging ni de producción activo; no se publica nada hasta cerrar el acuerdo comercial con el cliente. Guía: `docs/operations/deployment-production.md`.
 
 ## 4. Entorno local
 
@@ -199,28 +209,33 @@ update auth.user set two_factor_enabled = false;
 
 ```
 apps/api/src/
-  modules/admin/       referencia completa (authz, usuarios, roles, sedes)
-  modules/catalog/     2a: domain, application, infrastructure, http
-  platform/            auth, authz, idempotencia, auditoría, flags, db
-apps/api/drizzle/      migraciones 0000–0005 (catálogo en 0004/0005)
-packages/contracts/    admin.ts, catalog.ts, common.ts, errors.ts
+  modules/            admin, catalog, inventory, purchasing, production, sales,
+                      distribution, pos, finance, accounting
+  addons/             assistant, tool-gateway
+  platform/           auth (Better Auth + TOTP), http, idempotency, audit, features, db, logger
+  cli/                migrate, seed, seed-demo, assistant-retention
+apps/api/drizzle/     migraciones 0000–0030
+packages/contracts/   esquemas Zod compartidos (API ↔ web)
 apps/web/src/
-  pages/               pantallas y shells (erp, pos, ruta)
-  components/          ui (sistema de diseño), layout, auth y piezas por módulo
-  hooks/               sesión, tema y título
-  services/            cliente HTTP y consultas/mutaciones por módulo
-  lib/                 permisos, formatos, contraseñas y tema
-  config/modules.ts    secciones y estado de los módulos
-  app/                 providers, router y guardas
-apps/web/e2e/          flujos, catálogo y accesibilidad (axe)
-docs/                  descubrimiento, requerimientos, arquitectura, specs, diseño, operación
+  pages/              acceso, usuarios, catalogo, compras, produccion, existencias,
+                      ventas, finanzas, pos, ruta, ia, erp
+  components/         ui (sistema de diseño), layout, auth
+  hooks/              sesión, tema y título
+  services/           cliente HTTP y consultas por módulo (TanStack Query)
+  lib/                permisos, formatos, contraseñas y tema
+  config/modules.ts   secciones y estado de los módulos
+  app/                providers, router y guardas
+apps/web/e2e/         flujos y accesibilidad (axe)
+infrastructure/       Dockerfile, roles de BD, respaldo/restauración, reset demo
+quatreros-ai/         agente Quatreros AI (Managed Agents) y `claude-lock.json`
+docs/                 descubrimiento, requerimientos, arquitectura, specs, planeación, diseño, operación
 ```
 
 ## 7. Trabajo en curso del responsable (no tocar sin preguntar)
 
-Las entregas 6 y 7 están en ramas publicadas pendientes de decisión del responsable. **No fusiones a `main`** ni incluyas en un commit el rediseño de `LoginPage.tsx` (y sus cambios en `styles.css` y el sistema de diseño) mientras el responsable no lo pida: ese trabajo está sin commitear y tiene un contraste pendiente en accesibilidad.
-
-El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
+- **No fusiones a `main` ni despliegues nada**: el merge y el despliegue los aprueba el responsable. Hoy el trabajo activo es comercial —cotización, reunión de alcance y acuerdo con el cliente—, no de código.
+- **No ejecutes `ant apply`** ni crees recursos remotos en Anthropic sin autorización explícita.
+- El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp` → `logo-mark.webp`, `favicon.png`, `apple-touch-icon.png`). Las fuentes alternativas quedaron archivadas en `docs/05-design/original/`.
 
 ## 8. Reglas para el próximo agente
 
@@ -239,3 +254,4 @@ El **logo oficial** está integrado en la marca y los iconos (`public/logo.webp`
 - **2026-11-03**: corregido el fallo de reservas de la entrega 5 que rompía `inventory.test.ts` en PostgreSQL real. `reserveOrderLine` ahora ignora el stock en tránsito/ruta y consolida una sola reserva por lote (la ubicación con mayor disponibilidad), respetando `reservations_order_line_lot_uq`. Integración PGlite 86/88 y PostgreSQL real 88/88.
 - **2026-11-03**: entrega 8 implementada (DEC-106). Backend `assistant` + `ToolGateway`, migraciones `0027`–`0028`, tickets, streaming SSE, consumo, techos y dos escrituras preparadas con confirmación. Frontend con burbuja funcional, tickets y configuración. Verificación: 94/94 PostgreSQL real, PGlite 92/94, E2E 81/15/0. Falta `ant apply` (Q-IA-04) para conectar las herramientas al agente real.
 - **2026-11-03**: `ant apply` publicado: agente Quatreros AI v2 con 9 lecturas y 2 escrituras preparadas; verificación real de consulta y creación de materia prima. También se implementó RNF-006/DEC-107: cierre por inactividad de 30 min en ERP, 12 h en POS y 8 h en ruta, con `platform.session_activity` y `401 SESSION_EXPIRED`.
+- **2026-11-03 (cierre del prototipo)**: las 8 entregas quedaron fusionadas en `main` (PRs #17–#22) y el **prototipo funcional se da por cerrado**: hay una base demostrable, aunque no es el producto final. **El despliegue queda pendiente y detenido** hasta pactar con el cliente alcance, precio, forma de pago, mantenimiento e infraestructura. Se creó la propuesta comercial `docs/cotizacion-piloto-quatreros.md` (PR #23) con referencia de mercado, precio del proyecto, comparación honesta con un SaaS, mantenimiento, infraestructura y facilidades de pago; y la guía operativa `docs/operations/deployment-production.md`. La facturación electrónica queda fuera de alcance porque el cliente no está obligado, confirmado con su contador.
