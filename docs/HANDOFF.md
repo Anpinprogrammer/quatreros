@@ -1,24 +1,24 @@
-# Traspaso — estado al 2026-11-02
+# Traspaso — estado al 2026-11-03
 
 > Para el siguiente agente o desarrollador. Léelo después de `AGENTS.md` y [`MEMORY.md`](../MEMORY.md). Actualízalo al terminar cada trabajo.
 
 ## 1. Dónde está el proyecto
 
-| Etapa                                                                         | Estado                                                                                                                |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| A–E: descubrimiento, requerimientos, arquitectura, diseño de IA y de Telegram | Completas (`docs/00-discovery` … `docs/02-architecture`)                                                              |
-| F: preparación del repositorio, CI/CD, respaldos                              | Completa y verificada                                                                                                 |
-| G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md`                                             |
-| Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                                                             |
-| **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                                                               |
-| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                                                                   |
-| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                                                                        |
-| **Entrega 4**: producción                                                     | **Terminada.**                                                                                                        |
-| **Entrega 5**: pedidos y reparto                                              | **Terminada.**                                                                                                        |
-| **Entrega 6**: caja (POS)                                                     | **Terminada** (rama `feat/pos-caja`, pendiente de fusión)                                                             |
-| **Entrega 7**: cartera, recaudos y hechos económicos                          | **Terminada** (rama `feat/fin-cartera-recaudos`, pendiente de fusión)                                                 |
-| **Entrega 8**: asistente de IA                                                | **Implementada** (rama `feat/ia-asistente`, pendiente de fusión) · activación real pendiente de `ant apply` (Q-IA-04) |
-| **Refactorización de la SPA**                                                 | Terminada en la rama `refactor/web-estructura-pages-components-hooks`; pendiente de fusión (ADR-024, DEC-101)         |
+| Etapa                                                                         | Estado                                                                             |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| A–E: descubrimiento, requerimientos, arquitectura, diseño de IA y de Telegram | Completas (`docs/00-discovery` … `docs/02-architecture`)                           |
+| F: preparación del repositorio, CI/CD, respaldos                              | Completa y verificada                                                              |
+| G: roadmap del prototipo                                                      | Aprobado (DEC-083). 8 entregas en `docs/03-planning/roadmap-prototipo.md`          |
+| Sistema de diseño                                                             | Adoptado (DEC-086): `docs/05-design/sistema-de-diseno.md`                          |
+| **Entrega 1**: ingreso, usuarios, roles y sedes                               | **Terminada** en `main`                                                            |
+| **Entrega 2**: catálogo e inventario                                          | **Terminada.** 2a, 2b y 2c cerradas                                                |
+| **Entrega 3**: compras y recepción                                            | **Terminada.**                                                                     |
+| **Entrega 4**: producción                                                     | **Terminada.**                                                                     |
+| **Entrega 5**: pedidos y reparto                                              | **Terminada.**                                                                     |
+| **Entrega 6**: caja (POS)                                                     | **Terminada** y fusionada en `main`                                                |
+| **Entrega 7**: cartera, recaudos y hechos económicos                          | **Terminada** y fusionada en `main` (PR #17)                                       |
+| **Entrega 8**: asistente de IA                                                | **Terminada** y fusionada en `main` (PR #18) · agente v2 publicado con `ant apply` |
+| **Refactorización de la SPA**                                                 | Fusionada en `main` (PR #15; ADR-024, DEC-101)                                     |
 
 **Entrega 1 en detalle** (spec: `docs/04-specifications/adm/acceso-usuarios.md`):
 
@@ -61,11 +61,14 @@
 - Permisos: `inv.stock.read` para consultar; `inv.traceability.read` para ADM, MGR, PROD y CONT. El Comprador consulta existencias y kardex, pero no trazabilidad.
 - Verificación: 71 unitarias; 55 de integración (PGlite y PostgreSQL 17 real, incluida concurrencia); 47 E2E con axe en escritorio, tableta y móvil; migraciones 0006/0007 desde base vacía.
 
-### Quatreros AI (asistente, 2026-10-30)
+### Quatreros AI (asistente, estado al 2026-11-03)
 
-- El agente ya existe en Anthropic Console y su configuración está versionada en `quatreros-ai/` (DEC-087, ADR-023). Diseño de la integración: `docs/02-architecture/ai-architecture.md` v0.2.
-- **No está integrado funcionalmente.** No hay módulo `assistant` en el backend ni `ToolGateway`, y el agente no tiene herramientas: hoy solo puede conversar. La lista de lo que falta está en ai-architecture §15. Se construye en la entrega 8.
-- Desde la entrega 2, cada módulo nuevo debe dejar su caso de uso de lectura listo para envolverlo como herramienta (ai-architecture §2.1). **No declares herramientas en el agente ni ejecutes `ant apply`** sin autorización.
+- El agente existe en Anthropic Console y su configuración está versionada en `quatreros-ai/` (DEC-087, ADR-023). Diseño de la integración: `docs/02-architecture/ai-architecture.md`.
+- **Ya está integrado y funcionando:** módulo `addons/assistant` + `addons/tool-gateway`, esquema `assistant` (migraciones `0027`–`0028`), 9 lecturas y 2 escrituras preparadas con confirmación humana.
+- `ant apply` publicó el **agente v2** y `claude-lock.json` está sincronizado. Verificado contra Anthropic: consulta de existencias y creación de materia prima con propuesta más confirmación.
+- Retención cerrada con **DEC-108** (archivo en Anthropic a las 24 h, borrado a los 30 días; tickets y métricas se conservan) y modelo con **DEC-109** (`claude-haiku-5-5`, `effort: low`).
+- El lockfile actual corresponde al espacio de trabajo de **desarrollo**. Producción necesita su propio espacio, su clave y `claude-lock.production.json` (Q-IA-04).
+- **No ejecutes `ant apply`** sin autorización: `git push` no actualiza el agente.
 
 ### Rediseño visual v1.1 (DEC-093, 2026-11-02)
 
@@ -89,9 +92,18 @@
 - **Guía:** `apps/web/src/README.md`.
 - **Verificación:** `pnpm check` con 80 unitarias y ambas fronteras; integración 76/76 con PostgreSQL real; E2E 67 pasaron y 14 omitidos, igual que la línea base.
 
-## 2. Siguiente tarea: entrega 8, asistente de IA (demo)
+## 2. Estado del prototipo y siguiente tarea
 
-**Estado al 2026-11-02:** entregas 1, 2a, 2b, 2c, 3, 4, 5, 6 y 7 terminadas y verificadas. Sigue la 8: preguntas en lenguaje natural y un registro con resumen y confirmación (RF-340–345), con el agente Quatreros AI ya creado (DEC-087, ai-architecture §15).
+**Estado al 2026-11-03: el prototipo funcional está cerrado.** Las 8 entregas están terminadas y fusionadas en `main`, el CI está en verde y no quedan PRs de funcionalidad abiertos.
+
+**La siguiente tarea no es de código: es comercial y de despliegue.**
+
+1. Cerrar con el cliente el acuerdo de alcance, precio, forma de pago, mantenimiento e infraestructura (`docs/cotizacion-piloto-quatreros.md`).
+2. Solo después de la firma: desplegar siguiendo `docs/operations/deployment-production.md`.
+
+**No adelantes el despliegue.** No hay staging ni producción activos y no debe haberlos hasta que el acuerdo esté pactado. El prototipo sirve para demostrar el trabajo en local con datos demo, pero **no es el producto final**: le faltan el primer administrador, la configuración del entorno, los respaldos externos y los ajustes que salgan del piloto.
+
+Lo que sigue es el detalle histórico de las entregas 7 y 8.
 
 ### Hecho en 7: cartera, recaudos, conciliación y hechos económicos
 
@@ -123,8 +135,8 @@
 - Techos: USD 3/día, USD 10/semana y USD 30/mes; presupuesto por sesión USD 0,25; alertas 80/100.
 - Otras escrituras siguen bloqueadas por P-10 y responden `423 FEATURE_BLOCKED`.
 - **Herramientas publicadas:** 9 lecturas y 2 escrituras preparadas en `quatreros-ai/agents/tools/`; `ant apply` actualizó el agente a la versión 2 y el lockfile quedó sincronizado.
-- **Activación real verificada:** con el agente real se consultó `inventory_get_availability` y se creó una materia prima con `prepare_raw_material` + confirmación humana. Faltan Q-IA-05 (retención) y Q-IA-06 (modelo) para cerrar la demo.
-- Quedan abiertas Q-IA-04 (`ant apply`), Q-IA-05 (retención) y Q-IA-06 (modelo).
+- **Activación real verificada:** con el agente real se consultó `inventory_get_availability` y se creó una materia prima con `prepare_raw_material` + confirmación humana.
+- Q-IA-04 (`ant apply`), Q-IA-05 (retención) y Q-IA-06 (modelo) ya están cerradas: agente v2 publicado, DEC-108 y DEC-109.
 
 ### Verificación al cierre de 8
 
@@ -136,17 +148,23 @@
 
 ## 3. Pendientes que dependen del responsable (no los resuelvas por tu cuenta)
 
-| Pendiente                                                                                                                                                                        | Dónde                                                                                            |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Confirmar las reglas provisionales Q-B-01..09 **antes del piloto**                                                                                                               | `open-questions.md`                                                                              |
-| Hosting y operación: Q-C-01..06                                                                                                                                                  | `open-questions.md`                                                                              |
-| Cuestionario del contador: Q-CON-01..07, Q-POS-04, Q-SEC-03                                                                                                                      | Bloquea contabilidad e impuestos                                                                 |
-| ~~PR de Dependabot #6~~: cerrado; Dependabot ignora TypeScript 7 y `@types/node` mayores hasta que haya soporte                                                                  | —                                                                                                |
-| Texto de una línea por rol en "Crear usuario" (qué puede hacer cada uno)                                                                                                         | Recomendación de la crítica de diseño; redactar desde `actors-permissions.md` y pedir aprobación |
-| Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                                                                                    | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
-| **Quatreros AI:** autorizar la primera sincronización con `ant apply` (adopta el agente y el entorno existentes); definir quién la ejecuta y el espacio de trabajo de producción | Q-IA-04, ai-architecture §11                                                                     |
-| **Quatreros AI:** retención de conversaciones en Anthropic y confirmación del modelo `claude-haiku-5-5`                                                                          | Q-IA-05, Q-IA-06                                                                                 |
-| Fusionar el PR de la refactorización de la SPA (`refactor/web-estructura-pages-components-hooks`) cuando el CI esté en verde                                                     | ADR-024, DEC-101                                                                                 |
+| Pendiente                                                                                                       | Dónde                                                                                            |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Confirmar las reglas provisionales Q-B-01..09 **antes del piloto**                                              | `open-questions.md`                                                                              |
+| Hosting y operación: Q-C-01..06                                                                                 | `open-questions.md`                                                                              |
+| Cuestionario del contador: Q-CON-01..07, Q-POS-04, Q-SEC-03                                                     | Bloquea contabilidad e impuestos                                                                 |
+| ~~PR de Dependabot #6~~: cerrado; Dependabot ignora TypeScript 7 y `@types/node` mayores hasta que haya soporte | —                                                                                                |
+| Texto de una línea por rol en "Crear usuario" (qué puede hacer cada uno)                                        | Recomendación de la crítica de diseño; redactar desde `actors-permissions.md` y pedir aprobación |
+| Descripción pendiente: pestañas extra del ERP (Compras, Cartera, Administración) y ajustes AA                   | Sistema de diseño, Anexos A y B; el responsable puede pedir cambios                              |
+| ~~**Quatreros AI:** autorizar la primera sincronización con `ant apply`~~                                       | Cerrado: agente v2 publicado el 2026-11-03                                                       |
+| ~~**Quatreros AI:** retención de conversaciones y modelo~~                                                      | Cerrado: DEC-108 (retención) y DEC-109 (`claude-haiku-5-5`, `effort: low`)                       |
+| ~~Fusionar el PR de la refactorización de la SPA~~                                                              | Cerrado: fusionado en `main` (PR #15)                                                            |
+| **Despliegue:** autorizar el ambiente de producción, su titularidad y el gasto mensual                          | Bloqueado hasta el acuerdo con el cliente; ver `docs/operations/deployment-production.md`        |
+| **Primer administrador:** agregar el CLI `create-admin` antes de publicar                                       | Hoy `seed.js` crea roles y permisos, no usuarios                                                 |
+| **Respaldos externos:** la imagen de ejecución no trae `pg_dump`, `age` ni AWS CLI                              | Ampliar la imagen o respaldar fuera del contenedor                                               |
+| **Anthropic producción:** espacio de trabajo, clave y `claude-lock.production.json`                             | Q-IA-04                                                                                          |
+| **Rotar la API key de Anthropic** que quedó visible en una salida de terminal                                   | Antes de publicar                                                                                |
+| **Correo y recuperación de contraseña:** hoy no hay flujo de restablecimiento (Q-C-07)                          | Decidir antes de entregar                                                                        |
 
 ## 4. Notas de entorno
 
