@@ -43,8 +43,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.13",
-    "@electric-sql/pglite-socket": "^0.2.16",
+    "@electric-sql/pglite": "^0.5.14",
+    "@electric-sql/pglite-socket": "^0.2.17",
     "@quatreros/config": "workspace:*",
     "@testcontainers/postgresql": "^12.2.1",
     "@types/express": "^5.0.6",
@@ -56,6 +56,6 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vitest": "^5.0.5",
-    "dependency-cruiser": "^18.7.0"
+    "dependency-cruiser": "^18.7.1"
   }
 }
